@@ -4,7 +4,7 @@ Last updated: 2026-08-31
 
 ## Current phase
 
-Phase 0: foundation. Slice C (database and authentication) is complete. Slice D (repository and CI) is in progress.
+Phase 0: foundation. Slices A-D are complete. Slice E (Vercel deployment) is the next checkpoint.
 
 ## Completed work
 
@@ -34,21 +34,24 @@ Phase 0: foundation. Slice C (database and authentication) is complete. Slice D 
 - Passed the post-auth `pnpm check` quality gate: lint, standalone typecheck, three unit tests, and a production build with protected routes classified as dynamic. `pnpm db:check` also passes.
 - Completed the Development GitHub OAuth flow on port 3001 and confirmed Neon contains the synchronized `timbenniks` user.
 - Confirmed the local provider endpoint advertises `http://localhost:3001/api/auth/callback/github`.
+- Initialized Git on `main` and created the public `timbenniks/turbo-timmy-writer` GitHub repository with an HTTPS remote.
+- Pushed foundation commit `96ae01f` after confirming ignored secrets and completing a staged secret scan.
+- GitHub Actions CI run `33393486442` passed install, lint, typecheck, three unit tests, and production build in 40 seconds.
 
 ## Current validation checkpoint
 
-Create the public GitHub repository, push the foundation commit, and validate the GitHub Actions quality workflow.
+Deploy the linked Vercel project and validate Production OAuth, Neon connectivity, route protection, and the application shell.
 
 ## Known issues and setup state
 
-- This workspace is not yet a Git repository.
+- The workspace is a Git repository on `main`, tracking `https://github.com/timbenniks/turbo-timmy-writer.git`.
 - pnpm 11.25.0 is installed, pinned, and working.
 - GitHub CLI 2.98.0 is authenticated as `timbenniks` with repository access.
 - GitHub CLI is configured for SSH, but this environment has no usable SSH key/askpass. HTTPS cloning and GitHub API calls work. Use HTTPS for bootstrap or repair SSH deliberately.
 - Vercel CLI 59.10.0 is authenticated as `timbenniks`.
 - Neon is provisioned, connected, migrated, and reachable.
 - Development GitHub OAuth credentials are configured locally and the real login flow passes. Production/Preview credentials exist in Vercel but require deployment-time callback validation.
-- The planned GitHub repository is `turbo-timmy-writer`, and Tim confirmed it should be public. It has not been created yet.
+- The public GitHub repository is `https://github.com/timbenniks/turbo-timmy-writer`.
 - ESLint 10 currently breaks the React plugin used by `eslint-config-next` 16.3.3 despite its broad peer range. The official scaffold's deprecated ESLint 9.39.5 line remains until the plugin chain is compatible.
 - Preview deployments intentionally have no GitHub OAuth credentials because GitHub OAuth Apps support one callback URL. Local and production use separate applications; choose a preview strategy later only if preview login becomes necessary.
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
@@ -77,8 +80,8 @@ Create the public GitHub repository, push the foundation commit, and validate th
 
 ## Next tasks
 
-1. Initialize Git with `main`, review ignored files, and create the foundation commit.
-2. Create and push the public `timbenniks/turbo-timmy-writer` repository over HTTPS.
-3. Validate the GitHub Actions quality workflow.
-4. Begin Slice E: deploy through the linked Vercel project and validate Production OAuth, database access, and the application shell.
-5. Validate denied login with a non-allowlisted account when practical; automated policy coverage already passes.
+1. Deploy through the linked Vercel project.
+2. Inspect deployment output and runtime logs.
+3. Validate the production sign-in page, GitHub callback, allowed login, sign-out, Neon connectivity, and writing shell.
+4. Validate denied login with a non-allowlisted account when practical; automated policy coverage already passes.
+5. Run the final Phase 0 quality gate, update docs, and commit the completed phase.
