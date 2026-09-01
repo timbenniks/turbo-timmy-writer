@@ -73,10 +73,11 @@ Phase 0 and Phase 1 Slices 1-2 are complete. Phase 1, Slice 3 (local recovery, d
 - Drove a real authenticated two-tab Chromium flow through normal autosave, immediate-refresh recovery, simulated offline editing/retry, a stale tab save, conflict display, and explicit local-copy resolution. The test article advanced from revision 1 to 6, and the pooled database query matched its final title, canonical body projection, and metadata version.
 - Visual inspection at 1440 × 1000 and 390 × 844 caught a save/recovery refresh race; recovery is now evaluated once per editor mount and the open editor remains stable across save revalidation. The final saved and conflict layouts are readable at both widths.
 - Passed the Slice 3 local gate: Drizzle schema check, ESLint, standalone TypeScript, seventeen unit tests, and the Next.js production build.
+- GitHub Actions run `33492576830` passed the Slice 3 gate in 49 seconds, and Vercel deployed commit `842875a` successfully to the canonical Production URL.
 
 ## Current validation checkpoint
 
-Deploy Slice 3 through the connected Git workflow, then have Tim validate autosave and refresh recovery in Production before beginning Slice 4 writing controls.
+Have Tim validate autosave and refresh persistence in Production before beginning Slice 4 writing controls.
 
 ## Known issues and setup state
 
@@ -93,7 +94,7 @@ Deploy Slice 3 through the connected Git workflow, then have Tim validate autosa
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` and `0002` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production commit `f842847` still saves only through the button or ⌘/Ctrl-S. Slice 3 autosave and recovery are local until its Git-connected deployment passes.
+- Production commit `842875a` includes Slice 3 autosave, recovery, offline retry, and optimistic concurrency. Its final checkpoint still requires Tim's real Production autosave/reload validation.
 
 ## Important architecture decisions
 
@@ -119,6 +120,5 @@ Deploy Slice 3 through the connected Git workflow, then have Tim validate autosa
 
 ## Next tasks
 
-1. Commit and push Slice 3, then confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
-2. Have Tim type without pressing Save, wait for `Saved`, refresh, and confirm the content survives in Production.
-3. After approval, begin Slice 4 with status controls, tags, word count, reading time, and manual version checkpoints.
+1. Have Tim type without pressing Save, wait for `Saved`, refresh, and confirm the content survives in Production.
+2. After approval, begin Slice 4 with status controls, tags, word count, reading time, and manual version checkpoints.
