@@ -49,7 +49,7 @@ Checkpoint approved: GitHub Actions run `33490541452` and the Git-connected Verc
 - Inspected saved and conflict states at 1440 × 1000 and 390 × 844. A revalidation/recovery race found during inspection was fixed by evaluating recovery once per editor mount.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, seventeen unit tests, and the Next.js production build.
 
-Checkpoint: GitHub Actions run `33492576830` and Vercel deployment `dpl_A4EA2BWrB8sCGAh6REPGFTbWVUaw` passed. Tim now types without pressing Save, waits for `Saved`, reloads the article, and confirms the content survives in Production. Do not begin Slice 4 until autosave/recovery confidence is approved.
+Checkpoint approved: GitHub Actions run `33492576830` and Vercel deployment `dpl_A4EA2BWrB8sCGAh6REPGFTbWVUaw` passed. Tim typed without using Save, waited for autosave, reloaded the article successfully in Production, and approved the recovery behavior on 2026-09-01. Slice 4 may begin.
 
 ## Key decisions to validate
 

@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slices 1-2 are complete. Phase 1, Slice 3 (local recovery, debounced autosave, optimistic concurrency, and truthful save state), is implemented locally and awaiting the Production validation checkpoint.
+Phase 0 and Phase 1 Slices 1-3 are complete. Phase 1, Slice 4 (status controls, tags, word count, reading time, and manual version checkpoints), is next.
 
 ## Completed work
 
@@ -74,10 +74,11 @@ Phase 0 and Phase 1 Slices 1-2 are complete. Phase 1, Slice 3 (local recovery, d
 - Visual inspection at 1440 × 1000 and 390 × 844 caught a save/recovery refresh race; recovery is now evaluated once per editor mount and the open editor remains stable across save revalidation. The final saved and conflict layouts are readable at both widths.
 - Passed the Slice 3 local gate: Drizzle schema check, ESLint, standalone TypeScript, seventeen unit tests, and the Next.js production build.
 - GitHub Actions run `33492576830` passed the Slice 3 gate in 49 seconds, and Vercel deployed commit `842875a` successfully to the canonical Production URL.
+- Tim typed without using the Save button, waited for autosave, reloaded the article in Production, and approved the Slice 3 checkpoint.
 
 ## Current validation checkpoint
 
-Have Tim validate autosave and refresh persistence in Production before beginning Slice 4 writing controls.
+Implement Slice 4, then validate article organization, live writing metrics, and a durable manual version checkpoint in Production.
 
 ## Known issues and setup state
 
@@ -94,7 +95,7 @@ Have Tim validate autosave and refresh persistence in Production before beginnin
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` and `0002` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production commit `842875a` includes Slice 3 autosave, recovery, offline retry, and optimistic concurrency. Its final checkpoint still requires Tim's real Production autosave/reload validation.
+- Production commit `842875a` includes the validated Slice 3 autosave, recovery, offline retry, and optimistic concurrency behavior.
 
 ## Important architecture decisions
 
@@ -120,5 +121,7 @@ Have Tim validate autosave and refresh persistence in Production before beginnin
 
 ## Next tasks
 
-1. Have Tim type without pressing Save, wait for `Saved`, refresh, and confirm the content survives in Production.
-2. After approval, begin Slice 4 with status controls, tags, word count, reading time, and manual version checkpoints.
+1. Add owner-scoped article status changes using the existing lifecycle transition rules.
+2. Add normalized user-owned tags and article-tag assignment.
+3. Add deterministic word-count and reading-time helpers with live editor feedback.
+4. Add immutable manual article-version checkpoints, then validate the combined Slice 4 workflow.
