@@ -39,6 +39,8 @@ Checkpoint approved: credential-free runtime commit `a7fbdd8` passed GitHub Acti
 
 Slices 2 and 3 are locally complete. The next coherent slice is the structured, revisioned working brief and its manual editor.
 
+Deployment checkpoint: commit `6341184` passed GitHub Actions run `33535177840` in 1m22s, including four credential-free browser tests and the production build. Vercel deployment `dpl_CgZSrGPpb6oE3soz2Pm26WTP47Y8` reached Ready and owns `https://turbo-timmy-writer.vercel.app`; Production has the OpenAI key as a Secret and the shared model as Config.
+
 ## Key decisions to validate
 
 - Tim can stop the interview at any time.

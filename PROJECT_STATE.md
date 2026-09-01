@@ -130,10 +130,11 @@ Phases 0 and 1 are complete. Phase 2 Slices 2 and 3 are implemented and locally 
 - Authenticated Chrome exercised premise creation, live first-question streaming, answer persistence, a specific follow-up, and full conversation replay after reload. The first pass exposed a visibly incomplete response edge case; the skill allowance and persistence guard now prevent truncated turns from being committed. Zero browser errors appeared.
 - Removed the two exact disposable QA articles and their four AI runs after validation. Production data returned to 82 articles, zero article-start sessions, and zero writing messages.
 - Phase 2 Slices 2–3 local gate passes: Drizzle schema validation, ESLint, standalone TypeScript, 41 unit tests, and the production build.
+- Guided-interview commit `6341184` passed GitHub Actions run `33535177840` in 1m22s. Vercel deployment `dpl_CgZSrGPpb6oE3soz2Pm26WTP47Y8` reached Ready on the canonical Production alias with the OpenAI key stored as a Secret and the shared model stored as Config.
 
 ## Current validation checkpoint
 
-Commit, push, configure Production OpenAI values, and deploy Phase 2 Slices 2–3; then begin the structured revisioned brief.
+Begin Phase 2 Slice 4's structured revisioned brief and collapsible manual editor from the deployed guided-interview checkpoint.
 
 ## Known issues and setup state
 
@@ -177,5 +178,5 @@ Commit, push, configure Production OpenAI values, and deploy Phase 2 Slices 2–
 
 ## Next tasks
 
-1. Commit, push, and deploy Phase 2 Slices 2–3 after the full local gate.
-2. Begin Phase 2 Slice 4 with structured, revisioned brief updates and a collapsible manual brief editor.
+1. Begin Phase 2 Slice 4 with structured, revisioned brief updates and a collapsible manual brief editor.
+2. Preserve every AI and manual brief change as a new revision linked to its generating run when applicable.
