@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slice 1 are complete. Phase 1, Slice 2 (semantic Tiptap editor and versioned serialization), is implemented locally and awaiting the Production validation checkpoint.
+Phase 0 and Phase 1 Slices 1-2 are complete. Phase 1, Slice 3 (local recovery, debounced autosave, optimistic concurrency, and truthful save state), is next.
 
 ## Completed work
 
@@ -63,10 +63,12 @@ Phase 0 and Phase 1 Slice 1 are complete. Phase 1, Slice 2 (semantic Tiptap edit
 - Drove a real authenticated Chromium session through title/body editing, H2 creation, explicit save, database inspection, and reload. Neon retained the exact canonical JSON, title, version metadata, and derived plain text.
 - Rendered and inspected the populated editor at 1440 × 1000 and 390 × 844; changed the title control to auto-grow after the first narrow-width inspection exposed clipping.
 - Passed the Slice 2 local gate: Drizzle schema check, ESLint, standalone TypeScript, eleven unit tests, and the Next.js production build.
+- GitHub Actions run `33490541452` passed the Slice 2 gate in 49 seconds, and Vercel deployed commit `f842847` successfully to the canonical Production URL.
+- Tim edited the title and body, used semantic formatting, explicitly saved, reloaded the article in Production, and approved the Slice 2 checkpoint.
 
 ## Current validation checkpoint
 
-Deploy Slice 2 through the connected Git workflow and have Tim edit, explicitly save, and reload an article in Production before beginning autosave/local recovery.
+Implement Slice 3, then validate recovery and save-state behavior across refreshes, network failure, delayed responses, and competing tabs before moving to the remaining writing-core controls.
 
 ## Known issues and setup state
 
@@ -109,6 +111,7 @@ Deploy Slice 2 through the connected Git workflow and have Tim edit, explicitly 
 
 ## Next tasks
 
-1. Push Slice 2 and confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
-2. Have Tim edit the title and body, add semantic formatting, save, reload, and confirm the content survives in Production.
-3. After approval, begin Slice 3 with local recovery, debounced autosave, optimistic concurrency, and truthful save-state handling.
+1. Define the server revision token and optimistic-concurrency contract for article saves.
+2. Persist a versioned local recovery envelope before any debounced network save.
+3. Add debounced autosave with truthful saving, saved, offline, recovery, and conflict states while retaining an explicit save shortcut.
+4. Exercise refresh, network-failure, delayed-response, and multi-tab conflict paths, then inspect the responsive editor before the Production checkpoint.

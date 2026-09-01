@@ -37,7 +37,7 @@ Checkpoint approved: GitHub Actions and the Git-connected Vercel deployment pass
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, eleven unit tests, and the Next.js production build.
 - Inspected the editor at 1440 × 1000 and 390 × 844. The mobile pass caught and resolved title clipping with an auto-growing title field and hidden toolbar scrollbar.
 
-Checkpoint: deploy through Git, then Tim edits, saves, and reloads an article in Production. Do not begin Slice 3 until persistence and editor comfort are approved.
+Checkpoint approved: GitHub Actions run `33490541452` and the Git-connected Vercel deployment passed. Tim edited the title and body, used semantic formatting, explicitly saved, and reloaded the article successfully in Production on 2026-09-01. Slice 3 may begin.
 
 ## Key decisions to validate
 
