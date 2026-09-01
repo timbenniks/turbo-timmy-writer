@@ -20,7 +20,13 @@ import {
   updateThemeAction,
 } from "@/app/actions/themes";
 import { Button } from "@/components/ui/button";
-import { duplicateThemeName, type ThemeSettings, type WritingTheme } from "@/themes/model";
+import {
+  duplicateThemeName,
+  themeNameSchema,
+  themeSettingsSchema,
+  type ThemeSettings,
+  type WritingTheme,
+} from "@/themes/model";
 
 type WorkspaceThemeContextValue = {
   activeTheme: WritingTheme;
@@ -80,6 +86,25 @@ export function WritingWorkspaceProvider({
   const activeTheme = themes.find((theme) => theme.id === activeThemeId) ?? themes[0] ?? initialTheme;
   const [draftName, setDraftName] = useState(activeTheme.name);
   const [draftSettings, setDraftSettings] = useState(activeTheme.settings);
+  const draftSettingsResult = useMemo(
+    () => themeSettingsSchema.safeParse(draftSettings),
+    [draftSettings],
+  );
+  const draftIsValid = themeNameSchema.safeParse(draftName).success && draftSettingsResult.success;
+  const previewTheme = useMemo<WritingTheme>(
+    () => panelOpen && !activeTheme.isBuiltin && draftSettingsResult.success
+      ? {
+          ...activeTheme,
+          name: draftName.trim() || activeTheme.name,
+          settings: draftSettingsResult.data,
+        }
+      : activeTheme,
+    [activeTheme, draftName, draftSettingsResult, panelOpen],
+  );
+  const draftIsDirty = !activeTheme.isBuiltin && (
+    draftName.trim() !== activeTheme.name
+    || JSON.stringify(draftSettings) !== JSON.stringify(activeTheme.settings)
+  );
 
   useEffect(() => {
     function handleFocusShortcut(event: KeyboardEvent) {
@@ -87,18 +112,36 @@ export function WritingWorkspaceProvider({
         event.preventDefault();
         setFocusMode((current) => !current);
       }
-      if (event.key === "Escape") setFocusMode(false);
+      if (event.key === "Escape") {
+        setFocusMode(false);
+        setPanelOpen(false);
+        setDraftName(activeTheme.name);
+        setDraftSettings(activeTheme.settings);
+        setMessage("");
+      }
     }
     window.addEventListener("keydown", handleFocusShortcut);
     return () => window.removeEventListener("keydown", handleFocusShortcut);
-  }, []);
+  }, [activeTheme]);
 
   const context = useMemo(() => ({
-    activeTheme,
+    activeTheme: previewTheme,
     focusMode,
-    openThemes: () => setPanelOpen(true),
+    openThemes: () => {
+      setDraftName(activeTheme.name);
+      setDraftSettings(activeTheme.settings);
+      setMessage("");
+      setPanelOpen(true);
+    },
     toggleFocusMode: () => setFocusMode((current) => !current),
-  }), [activeTheme, focusMode]);
+  }), [activeTheme, previewTheme, focusMode]);
+
+  function closeThemePanel() {
+    setDraftName(activeTheme.name);
+    setDraftSettings(activeTheme.settings);
+    setMessage("");
+    setPanelOpen(false);
+  }
 
   function patchEditor(settings: Partial<ThemeSettings["editor"]>) {
     setDraftSettings((current) => ({ ...current, editor: { ...current.editor, ...settings } }));
@@ -195,21 +238,21 @@ export function WritingWorkspaceProvider({
       <main
         className="writing-workspace min-h-screen bg-background p-2 text-foreground sm:p-3"
         data-focus={focusMode ? "true" : "false"}
-        data-density={activeTheme.settings.chrome.density}
-        data-sidebar={activeTheme.settings.chrome.sidebar}
-        style={themeStyle(activeTheme)}
+        data-density={previewTheme.settings.chrome.density}
+        data-sidebar={previewTheme.settings.chrome.sidebar}
+        style={themeStyle(previewTheme)}
       >
         {children}
       </main>
       {panelOpen ? (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/25" role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) setPanelOpen(false);
+          if (event.target === event.currentTarget) closeThemePanel();
         }}>
           <section role="dialog" aria-modal="true" aria-label="Writing themes" className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-surface p-5 text-foreground shadow-2xl">
             <header className="flex items-center gap-3">
               <Palette className="size-5" />
               <div><h2 className="font-semibold">Writing themes</h2><p className="text-xs text-muted-foreground">Appearance only. Article content stays untouched.</p></div>
-              <Button className="ml-auto" variant="ghost" size="icon" aria-label="Close themes" onClick={() => setPanelOpen(false)}><X /></Button>
+              <Button className="ml-auto" variant="ghost" size="icon" aria-label="Close themes" onClick={closeThemePanel}><X /></Button>
             </header>
 
             <div className="mt-6 grid grid-cols-2 gap-2">
@@ -225,29 +268,38 @@ export function WritingWorkspaceProvider({
             <div className="mt-6 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => void toggleFavourite()}><Heart />{activeTheme.isFavorite ? "Unfavourite" : "Favourite"}</Button>
               <Button size="sm" variant="outline" disabled={activeTheme.isDefault || saving} onClick={() => void makeDefault()}><Star />Set default</Button>
-              <Button size="sm" variant="outline" disabled={saving} onClick={() => void duplicateActiveTheme()}><Copy />Duplicate</Button>
+              {!activeTheme.isBuiltin ? <Button size="sm" variant="outline" disabled={saving} onClick={() => void duplicateActiveTheme()}><Copy />Duplicate</Button> : null}
             </div>
 
-            <div className="mt-6 space-y-4 border-t border-border pt-5">
-              <label className="block text-xs font-medium">Name<input value={draftName} disabled={activeTheme.isBuiltin} maxLength={60} onChange={(event) => setDraftName(event.target.value)} className="mt-1 h-9 w-full rounded-md border bg-editor px-3 text-sm disabled:opacity-60" /></label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="text-xs font-medium">Typeface<select value={draftSettings.editor.fontFamily} disabled={activeTheme.isBuiltin} onChange={(event) => patchEditor({ fontFamily: event.target.value as ThemeSettings["editor"]["fontFamily"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="serif">Serif</option><option value="sans">Sans</option><option value="mono">Mono</option></select></label>
-                <label className="text-xs font-medium">Text size<input type="number" min="16" max="28" value={draftSettings.editor.fontSize} disabled={activeTheme.isBuiltin} onChange={(event) => patchEditor({ fontSize: Number(event.target.value) })} className="mt-1 h-9 w-full rounded-md border bg-editor px-3" /></label>
-                <label className="text-xs font-medium">Line height<input type="number" min="1.35" max="2" step="0.05" value={draftSettings.editor.lineHeight} disabled={activeTheme.isBuiltin} onChange={(event) => patchEditor({ lineHeight: Number(event.target.value) })} className="mt-1 h-9 w-full rounded-md border bg-editor px-3" /></label>
-                <label className="text-xs font-medium">Editor width<input type="number" min="560" max="1000" step="20" value={draftSettings.editor.maxWidth} disabled={activeTheme.isBuiltin} onChange={(event) => patchEditor({ maxWidth: Number(event.target.value) })} className="mt-1 h-9 w-full rounded-md border bg-editor px-3" /></label>
+            {activeTheme.isBuiltin ? (
+              <div className="mt-6 rounded-xl border border-dashed border-border bg-editor p-5">
+                <h3 className="text-sm font-semibold">Starter theme</h3>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">Starter themes stay protected so you can always return to their original design. Create a custom copy to change typography, colours, width, density, or sidebar.</p>
+                <Button className="mt-4" size="sm" disabled={saving} onClick={() => void duplicateActiveTheme()}><Copy />Duplicate to customise</Button>
+                {message ? <p aria-live="polite" className="mt-3 text-xs text-muted-foreground">{message}</p> : null}
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                {(["background", "foreground", "accent"] as const).map((key) => <label key={key} className="text-xs font-medium capitalize">{key}<input type="color" value={draftSettings.appearance[key]} disabled={activeTheme.isBuiltin} onChange={(event) => patchAppearance({ [key]: event.target.value })} className="mt-1 h-9 w-full rounded-md border bg-editor p-1" /></label>)}
+            ) : (
+              <div className="mt-6 space-y-4 border-t border-border pt-5">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-accent" /><span>{draftIsDirty ? "Live preview · not saved" : "Saved theme"}</span></div>
+                <label className="block text-xs font-medium">Name<input value={draftName} maxLength={60} onChange={(event) => setDraftName(event.target.value)} className="mt-1 h-9 w-full rounded-md border bg-editor px-3 text-sm" /></label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-xs font-medium">Typeface<select value={draftSettings.editor.fontFamily} onChange={(event) => patchEditor({ fontFamily: event.target.value as ThemeSettings["editor"]["fontFamily"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="serif">Serif</option><option value="sans">Sans</option><option value="mono">Mono</option></select></label>
+                  <label className="text-xs font-medium">Text size<input type="number" min="16" max="28" value={draftSettings.editor.fontSize} onChange={(event) => patchEditor({ fontSize: Math.min(28, Math.max(16, Number(event.target.value))) })} className="mt-1 h-9 w-full rounded-md border bg-editor px-3" /></label>
+                  <label className="text-xs font-medium">Line height<input type="number" min="1.35" max="2" step="0.05" value={draftSettings.editor.lineHeight} onChange={(event) => patchEditor({ lineHeight: Math.min(2, Math.max(1.35, Number(event.target.value))) })} className="mt-1 h-9 w-full rounded-md border bg-editor px-3" /></label>
+                  <label className="text-xs font-medium">Editor width<input type="number" min="560" max="1000" step="20" value={draftSettings.editor.maxWidth} onChange={(event) => patchEditor({ maxWidth: Math.min(1000, Math.max(560, Number(event.target.value))) })} className="mt-1 h-9 w-full rounded-md border bg-editor px-3" /></label>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {([['background', 'Canvas'], ['foreground', 'Text'], ['muted', 'Muted text'], ['accent', 'Accent'], ['selection', 'Selection']] as const).map(([key, label]) => <label key={key} className="text-xs font-medium">{label}<input type="color" value={draftSettings.appearance[key]} onChange={(event) => patchAppearance({ [key]: event.target.value })} className="mt-1 h-9 w-full rounded-md border bg-editor p-1" /></label>)}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-xs font-medium">Density<select value={draftSettings.chrome.density} onChange={(event) => patchChrome({ density: event.target.value as ThemeSettings["chrome"]["density"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
+                  <label className="text-xs font-medium">Sidebar<select value={draftSettings.chrome.sidebar} onChange={(event) => patchChrome({ sidebar: event.target.value as ThemeSettings["chrome"]["sidebar"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="visible">Visible</option><option value="minimal">Minimal</option><option value="hidden">Hidden</option></select></label>
+                </div>
+                <p className="text-xs leading-5 text-muted-foreground">Changes preview immediately. Close the panel or switch themes to discard them; save only when the workspace feels right.</p>
+                <div className="flex gap-2"><Button size="sm" disabled={saving || !draftIsValid || !draftIsDirty} onClick={() => void saveTheme()}><Check />Save theme</Button><Button size="sm" variant="ghost" disabled={saving} onClick={() => void deleteActiveTheme()}><Trash2 />Delete</Button></div>
+                {message ? <p aria-live="polite" className="text-xs text-muted-foreground">{message}</p> : null}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="text-xs font-medium">Density<select value={draftSettings.chrome.density} disabled={activeTheme.isBuiltin} onChange={(event) => patchChrome({ density: event.target.value as ThemeSettings["chrome"]["density"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
-                <label className="text-xs font-medium">Sidebar<select value={draftSettings.chrome.sidebar} disabled={activeTheme.isBuiltin} onChange={(event) => patchChrome({ sidebar: event.target.value as ThemeSettings["chrome"]["sidebar"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="visible">Visible</option><option value="minimal">Minimal</option><option value="hidden">Hidden</option></select></label>
-              </div>
-              {activeTheme.isBuiltin ? <p className="text-xs text-muted-foreground">Starter themes are immutable. Duplicate one to customise it.</p> : (
-                <div className="flex gap-2"><Button size="sm" disabled={saving} onClick={() => void saveTheme()}><Check />Save theme</Button><Button size="sm" variant="ghost" disabled={saving} onClick={() => void deleteActiveTheme()}><Trash2 />Delete</Button></div>
-              )}
-              {message ? <p aria-live="polite" className="text-xs text-muted-foreground">{message}</p> : null}
-            </div>
+            )}
           </section>
         </div>
       ) : null}

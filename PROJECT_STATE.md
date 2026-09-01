@@ -97,6 +97,8 @@ Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, c
 - GitHub Actions run `33506453953` passed the Slice 5 gate in 59 seconds, and Vercel deployment `dpl_CkS4T7dPSEHtkcx66GPMiAQ8E4iD` for commit `5094307` reached Ready on the canonical Production URL.
 - Tim's first Production check caught Night squeezing full sidebar contents into its minimal column. Reworked minimal treatment as a deliberate 72 px icon rail: accessible icon controls remain, recent writing and text labels hide, and measured navigation content stays within 71 px at 1024, 1200, 1280, and 1440 px.
 - Corrective commit `17a9050` passed GitHub Actions run `33507199048` in 46 seconds; Vercel deployment `dpl_CFmkUcy9mv3QZqTNrUfyVQLXQLBC` reached Ready and owns the canonical Production alias.
+- Replaced the misleading disabled starter form with protected-theme guidance and `Duplicate to customise`. Custom theme fields now live-preview name, typography, width, all five colours, density, and sidebar without persisting until Save; close, Escape, or theme switching discards the draft.
+- Authenticated Chromium verified immediate `#203040` canvas and 640 px editor previews, close-to-discard, saved/default persistence across reload, and custom-theme deletion. Removed the automation copy afterward; pooled reads show exactly five built-ins, zero preferences, and the untouched test article at revision 2.
 
 ## Current validation checkpoint
 

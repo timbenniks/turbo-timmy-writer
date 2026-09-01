@@ -76,6 +76,8 @@ Checkpoint approved: GitHub Actions run `33505029706` and Vercel deployment `dpl
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
 - The first Production check exposed that Night's 92 px minimal sidebar still rendered full-width labels and visibly crushed them. Replaced it with a deliberate 72 px icon rail that hides only brand/navigation/footer labels and recent-writing text; verified exact 72 px navigation width with no content overflow at 1024, 1200, 1280, and 1440 px.
 - Night's corrective commit `17a9050` passed GitHub Actions run `33507199048` in 46 seconds and reached Ready in Vercel deployment `dpl_CFmkUcy9mv3QZqTNrUfyVQLXQLBC` on the canonical Production alias.
+- Replaced disabled starter-theme fields with explicit protected-starter guidance and a `Duplicate to customise` action. Custom forms now apply a reversible live preview for all typography, width, colour, density, and sidebar settings; close/Escape/theme switching discards unsaved changes, while Save remains explicit.
+- Authenticated Chromium verified an immediate canvas change to `#203040` and editor width change to 640 px, close-to-discard back to Night, save/default persistence across reload, and cleanup back to exactly five starters. The article remained at revision 2 with identical title and plain text.
 
 Checkpoint: Slice 5 and the Night sidebar correction are deployed. Tim now rechecks Night, switches starters, duplicates/edits one custom theme, reloads to confirm the default, and enters/exits focus mode in Production. Do not begin Slice 6 until the workspace workflow is approved.
 
