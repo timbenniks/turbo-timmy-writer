@@ -45,5 +45,8 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Browser tests
+        run: pnpm test:e2e
+
       - name: Production build
         run: pnpm build

@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, custom-theme persistence, instant switching, and focus mode), is deployed and awaiting the Production validation checkpoint.
+Phase 0 and Phase 1 Slices 1-5 are complete. Phase 1, Slice 6 (reusable browser coverage and extended writing/recovery validation), is implemented locally and awaiting CI/deployment plus the final Production checkpoint.
 
 ## Completed work
 
@@ -100,10 +100,16 @@ Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, c
 - Replaced the misleading disabled starter form with protected-theme guidance and `Duplicate to customise`. Custom theme fields now live-preview name, typography, width, all five colours, density, and sidebar without persisting until Save; close, Escape, or theme switching discards the draft.
 - Authenticated Chromium verified immediate `#203040` canvas and 640 px editor previews, close-to-discard, saved/default persistence across reload, and custom-theme deletion. Removed the automation copy afterward; pooled reads show exactly five built-ins, zero preferences, and the untouched test article at revision 2.
 - Live-preview commit `e65d5e0` passed GitHub Actions run `33508060371` in 51 seconds; Vercel deployment `dpl_73RyfFeceY4VDeMjbHZXooQXpHGV` reached Ready on the canonical Production alias.
+- Tim validated Night's corrected rail and live custom-theme workflow in Production and approved the Slice 5 checkpoint on 2026-09-01.
+- Added Playwright 1.62 with deterministic desktop and 390 × 844 projects, a system-browser fallback, retained failure traces, and one-worker execution to avoid Chromium profile/process instability.
+- Added always-on, credential-free browser checks for protected-route redirects and safe auth errors. Added opt-in authenticated tests for autosave/reload/restore and theme/focus prose invariance, with ignored session storage and a designated test article.
+- Added a safe local auth-state recorder and browser-test instructions. No authenticated state, OAuth secret, or database credential enters Git or CI.
+- Authenticated Playwright round-tripped 1,200 words through autosave/reload at both widths, restored and reloaded the exact original in `finally`, and passed all eight scenarios. Credential-free mode passed four scenarios and skipped the four auth-required cases.
+- Passed the complete Slice 6 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-four unit tests, Next.js production build, and both Playwright modes.
 
 ## Current validation checkpoint
 
-Have Tim validate instant theme switching, a durable custom/default theme, and focus mode in Production.
+Push and deploy Slice 6, confirm the credential-free browser suite runs in CI, then have Tim complete one comfortable extended writing session before closing Phase 1.
 
 ## Known issues and setup state
 
@@ -120,7 +126,7 @@ Have Tim validate instant theme switching, a durable custom/default theme, and f
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0004` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production includes Slice 5 themes/focus mode, Night's corrected icon rail, and live theme previews through commit `e65d5e0`. Its final checkpoint requires Tim's Production recheck.
+- Production includes the approved Slice 5 themes/focus mode, corrected Night rail, and live previews through commit `e65d5e0`. Slice 6 browser coverage remains local until pushed.
 
 ## Important architecture decisions
 
@@ -146,5 +152,6 @@ Have Tim validate instant theme switching, a durable custom/default theme, and f
 
 ## Next tasks
 
-1. Have Tim switch themes, duplicate and edit one, set it as default, reload, and enter/exit focus mode in Production.
-2. After approval, complete Slice 6 coverage and the extended-writing/recovery validation for Phase 1.
+1. Commit and push Slice 6; verify CI executes Playwright without secrets and Vercel reaches Ready.
+2. Have Tim complete one extended Production writing session, including reload and focus/theme switching.
+3. After approval, close Phase 1 and begin Phase 2's premise-first AI-assisted start.

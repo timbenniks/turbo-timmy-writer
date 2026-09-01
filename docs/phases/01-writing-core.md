@@ -80,7 +80,18 @@ Checkpoint approved: GitHub Actions run `33505029706` and Vercel deployment `dpl
 - Authenticated Chromium verified an immediate canvas change to `#203040` and editor width change to 640 px, close-to-discard back to Night, save/default persistence across reload, and cleanup back to exactly five starters. The article remained at revision 2 with identical title and plain text.
 - Live-preview commit `e65d5e0` passed GitHub Actions run `33508060371` in 51 seconds and reached Ready in Vercel deployment `dpl_73RyfFeceY4VDeMjbHZXooQXpHGV` on the canonical Production alias.
 
-Checkpoint: Slice 5 and the Night sidebar correction are deployed. Tim now rechecks Night, switches starters, duplicates/edits one custom theme, reloads to confirm the default, and enters/exits focus mode in Production. Do not begin Slice 6 until the workspace workflow is approved.
+Checkpoint approved: Slice 5, Night's corrected icon rail, and live custom-theme previews are deployed. Tim validated the complete workspace workflow in Production on 2026-09-01. Slice 6 may begin.
+
+## Slice 6 validation — 2026-09-01
+
+- Added a reusable Playwright harness using the installed system Chromium, deterministic single-worker execution, desktop/390 × 844 projects, retained failure traces, and the existing Next.js development server.
+- Added CI browser coverage for protected-route redirects and safe unknown-auth-error handling at both widths. These checks use an explicitly empty browser state and require no credentials or database.
+- Added opt-in authenticated coverage for autosave/reload/restore plus theme/focus invariance. Auth state lives only in ignored `.auth/`, a recorder script supports safe local renewal, and a designated article ID prevents accidental writes to arbitrary articles.
+- Round-tripped a 1,200-word document through autosave and reload on desktop and mobile, restored the original in `finally`, reloaded again, and asserted the exact original title/body. Theme switching and focus mode left prose identical.
+- The authenticated suite passed all eight scenarios. The credential-free suite passed four and explicitly skipped four authenticated scenarios, matching CI's security boundary.
+- Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-four unit tests, the Next.js production build, and both Playwright modes.
+
+Checkpoint: deploy the coverage milestone, confirm CI runs the credential-free browser suite, then have Tim complete one comfortable extended writing session before closing Phase 1.
 
 ## Key decisions to validate
 

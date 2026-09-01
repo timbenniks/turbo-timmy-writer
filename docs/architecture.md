@@ -175,8 +175,8 @@ Early phases may use Vercel logs. Add a dedicated observability provider only wh
 
 - Unit tests cover pure state transitions, serializers, settings validation, prompt/output schemas, ranking helpers, and publisher transformations.
 - Integration tests cover Drizzle queries against a test database and external adapters through mocks.
-- Playwright covers critical user flows with deterministic fixtures and no paid AI calls.
-- CI runs formatting/lint checks, typecheck, unit tests, and `next build`. Database integration and browser suites can become separate jobs when their infrastructure exists.
+- Playwright covers critical user flows with deterministic fixtures and no paid AI calls. Fail-closed auth checks always run in CI; authenticated writing checks require an ignored local storage state and designated test article.
+- CI runs lint, typecheck, unit tests, credential-free Playwright checks, and `next build`. Authenticated database/browser suites remain explicit local gates until isolated CI identity and data exist.
 
 ## Deployment and environment strategy
 
