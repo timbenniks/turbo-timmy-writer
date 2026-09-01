@@ -13,6 +13,7 @@ test.describe("authenticated writing core", () => {
     const body = page.locator('[aria-label="Article body"]');
     const originalTitle = await title.inputValue();
     const originalBody = await body.innerText();
+    expect(originalTitle).toMatch(/^Playwright fixture\b/);
     const markerTitle = `Playwright recovery ${Date.now()}`;
     const longBody = Array.from(
       { length: 1_200 },
@@ -24,6 +25,13 @@ test.describe("authenticated writing core", () => {
       await body.fill(longBody);
       await page.waitForTimeout(1_200);
       await expect(page.getByText(/Saved at/).first()).toBeVisible({ timeout: 10_000 });
+      const articleCanvas = page.locator(".article-canvas");
+      const editorFooter = page.locator(".workspace-frame > section > footer");
+      await expect
+        .poll(() => articleCanvas.evaluate((element) => element.scrollHeight > element.clientHeight))
+        .toBe(true);
+      await articleCanvas.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
+      await expect(editorFooter).toBeInViewport();
       await page.reload();
       await expect(title).toHaveValue(markerTitle);
       await expect(body).toHaveText(longBody);

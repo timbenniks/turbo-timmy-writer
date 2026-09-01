@@ -16,4 +16,4 @@ PLAYWRIGHT_ARTICLE_ID=<article-uuid> \
 pnpm test:e2e
 ```
 
-The authenticated suite round-trips a 1,200-word document through autosave and reload, restores and reloads the original article in `finally`, then verifies theme/focus changes leave prose unchanged. `.auth/`, traces, screenshots, and reports are ignored. Never commit the storage state; it contains an authenticated session.
+The authenticated suite requires a disposable, single-paragraph article whose title starts with `Playwright fixture`. It round-trips a 1,200-word document through autosave and reload, restores and reloads the original fixture in `finally`, then verifies theme/focus changes leave prose unchanged. Never point it at authored or imported content: browser text replacement does not preserve rich document structure. `.auth/`, traces, screenshots, and reports are ignored. Never commit the storage state; it contains an authenticated session.

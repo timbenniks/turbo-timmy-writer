@@ -236,7 +236,7 @@ export function WritingWorkspaceProvider({
   return (
     <WorkspaceThemeContext.Provider value={context}>
       <main
-        className="writing-workspace min-h-screen bg-background p-2 text-foreground sm:p-3"
+        className="writing-workspace h-dvh overflow-hidden bg-background p-2 text-foreground sm:p-3"
         data-focus={focusMode ? "true" : "false"}
         data-density={previewTheme.settings.chrome.density}
         data-sidebar={previewTheme.settings.chrome.sidebar}

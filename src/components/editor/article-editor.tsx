@@ -613,7 +613,7 @@ export function ArticleEditor({
 
   return (
     <>
-      <header className="flex min-h-16 items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
+      <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
         <Button variant="outline" size="icon" asChild aria-label="Back to library">
           <Link href="/">
             <ArrowLeft />
@@ -634,7 +634,7 @@ export function ArticleEditor({
         </div>
       </header>
 
-      <div className="editor-toolbar flex min-h-11 items-center gap-0.5 overflow-x-auto border-b border-border bg-surface px-3 py-1.5 sm:px-5">
+      <div className="editor-toolbar flex min-h-11 shrink-0 items-center gap-0.5 overflow-x-auto border-b border-border bg-surface px-3 py-1.5 sm:px-5">
         <ToolbarButton label="Undo" disabled={!editor?.can().undo()} onClick={() => editor?.chain().focus().undo().run()}>
           <Undo2 />
         </ToolbarButton>
@@ -681,7 +681,7 @@ export function ArticleEditor({
         </ToolbarButton>
       </div>
 
-      <div className="editor-toolbar flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border bg-sidebar px-4 py-1.5 text-xs text-muted-foreground sm:flex-nowrap sm:overflow-x-auto sm:px-6">
+      <div className="editor-toolbar flex min-h-11 shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border bg-sidebar px-4 py-1.5 text-xs text-muted-foreground sm:flex-nowrap sm:overflow-x-auto sm:px-6">
         <label className="flex shrink-0 items-center gap-2">
           <span className="font-medium text-foreground">Status</span>
           <select
@@ -757,7 +757,7 @@ export function ArticleEditor({
       {organizationMessage ? (
         <div
           aria-live="polite"
-          className={`border-b px-4 py-2 text-xs sm:px-6 ${
+          className={`shrink-0 border-b px-4 py-2 text-xs sm:px-6 ${
             organizationError
               ? "border-amber-300 bg-amber-50 text-amber-950"
               : "border-emerald-200 bg-emerald-50 text-emerald-900"
@@ -768,7 +768,7 @@ export function ArticleEditor({
       ) : null}
 
       {saveState === "conflict" ? (
-        <div className="flex flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 sm:px-6">
+        <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 sm:px-6">
           <span className="mr-auto">A newer version was saved elsewhere. Your local copy is still safe.</span>
           <Button variant="outline" size="sm" type="button" onClick={reloadSavedCopy}>
             Reload saved copy
@@ -779,7 +779,7 @@ export function ArticleEditor({
         </div>
       ) : null}
 
-      <article className="article-canvas mx-auto w-full flex-1 px-6 py-12 sm:px-12 sm:py-16">
+      <article className="article-canvas mx-auto min-h-0 w-full flex-1 overflow-y-auto px-6 py-12 sm:px-12 sm:py-16">
         <label htmlFor="article-title" className="sr-only">Article title</label>
         <textarea
           ref={titleRef}
@@ -801,7 +801,7 @@ export function ArticleEditor({
         </div>
       </article>
 
-      <footer className="flex min-h-11 items-center border-t border-border px-4 py-2 text-xs text-muted-foreground sm:px-6">
+      <footer className="flex min-h-11 shrink-0 items-center border-t border-border px-4 py-2 text-xs text-muted-foreground sm:px-6">
         <span>{activeTheme.name} theme{focusMode ? " · Focus mode" : ""}</span>
         <span className={`ml-auto ${statusIsWarning ? "text-amber-700" : ""}`}>
           {statusText} · ⌘S

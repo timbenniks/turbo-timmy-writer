@@ -101,9 +101,9 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <WritingWorkspaceProvider themes={themes}>
-      <div className="workspace-frame mx-auto grid min-h-[calc(100vh-1rem)] max-w-[1800px] overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_70px_rgba(37,32,24,0.08)] sm:min-h-[calc(100vh-1.5rem)] lg:grid-cols-[248px_minmax(0,1fr)_320px]">
-        <aside className="workspace-navigation hidden border-r border-border bg-sidebar lg:flex lg:flex-col">
-          <div className="workspace-sidebar-header flex h-16 items-center justify-between px-4">
+      <div className="workspace-frame mx-auto grid h-full min-h-0 max-w-[1800px] overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_70px_rgba(37,32,24,0.08)] lg:grid-cols-[248px_minmax(0,1fr)_320px]">
+        <aside className="workspace-navigation hidden min-h-0 border-r border-border bg-sidebar lg:flex lg:flex-col">
+          <div className="workspace-sidebar-header flex h-16 shrink-0 items-center justify-between px-4">
             <Link
               href="/"
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold hover:bg-muted"
@@ -140,7 +140,7 @@ export function AppShell({
             ))}
           </nav>
 
-          <div className="workspace-recent-section">
+          <div className="workspace-recent-section min-h-0 overflow-y-auto">
             <div className="mt-7 px-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Recent writing
             </div>
@@ -168,7 +168,7 @@ export function AppShell({
             </div>
           </div>
 
-          <div className="workspace-sidebar-footer mt-auto space-y-1 border-t border-border p-3">
+          <div className="workspace-sidebar-footer mt-auto shrink-0 space-y-1 border-t border-border p-3">
             <button aria-label="Search" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               <Search className="size-4" />
               <span className="workspace-footer-label">Search</span>
@@ -186,7 +186,7 @@ export function AppShell({
           </div>
         </aside>
 
-        <section className="flex min-w-0 flex-col bg-editor">
+        <section className="flex min-h-0 min-w-0 flex-col overflow-hidden bg-editor">
           {selectedArticle ? (
             <ArticleWorkspace
               article={selectedArticle}
@@ -201,8 +201,8 @@ export function AppShell({
           )}
         </section>
 
-        <aside className="workspace-assistant hidden border-l border-border bg-assistant xl:flex xl:flex-col">
-          <header className="flex h-16 items-center border-b border-border px-5">
+        <aside className="workspace-assistant hidden min-h-0 border-l border-border bg-assistant xl:flex xl:flex-col">
+          <header className="flex h-16 shrink-0 items-center border-b border-border px-5">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Sparkles className="size-4 text-accent" />
               Assistant
@@ -236,7 +236,7 @@ function Library({
 
   return (
     <>
-      <header className="flex min-h-16 items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
+      <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
         <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open library">
           <Command />
         </Button>
@@ -251,7 +251,7 @@ function Library({
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-10 sm:px-10 sm:py-14">
+      <div className="mx-auto min-h-0 w-full max-w-5xl flex-1 overflow-y-auto px-5 py-10 sm:px-10 sm:py-14">
         <div className="flex items-end justify-between gap-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">

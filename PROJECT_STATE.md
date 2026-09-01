@@ -111,6 +111,8 @@ Phase 0 is complete. Phase 1 Slices 1-6 are implemented, tested, and deployed; t
 - Replaced the 10 existing working/test articles with 82 source articles: 79 Published and three source-marked drafts. The import retained original titles, slugs, dates, canonical editor JSON, plain-text projections, 95 normalized tags, and all 477 article-tag assignments.
 - Created one immutable `import` checkpoint per article containing the exact original Markdown body. Database verification found 82 valid editor documents, 82 byte-matching source checkpoints, and zero orphaned tag assignments.
 - Added two focused import-conversion tests and passed ESLint, standalone TypeScript, 26 unit tests, and the production build after the import tooling change.
+- Converted the writing shell from page-height growth to a dynamic-viewport app frame. Navigation/editor footers, headers, toolbars, and assistant chrome stay visible; only the library body or article canvas scrolls. The authenticated 1,200-word flow passed all eight desktop/mobile scenarios and explicitly verified that the editor footer remains visible at the bottom of the scrolled canvas.
+- Hardened authenticated browser coverage to require a disposable single-paragraph article titled with the `Playwright fixture` prefix before any mutation. This prevents the plain-text restore mechanism from being pointed at authored rich content.
 
 ## Current validation checkpoint
 

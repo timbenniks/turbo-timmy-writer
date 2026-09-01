@@ -91,6 +91,8 @@ Checkpoint approved: Slice 5, Night's corrected icon rail, and live custom-theme
 - The authenticated suite passed all eight scenarios. The credential-free suite passed four and explicitly skipped four authenticated scenarios, matching CI's security boundary.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-four unit tests, the Next.js production build, and both Playwright modes.
 - The first clean-runner browser pass exposed Next.js's additional empty route-announcer `role="alert"`; the test now targets the exact visible error copy. Corrective commit `aa57be0` passed GitHub Actions run `33509578244` in 56 seconds, including four Playwright passes/four intentional auth skips, and reached Ready in Vercel deployment `dpl_C5LW7xjtdpFcRzzsJWMwVkCaf1hp`.
+- The app frame now uses the dynamic viewport height and keeps navigation/editor footers, headers, and toolbars visible while the library or article canvas owns vertical scrolling. The 1,200-word authenticated browser flow scrolls the article canvas to its end and asserts that the editor footer remains in the viewport at desktop and mobile widths.
+- Authenticated recovery coverage now refuses to mutate articles whose title does not start with `Playwright fixture`; fixtures must be disposable and single-paragraph because browser text replacement cannot preserve an authored rich document's structure.
 
 Checkpoint: coverage is deployed and the clean CI browser boundary passes. Have Tim complete one comfortable extended writing session before closing Phase 1.
 
