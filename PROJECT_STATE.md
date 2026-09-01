@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slices 1-3 are complete. Phase 1, Slice 4 (status controls, tags, word count, reading time, and manual version checkpoints), is implemented locally and awaiting the Production validation checkpoint.
+Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, custom-theme persistence, instant switching, and focus mode), is implemented locally and awaiting CI/deployment plus the Production validation checkpoint.
 
 ## Completed work
 
@@ -85,10 +85,19 @@ Phase 0 and Phase 1 Slices 1-3 are complete. Phase 1, Slice 4 (status controls, 
 - Added the app's existing T mark as a route-native SVG icon after browser inspection exposed the otherwise harmless missing-icon resource request.
 - Passed the Slice 4 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-one unit tests, and the Next.js production build.
 - GitHub Actions run `33505029706` passed the Slice 4 gate in 49 seconds, and Vercel deployed commit `549ff07` successfully to the canonical Production URL.
+- Tim validated status, tags, live metrics, and a durable manual checkpoint in Production and approved the Slice 4 checkpoint on 2026-09-01.
+- Added a versioned, Zod-validated theme model covering typeface, font size, line height, editor width, five appearance colours, density, and sidebar treatment.
+- Added five immutable starter themes—Quiet, Paper, Night, Terminal, and Manuscript—and a scoped client workspace provider that switches their CSS variables instantly without touching the editor document.
+- Added owner-scoped duplication, custom-theme editing/saving/deletion, per-user favourites, and one persisted default. Built-in theme records remain immutable; per-user state lives in a separate preference table.
+- Added focus mode with a visible header control, ⌘/Ctrl-Shift-F shortcut, Escape exit, and responsive chrome removal that keeps the article editor mounted.
+- Generated and applied additive migration `0004_pretty_smiling_tiger.sql` through the direct URL. Pooled inspection confirmed exactly five valid version-1 built-in themes.
+- Drove an authenticated Chromium flow through Night switching, minimal sidebar styling, focus mode, custom duplication/edit/default/favourite persistence, reload, and deletion. The test theme was removed afterward and preferences returned to a clean fallback state.
+- Confirmed the Slice 4 test article retained revision 2, its exact title and exact ten-word plain text throughout theme operations. Inspected at 1440 × 1000 and 390 × 844 with no horizontal overflow or title clipping.
+- Passed the Slice 5 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
 
 ## Current validation checkpoint
 
-Have Tim validate status, tags, live metrics, and one durable manual checkpoint in Production before beginning the workspace/theme slice.
+Push and deploy Slice 5, then have Tim validate instant theme switching, a durable custom/default theme, and focus mode in Production.
 
 ## Known issues and setup state
 
@@ -104,8 +113,8 @@ Have Tim validate status, tags, live metrics, and one durable manual checkpoint 
 - Preview deployments intentionally have no GitHub OAuth credentials because GitHub OAuth Apps support one callback URL. Local and production use separate applications; choose a preview strategy later only if preview login becomes necessary.
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
-- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0003` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production commit `549ff07` includes Slice 4 status controls, tags, live metrics, and immutable manual checkpoints. Its final checkpoint still requires Tim's real Production workflow validation.
+- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0004` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
+- Production commit `549ff07` includes the approved Slice 4 status controls, tags, live metrics, and immutable manual checkpoints. Slice 5 remains local until its feature commit is pushed and Vercel reports Ready.
 
 ## Important architecture decisions
 
@@ -131,5 +140,6 @@ Have Tim validate status, tags, live metrics, and one durable manual checkpoint 
 
 ## Next tasks
 
-1. Have Tim change an article status, add tags, confirm live metrics, create a labeled checkpoint, reload, and confirm the values survive in Production.
-2. After approval, begin Slice 5 with starter themes, theme persistence/editing, instant switching, and focus mode.
+1. Commit and push Slice 5, verify GitHub Actions and the canonical Vercel Production deployment.
+2. Have Tim switch themes, duplicate and edit one, set it as default, reload, and enter/exit focus mode in Production.
+3. After approval, complete Slice 6 coverage and the extended-writing/recovery validation for Phase 1.

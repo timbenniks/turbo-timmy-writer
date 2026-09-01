@@ -62,7 +62,20 @@ Checkpoint approved: GitHub Actions run `33492576830` and Vercel deployment `dpl
 - Inspected the workflow at 1440 × 1000 and 390 × 844. The metadata strip now remains single-row on desktop and wraps into two readable rows on phones.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-one unit tests, and the Next.js production build.
 
-Checkpoint: GitHub Actions run `33505029706` and Vercel deployment `dpl_8TRMjj4vWmFbMMG7jNXEWmGJTG94` passed. Tim now changes status, adds tags, observes live metrics, creates a labeled checkpoint, reloads, and confirms persistence in Production. Do not begin Slice 5 until the writing-organization workflow is approved.
+Checkpoint approved: GitHub Actions run `33505029706` and Vercel deployment `dpl_8TRMjj4vWmFbMMG7jNXEWmGJTG94` passed. Tim validated the complete writing-organization workflow in Production on 2026-09-01. Slice 5 may begin.
+
+## Slice 5 validation — 2026-09-01
+
+- Added a versioned, Zod-validated theme contract for typography, editor width, colours, density, and sidebar treatment.
+- Added five immutable starters—Quiet, Paper, Night, Terminal, and Manuscript—with instant in-workspace switching.
+- Added owner-scoped custom-theme duplication, editing, saving, deletion, favourites, and a per-user default without coupling theme mutations to article saves.
+- Added focus mode through the header control and ⌘/Ctrl-Shift-F; it removes both sidebars while keeping the editor, save state, and document mounted.
+- Generated and applied additive migration `0004_pretty_smiling_tiger.sql` for themes and per-user preferences. The migration ran through the direct URL; pooled reads confirmed five valid version-1 starters.
+- A real authenticated Chromium flow switched to Night, verified sidebar treatment, entered/exited focus mode, duplicated Quiet, edited and persisted a custom name/740 px width/default/favourite, reloaded, then deleted the test theme and returned cleanly to Quiet.
+- The exact article title, body, save state, and revision remained unchanged through all theme operations. Inspected at 1440 × 1000 and a fresh 390 × 844 load with no horizontal overflow or title clipping.
+- Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
+
+Checkpoint: deploy Slice 5, then have Tim switch starters, duplicate/edit one custom theme, reload to confirm the default, and enter/exit focus mode. Do not begin Slice 6 until the workspace workflow is approved.
 
 ## Key decisions to validate
 

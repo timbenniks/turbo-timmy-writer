@@ -103,11 +103,20 @@ Index `(article_id, created_at desc)`. Versions are immutable.
 | `name` | text | Display name |
 | `settings_json` | jsonb | Validated versioned theme |
 | `is_builtin` | boolean | Immutable starter |
-| `is_favorite` | boolean | User preference for custom records |
 | `created_at` | timestamptz | Creation time |
 | `updated_at` | timestamptz | Modification time |
 
-User settings store `default_theme_id`; if a separate settings table is unnecessary initially, add that nullable reference to `users` after themes exist.
+### `user_theme_preferences`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `user_id` | uuid | Owner; composite primary key with `theme_id` |
+| `theme_id` | uuid | Accessible built-in or owner-created theme |
+| `is_favorite` | boolean | Per-user favourite state, including starters |
+| `is_default` | boolean | At most one true row per user |
+| `updated_at` | timestamptz | Preference update time |
+
+Keeping preferences separate lets immutable built-in themes be favourited and selected independently by each user. Theme JSON is parsed at the query boundary before it reaches client CSS variables.
 
 ### `tags` and `article_tags`
 

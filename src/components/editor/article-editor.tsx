@@ -17,7 +17,6 @@ import {
   List,
   ListOrdered,
   Minus,
-  PanelRightClose,
   Quote,
   Redo2,
   Save,
@@ -50,6 +49,10 @@ import {
 } from "@/app/actions/article-organization";
 import { saveArticleAction } from "@/app/actions/articles";
 import { Button } from "@/components/ui/button";
+import {
+  WorkspaceAppearanceButtons,
+  useWorkspaceTheme,
+} from "@/components/themes/writing-workspace-provider";
 import {
   ARTICLE_DOCUMENT_VERSION,
   normalizeArticleDocument,
@@ -145,6 +148,7 @@ export function ArticleEditor({
   revision,
   updatedAt,
 }: ArticleEditorProps) {
+  const { activeTheme, focusMode } = useWorkspaceTheme();
   const [title, setTitle] = useState(initialTitle);
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const [savedAt, setSavedAt] = useState(updatedAt);
@@ -622,9 +626,7 @@ export function ArticleEditor({
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="icon" aria-label="Close assistant">
-            <PanelRightClose />
-          </Button>
+          <WorkspaceAppearanceButtons />
           <Button size="sm" type="button" disabled={!editor || saveState === "saving"} onClick={() => void saveArticle()}>
             <Save />
             Save
@@ -777,7 +779,7 @@ export function ArticleEditor({
         </div>
       ) : null}
 
-      <article className="mx-auto w-full max-w-[800px] flex-1 px-6 py-12 sm:px-12 sm:py-16">
+      <article className="article-canvas mx-auto w-full flex-1 px-6 py-12 sm:px-12 sm:py-16">
         <label htmlFor="article-title" className="sr-only">Article title</label>
         <textarea
           ref={titleRef}
@@ -792,7 +794,7 @@ export function ArticleEditor({
             setTitle(nextTitle);
             markLocalChange(editor?.getJSON() ?? initialDocument);
           }}
-          className="block w-full resize-none overflow-hidden border-0 bg-transparent font-serif text-4xl leading-[1.08] font-medium tracking-[-0.035em] outline-none placeholder:text-muted-foreground/55 sm:text-[3.35rem]"
+          className="article-title block w-full resize-none overflow-hidden border-0 bg-transparent text-4xl leading-[1.08] font-medium tracking-[-0.035em] outline-none placeholder:text-muted-foreground/55 sm:text-[3.35rem]"
         />
         <div className="mt-10">
           <EditorContent editor={editor} />
@@ -800,7 +802,7 @@ export function ArticleEditor({
       </article>
 
       <footer className="flex min-h-11 items-center border-t border-border px-4 py-2 text-xs text-muted-foreground sm:px-6">
-        <span>Quiet theme</span>
+        <span>{activeTheme.name} theme{focusMode ? " · Focus mode" : ""}</span>
         <span className={`ml-auto ${statusIsWarning ? "text-amber-700" : ""}`}>
           {statusText} · ⌘S
         </span>

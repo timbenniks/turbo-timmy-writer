@@ -7,6 +7,7 @@ import {
   listArticlesForUser,
   listRecentArticlesForUser,
 } from "@/db/queries/articles";
+import { listThemesForUser } from "@/db/queries/themes";
 
 type LibraryPageProps = {
   filter: LibraryFilter;
@@ -18,9 +19,10 @@ export async function LibraryPage({ filter }: LibraryPageProps) {
     redirect("/sign-in");
   }
 
-  const [articles, recentArticles] = await Promise.all([
+  const [articles, recentArticles, themes] = await Promise.all([
     listArticlesForUser(session.user.id, filter),
     listRecentArticlesForUser(session.user.id),
+    listThemesForUser(session.user.id),
   ]);
 
   return (
@@ -29,6 +31,7 @@ export async function LibraryPage({ filter }: LibraryPageProps) {
       activeFilter={filter}
       articles={articles}
       recentArticles={recentArticles}
+      themes={themes}
     />
   );
 }

@@ -21,9 +21,11 @@ import {
 import { createBlankArticleAction } from "@/app/actions/articles";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ArticleEditor } from "@/components/editor/article-editor";
+import { WritingWorkspaceProvider } from "@/components/themes/writing-workspace-provider";
 import { Button } from "@/components/ui/button";
 import type { ArticleDocument } from "@/editor/document";
 import { libraryDestinations } from "@/lib/navigation";
+import type { WritingTheme } from "@/themes/model";
 
 type ArticleSummary = {
   id: string;
@@ -54,6 +56,7 @@ type AppShellProps = {
     versionCount: number;
     latestVersionAt: Date | null;
   };
+  themes: WritingTheme[];
 };
 
 const filterTitles: Record<LibraryFilter, string> = {
@@ -94,11 +97,12 @@ export function AppShell({
   recentArticles,
   selectedArticle,
   selectedArticleOrganization,
+  themes,
 }: AppShellProps) {
   return (
-    <main className="min-h-screen bg-background p-2 text-foreground sm:p-3">
-      <div className="mx-auto grid min-h-[calc(100vh-1rem)] max-w-[1800px] overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_70px_rgba(37,32,24,0.08)] sm:min-h-[calc(100vh-1.5rem)] lg:grid-cols-[248px_minmax(0,1fr)_320px]">
-        <aside className="hidden border-r border-border bg-sidebar lg:flex lg:flex-col">
+    <WritingWorkspaceProvider themes={themes}>
+      <div className="workspace-frame mx-auto grid min-h-[calc(100vh-1rem)] max-w-[1800px] overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_70px_rgba(37,32,24,0.08)] sm:min-h-[calc(100vh-1.5rem)] lg:grid-cols-[248px_minmax(0,1fr)_320px]">
+        <aside className="workspace-navigation hidden border-r border-border bg-sidebar lg:flex lg:flex-col">
           <div className="flex h-16 items-center justify-between px-4">
             <Link
               href="/"
@@ -195,7 +199,7 @@ export function AppShell({
           )}
         </section>
 
-        <aside className="hidden border-l border-border bg-assistant xl:flex xl:flex-col">
+        <aside className="workspace-assistant hidden border-l border-border bg-assistant xl:flex xl:flex-col">
           <header className="flex h-16 items-center border-b border-border px-5">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Sparkles className="size-4 text-accent" />
@@ -215,7 +219,7 @@ export function AppShell({
           </div>
         </aside>
       </div>
-    </main>
+    </WritingWorkspaceProvider>
   );
 }
 
