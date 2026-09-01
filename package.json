@@ -19,6 +19,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
+    "db:import-writing": "node --env-file=.env.local scripts/import-writing.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
@@ -50,8 +51,10 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.3",
     "jsdom": "^30.0.1",
+    "mdast-util-from-markdown": "^2.0.3",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "yaml": "^2.9.0"
   }
 }

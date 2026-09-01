@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slices 1-5 are complete. Phase 1, Slice 6 (reusable browser coverage and extended writing/recovery validation), is implemented locally and awaiting CI/deployment plus the final Production checkpoint.
+Phase 0 is complete. Phase 1 Slices 1-6 are implemented, tested, and deployed; the final checkpoint remains Tim's comfortable extended Production writing session.
 
 ## Completed work
 
@@ -107,6 +107,10 @@ Phase 0 and Phase 1 Slices 1-5 are complete. Phase 1, Slice 6 (reusable browser 
 - Authenticated Playwright round-tripped 1,200 words through autosave/reload at both widths, restored and reloaded the exact original in `finally`, and passed all eight scenarios. Credential-free mode passed four scenarios and skipped the four auth-required cases.
 - Passed the complete Slice 6 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-four unit tests, Next.js production build, and both Playwright modes.
 - The first clean CI browser pass found an ambiguous locator because Next.js adds an empty route-announcer alert. Corrective commit `aa57be0` targets the exact visible message; GitHub Actions run `33509578244` then passed in 56 seconds with four browser passes/four intentional auth skips, and Vercel deployment `dpl_C5LW7xjtdpFcRzzsJWMwVkCaf1hp` reached Ready.
+- Added a dry-run-first, owner-scoped Markdown importer for `timbenniks/timbenniksdev-2024/content/4.writing`. Replacement mode requires the direct database URL and deletes/reinserts article data in one transaction while leaving users, authentication, starter themes, and preferences untouched.
+- Replaced the 10 existing working/test articles with 82 source articles: 79 Published and three source-marked drafts. The import retained original titles, slugs, dates, canonical editor JSON, plain-text projections, 95 normalized tags, and all 477 article-tag assignments.
+- Created one immutable `import` checkpoint per article containing the exact original Markdown body. Database verification found 82 valid editor documents, 82 byte-matching source checkpoints, and zero orphaned tag assignments.
+- Added two focused import-conversion tests and passed ESLint, standalone TypeScript, 26 unit tests, and the production build after the import tooling change.
 
 ## Current validation checkpoint
 
