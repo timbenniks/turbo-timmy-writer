@@ -5,7 +5,6 @@ import {
   MoreHorizontal,
   Plus,
   Search,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
@@ -20,11 +19,9 @@ import {
 import type { TagTaxonomyItem } from "@/articles/organization";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ArticleEditor } from "@/components/editor/article-editor";
-import {
-  InterviewAssistant,
-  type InterviewMessage,
-} from "@/components/writing/interview-assistant";
+import type { InterviewMessage } from "@/components/writing/interview-assistant";
 import type { ArticleBriefSnapshot } from "@/components/writing/article-brief-editor";
+import { WorkspaceAssistant } from "@/components/writing/workspace-assistant";
 import { TagManager } from "@/components/tags/tag-manager";
 import { WritingWorkspaceProvider } from "@/components/themes/writing-workspace-provider";
 import { Button } from "@/components/ui/button";
@@ -216,34 +213,11 @@ export function AppShell({
           )}
         </section>
 
-        <aside className="workspace-assistant hidden min-h-0 border-l border-border bg-assistant xl:flex xl:flex-col">
-          <header className="flex h-16 shrink-0 items-center border-b border-border px-5">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Sparkles className="size-4 text-accent" />
-              Assistant
-            </div>
-            <span className="ml-auto rounded-full bg-accent-soft px-2 py-1 text-[10px] font-medium text-accent">
-              Quiet
-            </span>
-          </header>
-          {selectedArticle && selectedArticleStart ? (
-            <InterviewAssistant
-              articleId={selectedArticle.id}
-              initialMessages={selectedArticleStart.messages}
-              initialBrief={selectedArticleBrief ?? undefined}
-              initialStatus={selectedArticleStart.status}
-            />
-          ) : (
-            <div className="flex flex-1 items-center px-7">
-              <div>
-                <p className="font-serif text-xl">Writing first.</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Start with a premise when you want a focused editorial conversation.
-                </p>
-              </div>
-            </div>
-          )}
-        </aside>
+        <WorkspaceAssistant
+          articleId={selectedArticle?.id}
+          articleStart={selectedArticleStart}
+          brief={selectedArticleBrief}
+        />
       </div>
     </WritingWorkspaceProvider>
   );

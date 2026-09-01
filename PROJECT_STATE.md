@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phases 0 and 1 are complete. Phase 2 Slice 5 is implemented and locally validated: explicit generation streams into the editor and atomically creates the canonical first draft plus an AI-linked immutable checkpoint.
+Phases 0 and 1 are complete. Phase 2 Slice 5 is deployed; Slice 6 responsive assistant access is implemented and locally validated. Deterministic mocked guided-flow Playwright coverage remains before the phase closes.
 
 ## Completed work
 
@@ -145,10 +145,13 @@ Phases 0 and 1 are complete. Phase 2 Slice 5 is implemented and locally validate
 - Browser QA used the premise-only stop path and produced a 7,529-character draft. A fresh tab restored title/body, conversation, brief, Draft saved state, and no errors. Exact database reads confirmed the AI-linked checkpoint and completed session.
 - The first live pass exposed a harmless redundant post-preview autosave revision; streamed editor callbacks are now excluded from autosave so the completion revision remains exact. Exact fixture cleanup restored 82 articles and zero guided-flow records.
 - Phase 2 Slice 5 current gate passes Drizzle validation, ESLint, standalone TypeScript, and 47 unit tests.
+- Draft commit `8e56452` passed GitHub Actions run `33537323515`; Vercel deployment `dpl_3kgefqkFUYnMpD12NiaES5Vy5d86` reached Ready on the canonical Production alias.
+- Replaced the desktop-only assistant with one responsive client instance: an `xl` rail and a smaller-screen overlay drawer. This avoids mounting two interview clients and therefore avoids duplicate automatic first-question requests.
+- Authenticated 390 × 844 QA confirmed Conversation and editable Brief access, close/reopen controls, exact premise state, no horizontal overflow, and zero errors. Exact fixture/run cleanup restored the 82-article baseline.
 
 ## Current validation checkpoint
 
-Run the full Slice 5 gate, commit/deploy it, then add credential-free mocked guided-flow Playwright coverage and responsive assistant access.
+Commit/deploy responsive assistant access, then add deterministic mocked guided-flow Playwright coverage before closing Phase 2.
 
 ## Known issues and setup state
 
@@ -192,5 +195,5 @@ Run the full Slice 5 gate, commit/deploy it, then add credential-free mocked gui
 
 ## Next tasks
 
-1. Run the full Phase 2 Slice 5 gate, commit, push, and verify deployment.
-2. Begin Slice 6 with deterministic mocked guided-flow Playwright coverage and responsive conversation/brief access.
+1. Run the responsive-assistant gate, commit, push, and verify deployment.
+2. Add deterministic mocked guided-flow Playwright coverage without paid OpenAI calls, then evaluate all Phase 2 acceptance criteria.

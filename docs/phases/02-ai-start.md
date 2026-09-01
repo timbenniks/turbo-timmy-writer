@@ -71,6 +71,16 @@ Deployment checkpoint: brief commit `7946398` passed GitHub Actions run `3353631
 
 Slice 5 is locally complete. Slice 6 should add deterministic mocked guided-flow Playwright coverage and responsive access to conversation/brief before closing Phase 2.
 
+Deployment checkpoint: draft commit `8e56452` passed GitHub Actions run `33537323515`; Vercel deployment `dpl_3kgefqkFUYnMpD12NiaES5Vy5d86` reached Ready on the canonical Production alias.
+
+## Slice 6 progress — 2026-09-01
+
+- Replaced the desktop-only assistant with one responsive client surface. The same mounted interview instance remains the desktop rail at `xl` and becomes an overlay drawer behind a fixed Assistant trigger below `xl`, preventing duplicate initial interview calls.
+- The drawer exposes Conversation, the complete editable Brief, and draft state; it closes by button, backdrop, or Escape and introduces no horizontal page overflow.
+- Authenticated 390 × 844 browser QA confirmed one trigger, the streamed question, Conversation/Brief access, exact premise content, close/reopen state, 390 px document width, and zero errors. Exact cleanup restored 82 articles and zero guided-flow records.
+
+Slice 6 remains open for deterministic mocked guided-flow Playwright coverage. Do not close Phase 2 until that acceptance coverage passes.
+
 ## Key decisions to validate
 
 - Tim can stop the interview at any time.
