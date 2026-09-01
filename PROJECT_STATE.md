@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phases 0 and 1 are complete. Phase 2 Slice 1 is implemented, tested, migrated, and deployed: the credential-free AI runtime, central model configuration, safe run logging, and deterministic mock provider.
+Phases 0 and 1 are complete. Phase 2 Slices 2 and 3 are implemented and locally validated: immediate premise persistence, durable article-start sessions/messages, the live Responses API adapter, and the dynamic one-question interview.
 
 ## Completed work
 
@@ -123,10 +123,17 @@ Phases 0 and 1 are complete. Phase 2 Slice 1 is implemented, tested, migrated, a
 - Generated additive migration `0005_far_loners.sql` for `ai_runs`, applied it through the verified direct URL, and confirmed through the pooled runtime URL that all 14 columns and four statuses exist with zero synthetic rows.
 - Passed the Slice 1 local gate: Drizzle schema validation, ESLint, standalone TypeScript, 35 unit tests, the production build, and four credential-free desktop/mobile Playwright checks with six authenticated fixture-dependent checks intentionally skipped.
 - AI runtime commit `a7fbdd8` passed GitHub Actions run `33526595600` in 1m12s. Vercel deployment `dpl_ETgNE3MN7p91DzMpgwGAgf4TLxHm` reached Ready and owns the canonical Production alias; Production `/` still redirects to sign-in and the configured provider endpoint returns 200.
+- Replaced the default blank-article action with a protected premise screen while keeping blank creation as an explicit secondary option. Guided creation persists the interviewing article, active article-start session, and premise message together before any AI call.
+- Added additive migration `0006_long_grim_reaper.sql` for owner-scoped writing sessions and ordered versioned messages. Applied it through the direct migration URL; pooled inspection confirmed both tables and an initially empty conversation store.
+- Added the server-only OpenAI Responses adapter through the Vercel AI SDK with provider storage disabled, a bounded timeout/output, safe errors, and usage metadata. One `OPENAI_MODEL` now supplies all generative purposes unless a purpose override is configured; embeddings remain separate.
+- Added `article-interview/v1`, which asks exactly one dynamically selected question, uses no fixed question count, never drafts, and stops asking when Tim requests drafting. Answers are stored before generation; completed questions are stored with their AI run IDs.
+- Authenticated Chrome exercised premise creation, live first-question streaming, answer persistence, a specific follow-up, and full conversation replay after reload. The first pass exposed a visibly incomplete response edge case; the skill allowance and persistence guard now prevent truncated turns from being committed. Zero browser errors appeared.
+- Removed the two exact disposable QA articles and their four AI runs after validation. Production data returned to 82 articles, zero article-start sessions, and zero writing messages.
+- Phase 2 Slices 2–3 local gate passes: Drizzle schema validation, ESLint, standalone TypeScript, 41 unit tests, and the production build.
 
 ## Current validation checkpoint
 
-Begin Phase 2 Slice 2's premise capture, immediate persistence, and durable article-start sessions/messages.
+Commit, push, configure Production OpenAI values, and deploy Phase 2 Slices 2–3; then begin the structured revisioned brief.
 
 ## Known issues and setup state
 
@@ -170,5 +177,5 @@ Begin Phase 2 Slice 2's premise capture, immediate persistence, and durable arti
 
 ## Next tasks
 
-1. Begin Phase 2 Slice 2 with immediate premise persistence and durable article-start sessions/messages.
-2. Add streamed message storage against the mocked provider before enabling live OpenAI credentials.
+1. Commit, push, and deploy Phase 2 Slices 2–3 after the full local gate.
+2. Begin Phase 2 Slice 4 with structured, revisioned brief updates and a collapsible manual brief editor.

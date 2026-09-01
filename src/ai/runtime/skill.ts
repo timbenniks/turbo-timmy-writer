@@ -25,6 +25,7 @@ export interface WritingSkill<TInput, TOutput = string> {
   name: string;
   description: string;
   modelPurpose: AiModelPurpose;
+  maxOutputTokens?: number;
   inputSchema: z.ZodType<TInput>;
   outputSchema?: z.ZodType<TOutput>;
   buildInstructions(input: TInput): string;

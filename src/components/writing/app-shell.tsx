@@ -18,9 +18,12 @@ import {
   type LibraryFilter,
 } from "@/articles/model";
 import type { TagTaxonomyItem } from "@/articles/organization";
-import { createBlankArticleAction } from "@/app/actions/articles";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ArticleEditor } from "@/components/editor/article-editor";
+import {
+  InterviewAssistant,
+  type InterviewMessage,
+} from "@/components/writing/interview-assistant";
 import { TagManager } from "@/components/tags/tag-manager";
 import { WritingWorkspaceProvider } from "@/components/themes/writing-workspace-provider";
 import { Button } from "@/components/ui/button";
@@ -57,6 +60,10 @@ type AppShellProps = {
     versionCount: number;
     latestVersionAt: Date | null;
   };
+  selectedArticleStart?: {
+    status: "active" | "completed" | "cancelled";
+    messages: InterviewMessage[];
+  } | null;
   themes: WritingTheme[];
   taxonomyTags: TagTaxonomyItem[];
 };
@@ -79,16 +86,18 @@ function formatUpdatedAt(date: Date) {
 
 function NewArticleButton({ compact = false }: { compact?: boolean }) {
   return (
-    <form action={createBlankArticleAction} className={compact ? undefined : "workspace-new-article"}>
+    <div className={compact ? undefined : "workspace-new-article"}>
       <Button
+        asChild
         className={compact ? undefined : "workspace-new-article-button w-full justify-start shadow-sm"}
         size={compact ? "sm" : "default"}
-        type="submit"
       >
-        <Plus />
-        <span className={compact ? undefined : "workspace-new-article-label"}>Blank article</span>
+        <Link href={"/start" as Route}>
+          <Plus />
+          <span className={compact ? undefined : "workspace-new-article-label"}>New article</span>
+        </Link>
       </Button>
-    </form>
+    </div>
   );
 }
 
@@ -99,6 +108,7 @@ export function AppShell({
   recentArticles,
   selectedArticle,
   selectedArticleOrganization,
+  selectedArticleStart,
   themes,
   taxonomyTags,
 }: AppShellProps) {
@@ -165,7 +175,7 @@ export function AppShell({
                 ))
               ) : (
                 <p className="px-3 py-2 text-xs leading-5 text-muted-foreground">
-                  Blank pages will appear here.
+                  New articles will appear here.
                 </p>
               )}
             </div>
@@ -213,14 +223,21 @@ export function AppShell({
               Quiet
             </span>
           </header>
-          <div className="flex flex-1 items-center px-7">
-            <div>
-              <p className="font-serif text-xl">Writing first.</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                The assistant stays out of the way until the AI writing phases.
-              </p>
+          {selectedArticle && selectedArticleStart?.status === "active" ? (
+            <InterviewAssistant
+              articleId={selectedArticle.id}
+              initialMessages={selectedArticleStart.messages}
+            />
+          ) : (
+            <div className="flex flex-1 items-center px-7">
+              <div>
+                <p className="font-serif text-xl">Writing first.</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Start with a premise when you want a focused editorial conversation.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </aside>
       </div>
     </WritingWorkspaceProvider>
@@ -300,7 +317,7 @@ function Library({
             <FileText className="mx-auto size-6 text-muted-foreground" />
             <h2 className="mt-5 font-serif text-2xl">Nothing here yet.</h2>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-              Create a blank article. The editor itself arrives in the next validated slice.
+              Start with a premise and shape it through a focused conversation, or open a blank article.
             </p>
             <div className="mt-6 flex justify-center">
               <NewArticleButton compact />

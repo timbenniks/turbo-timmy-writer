@@ -71,6 +71,7 @@ interface WritingSkill<TInput, TOutput> {
   name: string;
   description: string;
   modelPurpose: "interview" | "draft" | "edit" | "review" | "embedding";
+  maxOutputTokens?: number;
   inputSchema: z.ZodType<TInput>;
   outputSchema?: z.ZodType<TOutput>;
   buildInstructions(input: TInput): string;
@@ -80,6 +81,10 @@ interface WritingSkill<TInput, TOutput> {
 ```
 
 The executor validates input, resolves only requested context, selects a centrally configured model, starts an `ai_runs` record, executes or streams, validates structured output where applicable, then completes the run with usage and outcome. Skills do not import UI or publisher code.
+
+The live OpenAI adapter uses the Responses API through the Vercel AI SDK, disables provider-side response storage, imposes a request timeout, and maps provider failures to bounded safe codes. `OPENAI_MODEL` is the shared generative default; interview, draft, edit, and review may override it independently, while embeddings require an embedding-capable model. CI never supplies a live credential and exercises provider-neutral mocks only.
+
+The article-start route authenticates and owner-scopes the session before accepting input. It stores each user turn first, streams newline-delimited safe UI events from the interview skill, and stores the complete assistant turn with its AI run ID. A visibly incomplete response is not committed as a conversation turn. The client can retry while the already-saved user text remains durable.
 
 AI output can create a first draft when explicitly requested. After a canonical draft exists, transformations create suggestions and never directly change the article.
 
@@ -215,3 +220,4 @@ OpenAI and publisher variables are documented but not required until their phase
 15. Slice 4 keeps writing metrics derived in deterministic client-safe code, stores tags as normalized user-owned records, and creates manual checkpoints only from an acknowledged server revision. Checkpoints are immutable snapshots rather than autosave history.
 16. Slice 5 keeps versioned theme settings and per-user preferences outside articles. Validated settings become scoped CSS variables in a client workspace provider, so switching is immediate and cannot enter the canonical document or autosave path. Focus mode changes workspace chrome without unmounting the editor.
 17. Phase 2 starts behind a provider-neutral AI boundary. Skills declare a version and model purpose; the executor validates inputs and resolved context before starting a run, records safe status/usage/outcome metadata, validates structured output, and treats an abandoned text stream as cancelled. Provider prompts and generated content are not retained in `ai_runs`.
+18. The default new-article action opens an immediate-persistence premise flow. A durable owner-scoped article-start session replays ordered user and assistant messages. The OpenAI Responses adapter remains server-only, uses `store: false`, and accepts one shared generative model with optional purpose overrides.

@@ -25,6 +25,20 @@ Implement the premise-to-interview-to-brief-to-first-draft workflow.
 
 Checkpoint approved: credential-free runtime commit `a7fbdd8` passed GitHub Actions run `33526595600` and Vercel deployment `dpl_ETgNE3MN7p91DzMpgwGAgf4TLxHm` reached Ready on the canonical Production alias. Slice 2 can add the first user-visible premise and persisted writing-session flow without changing provider semantics.
 
+## Slices 2–3 validation — 2026-09-01
+
+- Changed the default new-article path from an empty document to a protected premise screen, while retaining `Open a blank article` as an explicit secondary choice.
+- Added owner-scoped article-start sessions and ordered versioned messages. The interviewing article, active session, and first premise message are persisted together before any provider request.
+- Added a live server-only OpenAI Responses adapter through the Vercel AI SDK. It uses the user-configured model, `store: false`, bounded output, a 45-second timeout, and safe failure codes; credentials never enter client code or run records.
+- `OPENAI_MODEL` is now the shared interview/draft/edit/review default. Purpose-specific variables remain optional overrides; embeddings remain separately configured.
+- Added versioned interview skill `article-interview/v1`. It dynamically chooses the highest-value missing detail, asks exactly one concise question, has no fixed count or sequence, does not draft, and stops questioning when Tim asks to draft.
+- The authenticated route stores answers before generation, streams NDJSON text deltas, and stores only a complete assistant turn linked to the successful AI run. Interrupted or failed work leaves Tim's input durable and retryable.
+- Real authenticated browser validation created a disposable premise, streamed a first question, persisted an answer, streamed a specific follow-up, reloaded the workspace, and recovered all four ordered turns with zero browser errors. Database cleanup removed the two exact QA articles and four runs, returning to 82 articles and zero article-start sessions/messages.
+- Migration `0006_long_grim_reaper.sql` passed Drizzle validation, applied successfully through the direct database URL, and pooled inspection confirmed both new tables.
+- ESLint, standalone TypeScript, 41 unit tests, and the production build pass. Unit tests include shared model fallback, purpose overrides, interview prompt invariants, serialization, and incomplete-response detection without paid calls.
+
+Slices 2 and 3 are locally complete. The next coherent slice is the structured, revisioned working brief and its manual editor.
+
 ## Key decisions to validate
 
 - Tim can stop the interview at any time.

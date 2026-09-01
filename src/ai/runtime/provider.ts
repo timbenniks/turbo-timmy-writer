@@ -10,6 +10,7 @@ export type AiProviderRequest = {
   instructions: string;
   input: string;
   signal?: AbortSignal;
+  maxOutputTokens?: number;
 };
 
 export type AiProviderStreamEvent =

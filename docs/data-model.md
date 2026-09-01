@@ -130,11 +130,13 @@ The tags table is also the reusable owner-scoped taxonomy. The editor searches a
 
 ### `writing_sessions`
 
-Contains `id`, `article_id`, `type` (initially `article-start`), status, optional title, `created_at`, and `updated_at`. Index sessions by article and update time.
+Contains `id`, `user_id`, `article_id`, `type` (initially `article-start`), status, the next durable message sequence, `created_at`, `updated_at`, and optional `completed_at`. Unique `(article_id, type)` prevents two competing article-start histories; owner/update indexes support workspace reads.
 
 ### `writing_messages`
 
-Contains `id`, `session_id`, `role`, structured content JSON, optional plain text, optional AI run reference, sequence number, and `created_at`. Unique `(session_id, sequence)` ensures stable replay.
+Contains `id`, `session_id`, role (`user` or `assistant`), versioned structured content JSON, required plain-text projection, optional AI run reference, sequence number, and `created_at`. Unique `(session_id, sequence)` ensures stable replay. Premise and answer text are stored before generation; a completed assistant message is stored only after its stream finishes and references the related run.
+
+Phase 2 Slice 2 implements both tables in additive migration `0006_long_grim_reaper.sql`. Sessions and messages cascade only with their parent article; AI run deletion clears the optional message reference. The default guided flow creates the interviewing article, session, and premise in one Neon HTTP transaction.
 
 ### `ai_runs`
 

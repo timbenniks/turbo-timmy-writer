@@ -12,6 +12,7 @@ import {
   listTaxonomyTagsForUser,
 } from "@/db/queries/article-organization";
 import { listThemesForUser } from "@/db/queries/themes";
+import { getArticleStartForUser } from "@/db/queries/writing-sessions";
 
 export const dynamic = "force-dynamic";
 
@@ -31,12 +32,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const articleId = parsedArticleId.data;
-  const [article, recentArticles, organization, themes, taxonomyTags] = await Promise.all([
+  const [article, recentArticles, organization, themes, taxonomyTags, articleStart] = await Promise.all([
     getArticleForUser(articleId, session.user.id),
     listRecentArticlesForUser(session.user.id),
     getArticleOrganizationForUser(articleId, session.user.id),
     listThemesForUser(session.user.id),
     listTaxonomyTagsForUser(session.user.id),
+    getArticleStartForUser(articleId, session.user.id),
   ]);
 
   if (!article) {
@@ -51,6 +53,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       recentArticles={recentArticles}
       selectedArticle={article}
       selectedArticleOrganization={organization}
+      selectedArticleStart={
+        articleStart
+          ? {
+              status: articleStart.session.status,
+              messages: articleStart.messages.map((message) => ({
+                id: message.id,
+                role: message.role,
+                text: message.plainText,
+              })),
+            }
+          : null
+      }
       themes={themes}
       taxonomyTags={taxonomyTags}
     />

@@ -17,7 +17,7 @@ export const aiModelConfigurationSchema = z.object({
   draft: modelNameSchema,
   edit: modelNameSchema,
   review: modelNameSchema,
-  embedding: modelNameSchema,
+  embedding: modelNameSchema.optional(),
 });
 
 export type AiModelConfiguration = z.infer<
@@ -27,11 +27,13 @@ export type AiModelConfiguration = z.infer<
 export function parseAiModelConfiguration(
   environment: Record<string, string | undefined>,
 ): AiModelConfiguration {
+  const sharedModel = environment.OPENAI_MODEL;
+
   return aiModelConfigurationSchema.parse({
-    interview: environment.OPENAI_MODEL_INTERVIEW,
-    draft: environment.OPENAI_MODEL_DRAFT,
-    edit: environment.OPENAI_MODEL_EDIT,
-    review: environment.OPENAI_MODEL_REVIEW,
+    interview: environment.OPENAI_MODEL_INTERVIEW ?? sharedModel,
+    draft: environment.OPENAI_MODEL_DRAFT ?? sharedModel,
+    edit: environment.OPENAI_MODEL_EDIT ?? sharedModel,
+    review: environment.OPENAI_MODEL_REVIEW ?? sharedModel,
     embedding: environment.OPENAI_MODEL_EMBEDDING,
   });
 }
@@ -40,5 +42,16 @@ export function resolveAiModel(
   configuration: AiModelConfiguration,
   purpose: AiModelPurpose,
 ) {
-  return configuration[purpose];
+  const model = configuration[purpose];
+  if (!model) {
+    throw new AiModelConfigurationError(purpose);
+  }
+  return model;
+}
+
+export class AiModelConfigurationError extends Error {
+  constructor(public readonly purpose: AiModelPurpose) {
+    super(`No AI model is configured for ${purpose}.`);
+    this.name = "AiModelConfigurationError";
+  }
 }

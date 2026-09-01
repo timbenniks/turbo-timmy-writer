@@ -43,6 +43,13 @@
       "when": 1788276593982,
       "tag": "0005_far_loners",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788281411846,
+      "tag": "0006_long_grim_reaper",
+      "breakpoints": true
     }
   ]
 }

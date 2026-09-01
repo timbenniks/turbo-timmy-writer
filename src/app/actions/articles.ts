@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import type { Route } from "next";
 
+import { articleStartPremiseSchema } from "@/ai/conversation/model";
 import {
   saveArticleInputSchema,
   type SaveArticleResult,
@@ -13,6 +14,7 @@ import {
   createBlankArticleForUser,
   saveArticleForUser,
 } from "@/db/queries/articles";
+import { createArticleStartForUser } from "@/db/queries/writing-sessions";
 import { articleDocumentToPlainText } from "@/editor/serialization/plain-text";
 
 export async function createBlankArticleAction() {
@@ -23,6 +25,36 @@ export async function createBlankArticleAction() {
 
   const article = await createBlankArticleForUser(session.user.id);
   redirect(`/articles/${article.id}` as Route);
+}
+
+export type CreateGuidedArticleState = {
+  error?: string;
+};
+
+export async function createGuidedArticleAction(
+  _previousState: CreateGuidedArticleState,
+  formData: FormData,
+): Promise<CreateGuidedArticleState> {
+  const session = await getAllowedSession();
+  if (!session) {
+    redirect("/sign-in");
+  }
+
+  const premise = articleStartPremiseSchema.safeParse(formData.get("premise"));
+  if (!premise.success) {
+    return {
+      error:
+        premise.error.issues[0]?.message ??
+        "Share a premise to start the conversation.",
+    };
+  }
+
+  const article = await createArticleStartForUser({
+    userId: session.user.id,
+    premise: premise.data,
+  });
+  revalidatePath("/");
+  redirect(`/articles/${article.articleId}` as Route);
 }
 
 export async function saveArticleAction(input: unknown): Promise<SaveArticleResult> {

@@ -41,6 +41,7 @@ type PreparedSkill<TInput, TOutput> = {
   instructions: string;
   providerInput: string;
   model: string;
+  maxOutputTokens?: number;
   skill: WritingSkill<TInput, TOutput>;
 };
 
@@ -95,6 +96,7 @@ async function prepareSkill<TInput, TOutput>(
     instructions: skill.buildInstructions(parsedInput),
     providerInput: skill.buildInput(parsedInput, context),
     model: resolveAiModel(models, skill.modelPurpose),
+    maxOutputTokens: skill.maxOutputTokens,
     skill,
   };
 }
@@ -162,6 +164,7 @@ export async function executeStructuredSkill<TInput, TOutput>(
       signal: request.signal,
       outputName: `${prepared.skill.id}_${prepared.skill.version}`,
       outputSchema: request.skill.outputSchema,
+      maxOutputTokens: prepared.maxOutputTokens,
     });
     const parsed = request.skill.outputSchema.safeParse(response.output);
     if (!parsed.success) {
@@ -233,6 +236,7 @@ export async function* streamTextSkill<TInput>(
       instructions: prepared.instructions,
       input: prepared.providerInput,
       signal: request.signal,
+      maxOutputTokens: prepared.maxOutputTokens,
     })) {
       if (event.type === "text-delta") {
         yield event.text;
