@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 is complete. Phase 1 Slices 1-6 are implemented, tested, and deployed; the final checkpoint remains Tim's comfortable extended Production writing session.
+Phases 0 and 1 are complete. Phase 2 Slice 1 is implemented locally: the credential-free AI runtime, central model configuration, safe run logging, deterministic mock provider, and additive `ai_runs` migration.
 
 ## Completed work
 
@@ -116,10 +116,16 @@ Phase 0 is complete. Phase 1 Slices 1-6 are implemented, tested, and deployed; t
 - Promoted the existing tags table into a reusable owner taxonomy without a migration. Replaced comma-separated article tag editing with a searchable multi-select and create-on-demand flow; added a real cog-powered manager with usage counts, create, rename, merge-on-collision, and confirmed deletion.
 - Consolidated the sidebar account controls into one row: the functional taxonomy cog, `@timbenniks`, and logout align together. Night's 72 px minimal rail stacks only its icon actions to stay within the deliberate narrow treatment.
 - Authenticated Playwright passed ten desktop/mobile scenarios, including taxonomy selection/clear, manager create/rename/delete, account-row alignment, and fixed-footer scrolling. Cleanup returned Production data to exactly 82 articles, 95 tags, and 477 assignments.
+- Tim's repeated Production checks covered real editing, autosave/reload, themes, focus mode, taxonomy, and responsive layout; his direction to continue on 2026-09-01 closes the Phase 1 acceptance checkpoint.
+- Added a provider-neutral AI runtime with versioned skill metadata, explicit model purposes, Zod-validated inputs/context/structured outputs, streamed text execution, and safe failure/cancellation semantics.
+- Centralized interview, draft, edit, review, and embedding model selection behind environment-backed configuration. The runtime itself never receives or logs the OpenAI credential.
+- Added a deterministic mock provider and eight focused tests covering configuration, preflight validation, successful structured and streamed work, parse failure, provider failure, and abandoned-stream cancellation without paid calls.
+- Generated additive migration `0005_far_loners.sql` for `ai_runs`, applied it through the verified direct URL, and confirmed through the pooled runtime URL that all 14 columns and four statuses exist with zero synthetic rows.
+- Passed the Slice 1 local gate: Drizzle schema validation, ESLint, standalone TypeScript, 35 unit tests, the production build, and four credential-free desktop/mobile Playwright checks with six authenticated fixture-dependent checks intentionally skipped.
 
 ## Current validation checkpoint
 
-Have Tim complete one comfortable extended Production writing session before closing Phase 1.
+Ship and verify the Phase 2 Slice 1 runtime checkpoint, then begin Slice 2's premise capture and persisted article-start sessions.
 
 ## Known issues and setup state
 
@@ -135,8 +141,8 @@ Have Tim complete one comfortable extended Production writing session before clo
 - Preview deployments intentionally have no GitHub OAuth credentials because GitHub OAuth Apps support one callback URL. Local and production use separate applications; choose a preview strategy later only if preview login becomes necessary.
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
-- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0004` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production includes Slice 6 browser coverage through corrective commit `aa57be0`; its final checkpoint is Tim's comfortable extended writing session.
+- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0005` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
+- Production includes the completed Phase 1 writing workflow through taxonomy commit `a9f9445`.
 
 ## Important architecture decisions
 
@@ -150,6 +156,7 @@ Have Tim complete one comfortable extended Production writing session before clo
 - AI changes to existing prose are stored as reviewable suggestions.
 - Variants are derived, editable documents with explicit stale detection and regeneration protection.
 - Publishing uses deployed APIs, requires confirmation, and stores external result identifiers.
+- AI skills declare versioned metadata and a central model purpose. Provider-neutral executors validate boundaries, log safe metadata without prompts or output, and distinguish success, failure, and cancellation before user-facing AI flows are added.
 
 ## Writing-voice audit findings
 
@@ -162,5 +169,5 @@ Have Tim complete one comfortable extended Production writing session before clo
 
 ## Next tasks
 
-1. Have Tim complete one extended Production writing session, including reload and focus/theme switching.
-2. After approval, close Phase 1 and begin Phase 2's premise-first AI-assisted start.
+1. Push Phase 2 Slice 1, verify GitHub Actions and the canonical Vercel deployment, and record the exact evidence.
+2. Begin Phase 2 Slice 2 with immediate premise persistence, article-start sessions, and streamed message storage.

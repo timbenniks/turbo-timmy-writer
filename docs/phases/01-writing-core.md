@@ -97,7 +97,7 @@ Checkpoint approved: Slice 5, Night's corrected icon rail, and live custom-theme
 - The app frame now uses the dynamic viewport height and keeps navigation/editor footers, headers, and toolbars visible while the library or article canvas owns vertical scrolling. The 1,200-word authenticated browser flow scrolls the article canvas to its end and asserts that the editor footer remains in the viewport at desktop and mobile widths.
 - Authenticated recovery coverage now refuses to mutate articles whose title does not start with `Playwright fixture`; fixtures must be disposable and single-paragraph because browser text replacement cannot preserve an authored rich document's structure.
 
-Checkpoint: coverage is deployed and the clean CI browser boundary passes. Have Tim complete one comfortable extended writing session before closing Phase 1.
+Checkpoint approved: coverage is deployed and the clean CI browser boundary passes. Tim repeatedly validated the complete Production writing workflow, including real editing, reload, autosave, themes, focus mode, taxonomy, and responsive layout, then explicitly directed work to continue on 2026-09-01. Phase 1 is complete.
 
 ## Key decisions to validate
 

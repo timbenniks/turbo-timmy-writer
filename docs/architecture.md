@@ -70,9 +70,11 @@ interface WritingSkill<TInput, TOutput> {
   version: string;
   name: string;
   description: string;
+  modelPurpose: "interview" | "draft" | "edit" | "review" | "embedding";
   inputSchema: z.ZodType<TInput>;
   outputSchema?: z.ZodType<TOutput>;
-  buildInstructions(): string;
+  buildInstructions(input: TInput): string;
+  buildInput(input: TInput, context: WritingContext): string;
   resolveContext?(input: TInput): Promise<WritingContext>;
 }
 ```
@@ -212,3 +214,4 @@ OpenAI and publisher variables are documented but not required until their phase
 14. Slice 3 writes a validated local recovery envelope before a 900 ms server debounce. Server saves use an explicit integer revision; late acknowledgements never claim newer local edits, offline changes retry on reconnection, and stale tabs require explicit conflict resolution.
 15. Slice 4 keeps writing metrics derived in deterministic client-safe code, stores tags as normalized user-owned records, and creates manual checkpoints only from an acknowledged server revision. Checkpoints are immutable snapshots rather than autosave history.
 16. Slice 5 keeps versioned theme settings and per-user preferences outside articles. Validated settings become scoped CSS variables in a client workspace provider, so switching is immediate and cannot enter the canonical document or autosave path. Focus mode changes workspace chrome without unmounting the editor.
+17. Phase 2 starts behind a provider-neutral AI boundary. Skills declare a version and model purpose; the executor validates inputs and resolved context before starting a run, records safe status/usage/outcome metadata, validates structured output, and treats an abandoned text stream as cancelled. Provider prompts and generated content are not retained in `ai_runs`.

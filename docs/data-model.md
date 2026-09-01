@@ -157,6 +157,8 @@ Contains `id`, `session_id`, `role`, structured content JSON, optional plain tex
 
 Do not store API keys or raw secret-bearing headers. Prompt/instruction identifiers belong in safe version metadata. Raw prompt retention, if ever introduced, needs an explicit privacy decision.
 
+Phase 2 Slice 1 implements this as additive migration `0005_far_loners.sql`. `outcome_json` is a versioned safe envelope containing only execution mode, optional provider response/finish identifiers, and structured-validation state. Prompt text, retrieved context, and generated content are deliberately excluded. Owner-scoped query code verifies an optional article belongs to the run owner before insert and finalizes only a matching `running` record.
+
 ### `ai_suggestions`
 
 Contains `id`, `article_id`, optional `article_version_id`, optional `ai_run_id`, original text, suggested text, instruction, location anchor JSON, status (`pending`, `accepted`, `rejected`, `superseded`), and creation/resolution timestamps.
