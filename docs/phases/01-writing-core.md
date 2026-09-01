@@ -78,6 +78,7 @@ Checkpoint approved: GitHub Actions run `33505029706` and Vercel deployment `dpl
 - Night's corrective commit `17a9050` passed GitHub Actions run `33507199048` in 46 seconds and reached Ready in Vercel deployment `dpl_CFmkUcy9mv3QZqTNrUfyVQLXQLBC` on the canonical Production alias.
 - Replaced disabled starter-theme fields with explicit protected-starter guidance and a `Duplicate to customise` action. Custom forms now apply a reversible live preview for all typography, width, colour, density, and sidebar settings; close/Escape/theme switching discards unsaved changes, while Save remains explicit.
 - Authenticated Chromium verified an immediate canvas change to `#203040` and editor width change to 640 px, close-to-discard back to Night, save/default persistence across reload, and cleanup back to exactly five starters. The article remained at revision 2 with identical title and plain text.
+- Live-preview commit `e65d5e0` passed GitHub Actions run `33508060371` in 51 seconds and reached Ready in Vercel deployment `dpl_73RyfFeceY4VDeMjbHZXooQXpHGV` on the canonical Production alias.
 
 Checkpoint: Slice 5 and the Night sidebar correction are deployed. Tim now rechecks Night, switches starters, duplicates/edits one custom theme, reloads to confirm the default, and enters/exits focus mode in Production. Do not begin Slice 6 until the workspace workflow is approved.
 

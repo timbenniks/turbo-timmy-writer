@@ -99,6 +99,7 @@ Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, c
 - Corrective commit `17a9050` passed GitHub Actions run `33507199048` in 46 seconds; Vercel deployment `dpl_CFmkUcy9mv3QZqTNrUfyVQLXQLBC` reached Ready and owns the canonical Production alias.
 - Replaced the misleading disabled starter form with protected-theme guidance and `Duplicate to customise`. Custom theme fields now live-preview name, typography, width, all five colours, density, and sidebar without persisting until Save; close, Escape, or theme switching discards the draft.
 - Authenticated Chromium verified immediate `#203040` canvas and 640 px editor previews, close-to-discard, saved/default persistence across reload, and custom-theme deletion. Removed the automation copy afterward; pooled reads show exactly five built-ins, zero preferences, and the untouched test article at revision 2.
+- Live-preview commit `e65d5e0` passed GitHub Actions run `33508060371` in 51 seconds; Vercel deployment `dpl_73RyfFeceY4VDeMjbHZXooQXpHGV` reached Ready on the canonical Production alias.
 
 ## Current validation checkpoint
 
@@ -119,7 +120,7 @@ Have Tim validate instant theme switching, a durable custom/default theme, and f
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0004` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production includes Slice 5 themes/focus mode plus corrective commit `17a9050` for Night's minimal sidebar. Its final checkpoint requires Tim's Production recheck.
+- Production includes Slice 5 themes/focus mode, Night's corrected icon rail, and live theme previews through commit `e65d5e0`. Its final checkpoint requires Tim's Production recheck.
 
 ## Important architecture decisions
 
