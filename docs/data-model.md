@@ -82,9 +82,11 @@ Unique `(article_id, revision)`; index `(article_id, created_at desc)`.
 | --- | --- | --- |
 | `id` | uuid | Primary key |
 | `article_id` | uuid | Parent article |
+| `article_revision` | integer | Exact acknowledged source revision |
+| `title` | text | Stable title snapshot |
 | `document_json` | jsonb | Stable canonical snapshot |
 | `plain_text` | text | Stable text snapshot |
-| `markdown` | text nullable | Stable derived export when needed |
+| `markdown` | text | Stable deterministic export |
 | `reason` | enum/text | Snapshot trigger |
 | `label` | text nullable | User-facing name |
 | `ai_run_id` | uuid nullable | Related run |
@@ -109,7 +111,7 @@ User settings store `default_theme_id`; if a separate settings table is unnecess
 
 ### `tags` and `article_tags`
 
-`tags` contains `id`, `user_id`, normalized `name`, display `label`, and timestamps with unique `(user_id, name)`. `article_tags` contains `article_id`, `tag_id`, and optional `position`, with a composite primary key.
+`tags` contains `id`, `user_id`, `normalized_name`, display `label`, and timestamps with unique `(user_id, normalized_name)`. `article_tags` contains `article_id`, `tag_id`, and `position`, with a composite primary key. Slice 4 replaces assignments in one Neon HTTP transaction after confirming article ownership; tag identity is case-insensitive while the first canonical display label remains readable.
 
 ## Conversation and AI tables
 

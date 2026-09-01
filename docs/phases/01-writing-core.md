@@ -51,6 +51,19 @@ Checkpoint approved: GitHub Actions run `33490541452` and the Git-connected Verc
 
 Checkpoint approved: GitHub Actions run `33492576830` and Vercel deployment `dpl_A4EA2BWrB8sCGAh6REPGFTbWVUaw` passed. Tim typed without using Save, waited for autosave, reloaded the article successfully in Production, and approved the recovery behavior on 2026-09-01. Slice 4 may begin.
 
+## Slice 4 validation — 2026-09-01
+
+- Added owner-scoped, stale-safe status changes using the existing lifecycle-transition domain rules and a compact valid-next-state selector.
+- Added user-owned normalized tags and article assignments with case-insensitive deduplication, input bounds, transactional replacement, and persisted canonical display labels.
+- Added deterministic Unicode-aware live word count and reading time derived directly from canonical editor JSON.
+- Added immutable labeled manual checkpoints of acknowledged server revisions containing title, Tiptap JSON, plain text, deterministic Markdown, reason, and timestamp.
+- Generated and applied additive migration `0003_solid_betty_brant.sql` for `tags`, `article_tags`, and `article_versions`; verified all three tables and the complete test record through the pooled runtime connection.
+- A real authenticated Chromium flow changed a drafting article to editing, canonicalized `Performance, Next.js, performance` to `Next.js, Performance`, showed ten words and a one-minute read, created a labeled checkpoint, reloaded, and retained every value.
+- Inspected the workflow at 1440 × 1000 and 390 × 844. The metadata strip now remains single-row on desktop and wraps into two readable rows on phones.
+- Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-one unit tests, and the Next.js production build.
+
+Checkpoint: deploy through Git, then Tim changes status, adds tags, observes live metrics, creates a labeled checkpoint, reloads, and confirms persistence in Production. Do not begin Slice 5 until the writing-organization workflow is approved.
+
 ## Key decisions to validate
 
 - Tiptap JSON remains canonical and projections are deterministic.

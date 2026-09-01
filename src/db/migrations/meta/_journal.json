@@ -22,6 +22,13 @@
       "when": 1788254283847,
       "tag": "0002_tranquil_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788263206748,
+      "tag": "0003_solid_betty_brant",
+      "breakpoints": true
     }
   ]
 }

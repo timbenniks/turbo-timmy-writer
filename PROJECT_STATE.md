@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slices 1-3 are complete. Phase 1, Slice 4 (status controls, tags, word count, reading time, and manual version checkpoints), is next.
+Phase 0 and Phase 1 Slices 1-3 are complete. Phase 1, Slice 4 (status controls, tags, word count, reading time, and manual version checkpoints), is implemented locally and awaiting the Production validation checkpoint.
 
 ## Completed work
 
@@ -75,10 +75,19 @@ Phase 0 and Phase 1 Slices 1-3 are complete. Phase 1, Slice 4 (status controls, 
 - Passed the Slice 3 local gate: Drizzle schema check, ESLint, standalone TypeScript, seventeen unit tests, and the Next.js production build.
 - GitHub Actions run `33492576830` passed the Slice 3 gate in 49 seconds, and Vercel deployed commit `842875a` successfully to the canonical Production URL.
 - Tim typed without using the Save button, waited for autosave, reloaded the article in Production, and approved the Slice 3 checkpoint.
+- Added owner-scoped status mutations that reuse the tested lifecycle-transition rules, reject stale expected statuses, and expose only valid next states in the editor.
+- Added normalized user-owned tags and article assignments with a transactional Neon HTTP batch, case-insensitive deduplication, stable display labels, ten-tag/40-character boundaries, and owner-scoped reads and writes.
+- Added deterministic Unicode-aware word count and reading time. Metrics update from the canonical editor document immediately and survive recovery/reload without being persisted as duplicate mutable data.
+- Added immutable manual article checkpoints containing the acknowledged article revision, title, canonical Tiptap JSON, plain text, deterministic Markdown, reason, optional label, and creation time. The checkpoint control is disabled until autosave has acknowledged the current document.
+- Generated and applied additive migration `0003_solid_betty_brant.sql` through the configured direct URL. Pooled runtime inspection confirmed the new `tags`, `article_tags`, and `article_versions` tables.
+- Drove a real authenticated Chromium flow through autosave, a valid status transition, duplicate-tag canonicalization, live ten-word/one-minute metrics, labeled checkpoint creation, and reload. Pooled database queries matched status `editing`, tags `Next.js`/`Performance`, article revision 2, and the immutable version's exact title, plain text, Markdown, reason, and label.
+- Inspected the complete Slice 4 workspace at 1440 × 1000 and 390 × 844. The first mobile pass hid metrics/checkpoints off-screen; the metadata strip now wraps into two compact rows on phones while remaining a single calm row on desktop.
+- Added the app's existing T mark as a route-native SVG icon after browser inspection exposed the otherwise harmless missing-icon resource request.
+- Passed the Slice 4 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-one unit tests, and the Next.js production build.
 
 ## Current validation checkpoint
 
-Implement Slice 4, then validate article organization, live writing metrics, and a durable manual version checkpoint in Production.
+Deploy Slice 4 through the connected Git workflow, then have Tim validate status, tags, live metrics, and one durable manual checkpoint in Production before beginning the workspace/theme slice.
 
 ## Known issues and setup state
 
@@ -94,7 +103,7 @@ Implement Slice 4, then validate article organization, live writing metrics, and
 - Preview deployments intentionally have no GitHub OAuth credentials because GitHub OAuth Apps support one callback URL. Local and production use separate applications; choose a preview strategy later only if preview login becomes necessary.
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
-- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` and `0002` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
+- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0003` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
 - Production commit `842875a` includes the validated Slice 3 autosave, recovery, offline retry, and optimistic concurrency behavior.
 
 ## Important architecture decisions
@@ -121,7 +130,6 @@ Implement Slice 4, then validate article organization, live writing metrics, and
 
 ## Next tasks
 
-1. Add owner-scoped article status changes using the existing lifecycle transition rules.
-2. Add normalized user-owned tags and article-tag assignment.
-3. Add deterministic word-count and reading-time helpers with live editor feedback.
-4. Add immutable manual article-version checkpoints, then validate the combined Slice 4 workflow.
+1. Commit and push Slice 4, then confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
+2. Have Tim change an article status, add tags, confirm live metrics, create a labeled checkpoint, reload, and confirm the values survive in Production.
+3. After approval, begin Slice 5 with starter themes, theme persistence/editing, instant switching, and focus mode.

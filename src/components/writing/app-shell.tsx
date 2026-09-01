@@ -49,6 +49,11 @@ type AppShellProps = {
   articles: ArticleSummary[];
   recentArticles: ArticleSummary[];
   selectedArticle?: SelectedArticle;
+  selectedArticleOrganization?: {
+    tags: string[];
+    versionCount: number;
+    latestVersionAt: Date | null;
+  };
 };
 
 const filterTitles: Record<LibraryFilter, string> = {
@@ -88,6 +93,7 @@ export function AppShell({
   articles,
   recentArticles,
   selectedArticle,
+  selectedArticleOrganization,
 }: AppShellProps) {
   return (
     <main className="min-h-screen bg-background p-2 text-foreground sm:p-3">
@@ -176,7 +182,14 @@ export function AppShell({
 
         <section className="flex min-w-0 flex-col bg-editor">
           {selectedArticle ? (
-            <ArticleWorkspace article={selectedArticle} />
+            <ArticleWorkspace
+              article={selectedArticle}
+              organization={selectedArticleOrganization ?? {
+                tags: [],
+                versionCount: 0,
+                latestVersionAt: null,
+              }}
+            />
           ) : (
             <Library articles={articles} filter={activeFilter} />
           )}
@@ -291,13 +304,22 @@ function Library({
   );
 }
 
-function ArticleWorkspace({ article }: { article: SelectedArticle }) {
+function ArticleWorkspace({
+  article,
+  organization,
+}: {
+  article: SelectedArticle;
+  organization: NonNullable<AppShellProps["selectedArticleOrganization"]>;
+}) {
   return (
     <ArticleEditor
       articleId={article.id}
       initialTitle={article.title}
       initialDocument={article.documentJson}
       status={article.status}
+      initialTags={organization.tags}
+      initialVersionCount={organization.versionCount}
+      initialLatestVersionAt={organization.latestVersionAt?.toISOString() ?? null}
       revision={article.revision}
       updatedAt={article.updatedAt.toISOString()}
     />

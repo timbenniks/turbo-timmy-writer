@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   articleDisplayTitle,
   articleIdSchema,
+  availableArticleStatuses,
   canTransitionArticleStatus,
   statusesForLibraryFilter,
   untitledArticleSlug,
@@ -15,6 +16,12 @@ describe("article lifecycle", () => {
     expect(canTransitionArticleStatus("ready", "published")).toBe(true);
     expect(canTransitionArticleStatus("published", "idea")).toBe(false);
     expect(canTransitionArticleStatus("archived", "editing")).toBe(true);
+    expect(availableArticleStatuses("drafting")).toEqual([
+      "drafting",
+      "editing",
+      "ready",
+      "archived",
+    ]);
   });
 
   it("maps library views to explicit lifecycle states", () => {

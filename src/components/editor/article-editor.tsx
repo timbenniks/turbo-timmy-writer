@@ -6,6 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import {
   ArrowLeft,
   Bold,
+  BookmarkPlus,
   Code,
   CodeXml,
   Heading2,
@@ -20,12 +21,20 @@ import {
   Quote,
   Redo2,
   Save,
+  Tag,
   Undo2,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { articleDisplayTitle, articleStatusLabel, type ArticleStatus } from "@/articles/model";
+import {
+  articleDisplayTitle,
+  articleStatusLabel,
+  availableArticleStatuses,
+  type ArticleStatus,
+} from "@/articles/model";
+import { calculateWritingMetrics } from "@/articles/metrics";
+import { updateArticleTagsInputSchema } from "@/articles/organization";
 import { hasChangesAfterSaveStarted } from "@/articles/save";
 import {
   ARTICLE_RECOVERY_STORAGE_PREFIX,
@@ -34,6 +43,11 @@ import {
   decideArticleRecovery,
   parseArticleRecoveryEnvelope,
 } from "@/articles/recovery";
+import {
+  createManualCheckpointAction,
+  updateArticleStatusAction,
+  updateArticleTagsAction,
+} from "@/app/actions/article-organization";
 import { saveArticleAction } from "@/app/actions/articles";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +55,7 @@ import {
   normalizeArticleDocument,
   type ArticleDocument,
 } from "@/editor/document";
+import { articleDocumentToPlainText } from "@/editor/serialization/plain-text";
 
 const editorExtensions = [
   StarterKit.configure({
@@ -73,6 +88,9 @@ type ArticleEditorProps = {
   initialTitle: string;
   initialDocument: ArticleDocument;
   status: ArticleStatus;
+  initialTags: string[];
+  initialVersionCount: number;
+  initialLatestVersionAt: string | null;
   revision: number;
   updatedAt: string;
 };
@@ -121,6 +139,9 @@ export function ArticleEditor({
   initialTitle,
   initialDocument,
   status,
+  initialTags,
+  initialVersionCount,
+  initialLatestVersionAt,
   revision,
   updatedAt,
 }: ArticleEditorProps) {
@@ -128,9 +149,23 @@ export function ArticleEditor({
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const [savedAt, setSavedAt] = useState(updatedAt);
   const [saveMessage, setSaveMessage] = useState("");
+  const [articleStatus, setArticleStatus] = useState(status);
+  const [statusSaving, setStatusSaving] = useState(false);
+  const [tagsDraft, setTagsDraft] = useState(initialTags.join(", "));
+  const [tagsSaving, setTagsSaving] = useState(false);
+  const [versionCount, setVersionCount] = useState(initialVersionCount);
+  const [latestVersionAt, setLatestVersionAt] = useState(initialLatestVersionAt);
+  const [checkpointSaving, setCheckpointSaving] = useState(false);
+  const [organizationMessage, setOrganizationMessage] = useState("");
+  const [organizationError, setOrganizationError] = useState(false);
+  const [metrics, setMetrics] = useState(() =>
+    calculateWritingMetrics(articleDocumentToPlainText(initialDocument)),
+  );
   const [, setToolbarRevision] = useState(0);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const titleValueRef = useRef(initialTitle);
+  const savedTagsDraftRef = useRef(initialTags.join(", "));
+  const skipNextTagSaveRef = useRef(false);
   const changeRevisionRef = useRef(0);
   const serverRevisionRef = useRef(revision);
   const conflictRevisionRef = useRef<number | null>(null);
@@ -141,6 +176,14 @@ export function ArticleEditor({
   const saveInFlightRef = useRef(false);
   const queuedSaveRef = useRef(false);
   const requestSaveRef = useRef<() => void>(() => undefined);
+
+  const updateMetrics = useCallback((rawDocument: unknown) => {
+    const parsedDocument = normalizeArticleDocument(rawDocument);
+    if (!parsedDocument.success) return;
+    setMetrics(
+      calculateWritingMetrics(articleDocumentToPlainText(parsedDocument.data)),
+    );
+  }, []);
 
   const ensureRecoveryIdentity = useCallback(() => {
     if (recoveryClientIdRef.current && recoveryKeyRef.current) {
@@ -220,7 +263,11 @@ export function ArticleEditor({
         "aria-label": "Article body",
       },
     },
-    onUpdate: ({ editor: updatedEditor }) => markLocalChange(updatedEditor.getJSON()),
+    onUpdate: ({ editor: updatedEditor }) => {
+      const document = updatedEditor.getJSON();
+      updateMetrics(document);
+      markLocalChange(document);
+    },
     onSelectionUpdate: () => setToolbarRevision((revision) => revision + 1),
     onTransaction: () => setToolbarRevision((revision) => revision + 1),
   });
@@ -352,6 +399,7 @@ export function ArticleEditor({
       setTitle(decision.envelope.title);
       changeRevisionRef.current = decision.envelope.changeRevision;
       editor.commands.setContent(decision.envelope.documentJson, { emitUpdate: false });
+      updateMetrics(decision.envelope.documentJson);
 
       if (decision.kind === "recover") {
         setSaveState("offline");
@@ -373,6 +421,7 @@ export function ArticleEditor({
     initialTitle,
     revision,
     scheduleAutosave,
+    updateMetrics,
   ]);
 
   useEffect(() => {
@@ -415,6 +464,108 @@ export function ArticleEditor({
   function reloadSavedCopy() {
     if (recoveryKeyRef.current) localStorage.removeItem(recoveryKeyRef.current);
     window.location.reload();
+  }
+
+  async function changeArticleStatus(nextStatus: ArticleStatus) {
+    if (nextStatus === articleStatus || statusSaving) return;
+    const expectedStatus = articleStatus;
+    setStatusSaving(true);
+    setOrganizationMessage("");
+
+    try {
+      const result = await updateArticleStatusAction({
+        articleId,
+        expectedStatus,
+        nextStatus,
+      });
+      if (!result.ok) {
+        if (result.currentStatus) setArticleStatus(result.currentStatus);
+        setOrganizationError(true);
+        setOrganizationMessage(result.message);
+        return;
+      }
+      setArticleStatus(result.status);
+      setOrganizationError(false);
+      setOrganizationMessage(`Status changed to ${articleStatusLabel(result.status)}.`);
+    } catch {
+      setOrganizationError(true);
+      setOrganizationMessage("The status could not be updated.");
+    } finally {
+      setStatusSaving(false);
+    }
+  }
+
+  async function saveTags() {
+    if (tagsSaving) return;
+    if (tagsDraft.trim() === savedTagsDraftRef.current) return;
+    const rawTags = tagsDraft
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const parsed = updateArticleTagsInputSchema.safeParse({ articleId, tags: rawTags });
+    if (!parsed.success) {
+      setOrganizationError(true);
+      setOrganizationMessage(
+        "Use up to ten comma-separated tags, each at most 40 characters.",
+      );
+      return;
+    }
+
+    setTagsSaving(true);
+    setOrganizationMessage("");
+    try {
+      const result = await updateArticleTagsAction(parsed.data);
+      if (!result.ok) {
+        setOrganizationError(true);
+        setOrganizationMessage(result.message);
+        return;
+      }
+      const canonicalDraft = result.tags.join(", ");
+      savedTagsDraftRef.current = canonicalDraft;
+      setTagsDraft(canonicalDraft);
+      setOrganizationError(false);
+      setOrganizationMessage(result.tags.length ? "Tags saved." : "Tags cleared.");
+    } catch {
+      setOrganizationError(true);
+      setOrganizationMessage("The tags could not be updated.");
+    } finally {
+      setTagsSaving(false);
+    }
+  }
+
+  async function createCheckpoint() {
+    if (saveState !== "saved" || checkpointSaving) return;
+    const label = window.prompt("Checkpoint label (optional)", "Manual checkpoint");
+    if (label === null) return;
+
+    setCheckpointSaving(true);
+    setOrganizationMessage("");
+    try {
+      const result = await createManualCheckpointAction({
+        articleId,
+        expectedRevision: serverRevisionRef.current,
+        label,
+      });
+      if (!result.ok) {
+        if (result.code === "conflict") {
+          conflictRevisionRef.current = result.currentRevision;
+          setSaveState("conflict");
+          setSaveMessage(result.message);
+        }
+        setOrganizationError(true);
+        setOrganizationMessage(result.message);
+        return;
+      }
+      setVersionCount(result.versionCount);
+      setLatestVersionAt(result.createdAt);
+      setOrganizationError(false);
+      setOrganizationMessage("Manual checkpoint created.");
+    } catch {
+      setOrganizationError(true);
+      setOrganizationMessage("The checkpoint could not be created.");
+    } finally {
+      setCheckpointSaving(false);
+    }
   }
 
   useLayoutEffect(() => {
@@ -471,9 +622,6 @@ export function ArticleEditor({
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <span className="hidden rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-muted-foreground sm:inline">
-            {articleStatusLabel(status)}
-          </span>
           <Button variant="ghost" size="icon" aria-label="Close assistant">
             <PanelRightClose />
           </Button>
@@ -530,6 +678,92 @@ export function ArticleEditor({
           <ImageIcon />
         </ToolbarButton>
       </div>
+
+      <div className="editor-toolbar flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border bg-sidebar px-4 py-1.5 text-xs text-muted-foreground sm:flex-nowrap sm:overflow-x-auto sm:px-6">
+        <label className="flex shrink-0 items-center gap-2">
+          <span className="font-medium text-foreground">Status</span>
+          <select
+            aria-label="Article status"
+            value={articleStatus}
+            disabled={statusSaving}
+            onChange={(event) => void changeArticleStatus(event.target.value as ArticleStatus)}
+            className="h-7 rounded-md border border-border bg-surface px-2 text-xs text-foreground outline-none focus:border-foreground disabled:opacity-50"
+          >
+            {availableArticleStatuses(articleStatus).map((availableStatus) => (
+              <option key={availableStatus} value={availableStatus}>
+                {articleStatusLabel(availableStatus)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span className="h-5 w-px shrink-0 bg-border" />
+        <label className="flex min-w-[190px] max-w-sm flex-1 items-center gap-2">
+          <Tag className="size-3.5 shrink-0" />
+          <span className="sr-only">Article tags, comma separated</span>
+          <input
+            aria-label="Article tags"
+            value={tagsDraft}
+            disabled={tagsSaving}
+            placeholder="Add tags, separated by commas"
+            onChange={(event) => setTagsDraft(event.target.value)}
+            onBlur={() => {
+              if (skipNextTagSaveRef.current) {
+                skipNextTagSaveRef.current = false;
+                return;
+              }
+              void saveTags();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                event.currentTarget.blur();
+              }
+              if (event.key === "Escape") {
+                skipNextTagSaveRef.current = true;
+                setTagsDraft(savedTagsDraftRef.current);
+                event.currentTarget.blur();
+              }
+            }}
+            className="h-7 w-full min-w-0 rounded-md border border-transparent bg-transparent px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-border focus:bg-surface disabled:opacity-50"
+          />
+        </label>
+        <span className="h-5 w-px shrink-0 bg-border" />
+        <span className="shrink-0 tabular-nums">
+          {metrics.wordCount} {metrics.wordCount === 1 ? "word" : "words"}
+        </span>
+        <span className="shrink-0 tabular-nums">
+          {metrics.readingMinutes === 0 ? "—" : `${metrics.readingMinutes} min read`}
+        </span>
+        <span className="h-5 w-px shrink-0 bg-border" />
+        <Button
+          variant="outline"
+          size="sm"
+          type="button"
+          disabled={saveState !== "saved" || checkpointSaving}
+          title={saveState === "saved" ? "Create a manual version checkpoint" : "Wait for the article to save first"}
+          onClick={() => void createCheckpoint()}
+          className="h-7 shrink-0 px-2.5 text-xs"
+        >
+          <BookmarkPlus />
+          {checkpointSaving ? "Creating…" : "Checkpoint"}
+        </Button>
+        <span className="shrink-0 tabular-nums" title={latestVersionAt ? `Last checkpoint at ${formatSavedAt(latestVersionAt)}` : undefined}>
+          {versionCount} {versionCount === 1 ? "version" : "versions"}
+        </span>
+      </div>
+
+      {organizationMessage ? (
+        <div
+          aria-live="polite"
+          className={`border-b px-4 py-2 text-xs sm:px-6 ${
+            organizationError
+              ? "border-amber-300 bg-amber-50 text-amber-950"
+              : "border-emerald-200 bg-emerald-50 text-emerald-900"
+          }`}
+        >
+          {organizationMessage}
+        </div>
+      ) : null}
 
       {saveState === "conflict" ? (
         <div className="flex flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 sm:px-6">

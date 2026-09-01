@@ -48,6 +48,10 @@ export function canTransitionArticleStatus(
   return from === to || transitions[from].includes(to);
 }
 
+export function availableArticleStatuses(status: ArticleStatus) {
+  return [status, ...transitions[status]] as const;
+}
+
 export function statusesForLibraryFilter(
   filter: LibraryFilter,
 ): readonly ArticleStatus[] {

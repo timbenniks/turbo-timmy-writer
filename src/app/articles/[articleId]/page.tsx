@@ -7,6 +7,7 @@ import {
   getArticleForUser,
   listRecentArticlesForUser,
 } from "@/db/queries/articles";
+import { getArticleOrganizationForUser } from "@/db/queries/article-organization";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +27,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const articleId = parsedArticleId.data;
-  const [article, recentArticles] = await Promise.all([
+  const [article, recentArticles, organization] = await Promise.all([
     getArticleForUser(articleId, session.user.id),
     listRecentArticlesForUser(session.user.id),
+    getArticleOrganizationForUser(articleId, session.user.id),
   ]);
 
   if (!article) {
@@ -42,6 +44,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       articles={[]}
       recentArticles={recentArticles}
       selectedArticle={article}
+      selectedArticleOrganization={organization}
     />
   );
 }
