@@ -180,9 +180,44 @@ a {
 
 @media (min-width: 1024px) {
   .writing-workspace[data-sidebar="minimal"] .workspace-frame {
-    grid-template-columns: 92px minmax(0, 1fr);
+    grid-template-columns: 72px minmax(0, 1fr);
   }
-  .writing-workspace[data-sidebar="minimal"] .workspace-navigation { overflow: hidden; }
+  .writing-workspace[data-sidebar="minimal"] .workspace-navigation {
+    overflow: hidden;
+  }
+  .writing-workspace[data-sidebar="minimal"] .workspace-sidebar-header {
+    justify-content: center;
+    padding-inline: 0.5rem;
+  }
+  .writing-workspace[data-sidebar="minimal"] .workspace-brand-label,
+  .writing-workspace[data-sidebar="minimal"] .workspace-sidebar-secondary,
+  .writing-workspace[data-sidebar="minimal"] .workspace-new-article-label,
+  .writing-workspace[data-sidebar="minimal"] .workspace-nav-label,
+  .writing-workspace[data-sidebar="minimal"] .workspace-recent-section,
+  .writing-workspace[data-sidebar="minimal"] .workspace-footer-label {
+    display: none;
+  }
+  .writing-workspace[data-sidebar="minimal"] .workspace-new-article {
+    display: flex;
+    justify-content: center;
+  }
+  .writing-workspace[data-sidebar="minimal"] .workspace-new-article-button,
+  .writing-workspace[data-sidebar="minimal"] .workspace-nav-link,
+  .writing-workspace[data-sidebar="minimal"] .workspace-footer-action {
+    width: 2.25rem;
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0;
+  }
+  .writing-workspace[data-sidebar="minimal"] .workspace-navigation nav,
+  .writing-workspace[data-sidebar="minimal"] .workspace-sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .writing-workspace[data-sidebar="minimal"] .workspace-sign-out {
+    justify-content: center;
+  }
   .writing-workspace[data-sidebar="hidden"] .workspace-frame,
   .writing-workspace[data-focus="true"] .workspace-frame {
     grid-template-columns: minmax(0, 1fr);
@@ -193,7 +228,7 @@ a {
 
 @media (min-width: 1280px) {
   .writing-workspace[data-sidebar="minimal"] .workspace-frame {
-    grid-template-columns: 92px minmax(0, 1fr) 320px;
+    grid-template-columns: 72px minmax(0, 1fr) 320px;
   }
   .writing-workspace[data-sidebar="hidden"] .workspace-frame {
     grid-template-columns: minmax(0, 1fr) 320px;

@@ -95,6 +95,7 @@ Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, c
 - Confirmed the Slice 4 test article retained revision 2, its exact title and exact ten-word plain text throughout theme operations. Inspected at 1440 × 1000 and 390 × 844 with no horizontal overflow or title clipping.
 - Passed the Slice 5 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
 - GitHub Actions run `33506453953` passed the Slice 5 gate in 59 seconds, and Vercel deployment `dpl_CkS4T7dPSEHtkcx66GPMiAQ8E4iD` for commit `5094307` reached Ready on the canonical Production URL.
+- Tim's first Production check caught Night squeezing full sidebar contents into its minimal column. Reworked minimal treatment as a deliberate 72 px icon rail: accessible icon controls remain, recent writing and text labels hide, and measured navigation content stays within 71 px at 1024, 1200, 1280, and 1440 px.
 
 ## Current validation checkpoint
 

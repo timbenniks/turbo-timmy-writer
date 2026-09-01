@@ -77,14 +77,14 @@ function formatUpdatedAt(date: Date) {
 
 function NewArticleButton({ compact = false }: { compact?: boolean }) {
   return (
-    <form action={createBlankArticleAction}>
+    <form action={createBlankArticleAction} className={compact ? undefined : "workspace-new-article"}>
       <Button
-        className={compact ? undefined : "w-full justify-start shadow-sm"}
+        className={compact ? undefined : "workspace-new-article-button w-full justify-start shadow-sm"}
         size={compact ? "sm" : "default"}
         type="submit"
       >
         <Plus />
-        Blank article
+        <span className={compact ? undefined : "workspace-new-article-label"}>Blank article</span>
       </Button>
     </form>
   );
@@ -103,7 +103,7 @@ export function AppShell({
     <WritingWorkspaceProvider themes={themes}>
       <div className="workspace-frame mx-auto grid min-h-[calc(100vh-1rem)] max-w-[1800px] overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_70px_rgba(37,32,24,0.08)] sm:min-h-[calc(100vh-1.5rem)] lg:grid-cols-[248px_minmax(0,1fr)_320px]">
         <aside className="workspace-navigation hidden border-r border-border bg-sidebar lg:flex lg:flex-col">
-          <div className="flex h-16 items-center justify-between px-4">
+          <div className="workspace-sidebar-header flex h-16 items-center justify-between px-4">
             <Link
               href="/"
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold hover:bg-muted"
@@ -111,10 +111,10 @@ export function AppShell({
               <span className="grid size-7 place-items-center rounded-lg bg-foreground font-serif text-sm text-background">
                 T
               </span>
-              Turbo Timmy
-              <ChevronDown className="size-3.5 text-muted-foreground" />
+              <span className="workspace-brand-label">Turbo Timmy</span>
+              <ChevronDown className="workspace-brand-label size-3.5 text-muted-foreground" />
             </Link>
-            <Button variant="ghost" size="icon" aria-label="More options">
+            <Button className="workspace-sidebar-secondary" variant="ghost" size="icon" aria-label="More options">
               <MoreHorizontal />
             </Button>
           </div>
@@ -128,57 +128,59 @@ export function AppShell({
               <Link
                 key={label}
                 href={href}
-                className={`flex h-9 items-center gap-3 rounded-lg px-3 text-sm transition-colors ${
+                className={`workspace-nav-link flex h-9 items-center gap-3 rounded-lg px-3 text-sm transition-colors ${
                   !selectedArticle && activeFilter === filter
                     ? "bg-muted font-medium text-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 <Icon className="size-4" />
-                {label}
+                <span className="workspace-nav-label">{label}</span>
               </Link>
             ))}
           </nav>
 
-          <div className="mt-7 px-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Recent writing
-          </div>
-          <div className="mt-2 space-y-1 px-3">
-            {recentArticles.length ? (
-              recentArticles.map((article) => (
-                <Link
-                  key={article.id}
-                  href={`/articles/${article.id}` as Route}
-                  className="block w-full rounded-lg px-3 py-2 text-left hover:bg-muted"
-                >
-                  <span className="block truncate text-sm text-foreground">
-                    {articleDisplayTitle(article.title)}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">
-                    {articleStatusLabel(article.status)} · {formatUpdatedAt(article.updatedAt)}
-                  </span>
-                </Link>
-              ))
-            ) : (
-              <p className="px-3 py-2 text-xs leading-5 text-muted-foreground">
-                Blank pages will appear here.
-              </p>
-            )}
+          <div className="workspace-recent-section">
+            <div className="mt-7 px-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Recent writing
+            </div>
+            <div className="mt-2 space-y-1 px-3">
+              {recentArticles.length ? (
+                recentArticles.map((article) => (
+                  <Link
+                    key={article.id}
+                    href={`/articles/${article.id}` as Route}
+                    className="block w-full rounded-lg px-3 py-2 text-left hover:bg-muted"
+                  >
+                    <span className="block truncate text-sm text-foreground">
+                      {articleDisplayTitle(article.title)}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {articleStatusLabel(article.status)} · {formatUpdatedAt(article.updatedAt)}
+                    </span>
+                  </Link>
+                ))
+              ) : (
+                <p className="px-3 py-2 text-xs leading-5 text-muted-foreground">
+                  Blank pages will appear here.
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="mt-auto space-y-1 border-t border-border p-3">
-            <button className="flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+          <div className="workspace-sidebar-footer mt-auto space-y-1 border-t border-border p-3">
+            <button aria-label="Search" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               <Search className="size-4" />
-              Search
-              <span className="ml-auto rounded border border-border px-1.5 py-0.5 text-[10px]">
+              <span className="workspace-footer-label">Search</span>
+              <span className="workspace-footer-label ml-auto rounded border border-border px-1.5 py-0.5 text-[10px]">
                 ⌘K
               </span>
             </button>
-            <button className="flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+            <button aria-label="Settings" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               <Settings className="size-4" />
-              <span className="min-w-0 flex-1 truncate text-left">@{githubLogin}</span>
+              <span className="workspace-footer-label min-w-0 flex-1 truncate text-left">@{githubLogin}</span>
             </button>
-            <div className="flex justify-end">
+            <div className="workspace-sign-out flex justify-end">
               <SignOutButton />
             </div>
           </div>
