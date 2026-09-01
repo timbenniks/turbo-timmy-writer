@@ -3,6 +3,7 @@ import { index, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-o
 import type { ArticleDocument } from "@/editor/document";
 
 import { articles } from "./articles";
+import { aiRuns } from "./ai-runs";
 
 export const articleVersions = pgTable(
   "article_versions",
@@ -18,6 +19,9 @@ export const articleVersions = pgTable(
     markdown: text("markdown").notNull(),
     reason: text("reason").notNull(),
     label: text("label"),
+    aiRunId: uuid("ai_run_id").references(() => aiRuns.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

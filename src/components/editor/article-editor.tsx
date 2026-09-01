@@ -57,6 +57,7 @@ import {
   type ArticleDocument,
 } from "@/editor/document";
 import { articleDocumentToPlainText } from "@/editor/serialization/plain-text";
+import { generatedMarkdownToArticle } from "@/editor/serialization/markdown-to-document";
 
 const editorExtensions = [
   StarterKit.configure({
@@ -176,6 +177,11 @@ export function ArticleEditor({
   const saveInFlightRef = useRef(false);
   const queuedSaveRef = useRef(false);
   const requestSaveRef = useRef<() => void>(() => undefined);
+  const draftSnapshotRef = useRef<{
+    title: string;
+    document: ArticleDocument;
+  } | null>(null);
+  const draftInProgressRef = useRef(false);
 
   const updateMetrics = useCallback((rawDocument: unknown) => {
     const parsedDocument = normalizeArticleDocument(rawDocument);
@@ -266,6 +272,7 @@ export function ArticleEditor({
     onUpdate: ({ editor: updatedEditor }) => {
       const document = updatedEditor.getJSON();
       updateMetrics(document);
+      if (draftInProgressRef.current) return;
       markLocalChange(document);
     },
     onSelectionUpdate: () => setToolbarRevision((revision) => revision + 1),
@@ -351,6 +358,103 @@ export function ArticleEditor({
   useEffect(() => {
     requestSaveRef.current = () => void saveArticle();
   }, [saveArticle]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const activeEditor = editor;
+
+    function handleDraftStart(event: Event) {
+      if (saveState !== "saved" || title.trim() || activeEditor.getText().trim()) {
+        event.preventDefault();
+        setSaveState("error");
+        setSaveMessage("Draft generation requires the untouched empty editor.");
+        return;
+      }
+      const parsed = normalizeArticleDocument(activeEditor.getJSON());
+      if (!parsed.success) {
+        event.preventDefault();
+        return;
+      }
+      draftSnapshotRef.current = { title, document: parsed.data };
+      draftInProgressRef.current = true;
+      activeEditor.setEditable(false);
+      setSaveState("saving");
+      setSaveMessage("Generating the initial draft…");
+    }
+
+    function handleDraftPreview(event: Event) {
+      const detail = (event as CustomEvent<{ markdown?: unknown }>).detail;
+      if (typeof detail?.markdown !== "string") return;
+      try {
+        const preview = generatedMarkdownToArticle(detail.markdown);
+        setTitle(preview.title);
+        activeEditor.commands.setContent(preview.document, { emitUpdate: false });
+        updateMetrics(preview.document);
+      } catch {
+        // Partial streamed Markdown is expected to be invalid until enough arrives.
+      }
+    }
+
+    function handleDraftComplete(event: Event) {
+      const detail = (event as CustomEvent<{
+        title?: unknown;
+        document?: unknown;
+        revision?: unknown;
+        savedAt?: unknown;
+      }>).detail;
+      const document = normalizeArticleDocument(detail?.document);
+      if (
+        !document.success ||
+        typeof detail.title !== "string" ||
+        typeof detail.revision !== "number" ||
+        typeof detail.savedAt !== "string"
+      ) {
+        return;
+      }
+      titleValueRef.current = detail.title;
+      setTitle(detail.title);
+      activeEditor.commands.setContent(document.data, { emitUpdate: false });
+      activeEditor.setEditable(true);
+      updateMetrics(document.data);
+      serverRevisionRef.current = detail.revision;
+      conflictRevisionRef.current = null;
+      draftSnapshotRef.current = null;
+      draftInProgressRef.current = false;
+      if (recoveryKeyRef.current) localStorage.removeItem(recoveryKeyRef.current);
+      setArticleStatus("drafting");
+      setVersionCount((count) => count + 1);
+      setLatestVersionAt(detail.savedAt);
+      setSavedAt(detail.savedAt);
+      setSaveState("saved");
+      setSaveMessage("Initial AI draft saved as a checkpoint.");
+    }
+
+    function handleDraftError() {
+      const snapshot = draftSnapshotRef.current;
+      if (snapshot) {
+        titleValueRef.current = snapshot.title;
+        setTitle(snapshot.title);
+        activeEditor.commands.setContent(snapshot.document, { emitUpdate: false });
+        updateMetrics(snapshot.document);
+      }
+      draftSnapshotRef.current = null;
+      draftInProgressRef.current = false;
+      activeEditor.setEditable(true);
+      setSaveState("error");
+      setSaveMessage("Draft generation stopped. The saved article was not changed.");
+    }
+
+    window.addEventListener("turbo-timmy:draft-start", handleDraftStart);
+    window.addEventListener("turbo-timmy:draft-preview", handleDraftPreview);
+    window.addEventListener("turbo-timmy:draft-complete", handleDraftComplete);
+    window.addEventListener("turbo-timmy:draft-error", handleDraftError);
+    return () => {
+      window.removeEventListener("turbo-timmy:draft-start", handleDraftStart);
+      window.removeEventListener("turbo-timmy:draft-preview", handleDraftPreview);
+      window.removeEventListener("turbo-timmy:draft-complete", handleDraftComplete);
+      window.removeEventListener("turbo-timmy:draft-error", handleDraftError);
+    };
+  }, [editor, saveState, title, updateMetrics]);
 
   useEffect(() => {
     if (!editor || recoveryAppliedRef.current) return;

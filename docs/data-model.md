@@ -98,6 +98,8 @@ Phase 2 Slice 4 implements this in additive migration `0007_exotic_enchantress.s
 
 Index `(article_id, created_at desc)`. Versions are immutable.
 
+Migration `0008_sloppy_randall_flagg.sql` adds the optional `ai_run_id` foreign key required by generated-event snapshots. Slice 5 creates the canonical draft and its `Initial AI draft` version from one atomic update CTE; the version stores the exact resulting article revision and generating run, and deleting a run only clears the optional reference.
+
 ### `themes`
 
 | Column | Type | Notes |

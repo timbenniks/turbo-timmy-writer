@@ -88,6 +88,8 @@ The article-start route authenticates and owner-scopes the session before accept
 
 Every guided article starts with a deterministic premise-only brief before the first model call. After an answer and its next question are safely stored, a separate structured skill derives the complete next brief from the current revision and conversation. This intentionally keeps archive retrieval, interview phrasing, and brief evidence separate. AI and manual changes append immutable revisions; a failed brief refresh never rolls back the stored conversation turn.
 
+First-draft generation is an explicit action available only while the persisted editor is untouched and the article is `interviewing`. The draft skill streams Markdown; a deterministic boundary extracts one H1 title and converts only supported Markdown into validated canonical Tiptap JSON. The client previews that canonical projection in the disabled editor without autosaving. Completion atomically updates the owner/revision-scoped empty article, creates the AI-linked `Initial AI draft` snapshot, and completes the writing session. Failure restores the pre-stream editor and cannot overwrite prose.
+
 AI output can create a first draft when explicitly requested. After a canonical draft exists, transformations create suggestions and never directly change the article.
 
 ### Search and memory
@@ -224,3 +226,4 @@ OpenAI and publisher variables are documented but not required until their phase
 17. Phase 2 starts behind a provider-neutral AI boundary. Skills declare a version and model purpose; the executor validates inputs and resolved context before starting a run, records safe status/usage/outcome metadata, validates structured output, and treats an abandoned text stream as cancelled. Provider prompts and generated content are not retained in `ai_runs`.
 18. The default new-article action opens an immediate-persistence premise flow. A durable owner-scoped article-start session replays ordered user and assistant messages. The OpenAI Responses adapter remains server-only, uses `store: false`, and accepts one shared generative model with optional purpose overrides.
 19. Working briefs are append-only structured revisions. Revision 1 is deterministic from the saved premise, interview evidence creates an AI-linked revision, and manual changes create user revisions. Nullable optional strings keep the schema compatible with strict provider JSON Schema without inventing absent content.
+20. First-draft generation is explicit and single-use for an untouched interviewing article. Streamed Markdown is converted in deterministic code to canonical Tiptap JSON; the final article update, immutable initial-draft version, and session completion share one guarded database statement.

@@ -226,11 +226,12 @@ export function AppShell({
               Quiet
             </span>
           </header>
-          {selectedArticle && selectedArticleStart?.status === "active" ? (
+          {selectedArticle && selectedArticleStart ? (
             <InterviewAssistant
               articleId={selectedArticle.id}
               initialMessages={selectedArticleStart.messages}
               initialBrief={selectedArticleBrief ?? undefined}
+              initialStatus={selectedArticleStart.status}
             />
           ) : (
             <div className="flex flex-1 items-center px-7">

@@ -22,14 +22,27 @@ type StreamEvent =
   | { type: "brief-error"; error: string }
   | { type: "error"; error: string };
 
+type DraftStreamEvent =
+  | { type: "delta"; text: string }
+  | {
+      type: "done";
+      title: string;
+      document: unknown;
+      revision: number;
+      savedAt: string;
+    }
+  | { type: "error"; error: string };
+
 export function InterviewAssistant({
   articleId,
   initialMessages,
   initialBrief,
+  initialStatus,
 }: {
   articleId: string;
   initialMessages: InterviewMessage[];
   initialBrief?: ArticleBriefSnapshot;
+  initialStatus: "active" | "completed" | "cancelled";
 }) {
   const [messages, setMessages] = useState(initialMessages);
   const [answer, setAnswer] = useState("");
@@ -39,6 +52,8 @@ export function InterviewAssistant({
   const [activeTab, setActiveTab] = useState<"conversation" | "brief">("conversation");
   const [brief, setBrief] = useState(initialBrief);
   const [briefNotice, setBriefNotice] = useState<string>();
+  const [draftPending, setDraftPending] = useState(false);
+  const [draftComplete, setDraftComplete] = useState(initialStatus === "completed");
   const initialRequestStarted = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -129,6 +144,73 @@ export function InterviewAssistant({
     void askAssistant(text);
   }
 
+  async function generateDraft() {
+    if (pending || draftPending || draftComplete) return;
+    const canStart = window.dispatchEvent(
+      new CustomEvent("turbo-timmy:draft-start", { cancelable: true }),
+    );
+    if (!canStart) {
+      setError("Save or clear editor changes before generating the first draft.");
+      return;
+    }
+
+    setActiveTab("conversation");
+    setDraftPending(true);
+    setError(undefined);
+    let markdown = "";
+    try {
+      const response = await fetch(`/api/articles/${articleId}/draft`, {
+        method: "POST",
+      });
+      if (!response.ok || !response.body) {
+        const payload = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(payload?.error ?? "The draft could not be generated.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line) continue;
+          const event = JSON.parse(line) as DraftStreamEvent;
+          if (event.type === "delta") {
+            markdown += event.text;
+            window.dispatchEvent(
+              new CustomEvent("turbo-timmy:draft-preview", {
+                detail: { markdown },
+              }),
+            );
+          } else if (event.type === "done") {
+            window.dispatchEvent(
+              new CustomEvent("turbo-timmy:draft-complete", {
+                detail: event,
+              }),
+            );
+            setDraftComplete(true);
+            setBriefNotice("Initial AI draft saved. The conversation and brief remain here.");
+          } else {
+            throw new Error(event.error);
+          }
+        }
+        if (done) break;
+      }
+    } catch (caught) {
+      window.dispatchEvent(new CustomEvent("turbo-timmy:draft-error"));
+      setError(
+        caught instanceof Error ? caught.message : "The draft could not be generated.",
+      );
+    } finally {
+      setDraftPending(false);
+    }
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 border-b border-border px-4" role="tablist" aria-label="Assistant workspace">
@@ -158,6 +240,14 @@ export function InterviewAssistant({
         >
           Brief{brief ? ` · ${brief.revision}` : ""}
         </button>
+        <Button
+          className="ml-auto self-center"
+          size="sm"
+          onClick={() => void generateDraft()}
+          disabled={pending || draftPending || draftComplete || !brief}
+        >
+          {draftPending ? "Drafting…" : draftComplete ? "Draft saved" : "Draft article"}
+        </Button>
       </div>
       {activeTab === "conversation" ? (
         <>
@@ -191,6 +281,11 @@ export function InterviewAssistant({
                 </p>
               </article>
             )}
+            {draftPending && (
+              <p className="rounded-lg bg-accent-soft px-3 py-2 text-xs leading-5 text-accent" role="status">
+                Drafting into the editor…
+              </p>
+            )}
             {briefNotice && (
               <p className="rounded-lg bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground" role="status">
                 {briefNotice}
@@ -211,6 +306,7 @@ export function InterviewAssistant({
             )}
             <div ref={bottomRef} />
           </div>
+          {!draftComplete && (
           <form onSubmit={submit} className="shrink-0 border-t border-border p-4">
             <label htmlFor="interview-answer" className="sr-only">
               Your response
@@ -237,6 +333,7 @@ export function InterviewAssistant({
               </Button>
             </div>
           </form>
+          )}
         </>
       ) : brief ? (
         <div className="flex min-h-0 flex-1 flex-col">

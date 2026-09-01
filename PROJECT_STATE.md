@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phases 0 and 1 are complete. Phase 2 Slice 4 is implemented and locally validated: the guided interview now maintains an immutable structured working brief with AI-linked and manual revisions.
+Phases 0 and 1 are complete. Phase 2 Slice 5 is implemented and locally validated: explicit generation streams into the editor and atomically creates the canonical first draft plus an AI-linked immutable checkpoint.
 
 ## Completed work
 
@@ -138,10 +138,17 @@ Phases 0 and 1 are complete. Phase 2 Slice 4 is implemented and locally validate
 - A focused provider probe caught OpenAI's requirement that every strict response-schema property be required. Required nullable optional fields now pass live structured generation; no paid calls occur in automated tests.
 - Authenticated browser QA proved system revision 1, AI-linked revision 2, manual revision 3, exact reload persistence, and zero fresh-tab browser errors. Exact fixture cleanup returned to 82 articles and zero conversations/briefs.
 - Phase 2 Slice 4 current gate passes Drizzle schema validation, ESLint, standalone TypeScript, and 44 unit tests.
+- Brief commit `7946398` passed GitHub Actions run `33536313416` in 1m26s; Vercel deployment `dpl_4hSqBBPq4hyVT2x6wGzPNNQhU1RL` reached Ready on the canonical Production alias.
+- Added `article-first-draft/v1` with explicit authorship/evidence constraints and a deterministic Markdown-to-Tiptap boundary. The model supplies prose; tested code extracts the title and canonical supported editor document.
+- Added guarded single-use draft generation for an untouched interviewing article. The editor previews streamed canonical content read-only, suppresses autosave/recovery during generation, and restores its exact pre-stream state on failure.
+- Added one atomic completion statement that updates the canonical article/status/revision, creates `Initial AI draft` with the exact run, and completes the writing session. Migration `0008_sloppy_randall_flagg.sql` adds `article_versions.ai_run_id` and is applied/verified.
+- Browser QA used the premise-only stop path and produced a 7,529-character draft. A fresh tab restored title/body, conversation, brief, Draft saved state, and no errors. Exact database reads confirmed the AI-linked checkpoint and completed session.
+- The first live pass exposed a harmless redundant post-preview autosave revision; streamed editor callbacks are now excluded from autosave so the completion revision remains exact. Exact fixture cleanup restored 82 articles and zero guided-flow records.
+- Phase 2 Slice 5 current gate passes Drizzle validation, ESLint, standalone TypeScript, and 47 unit tests.
 
 ## Current validation checkpoint
 
-Run the full Slice 4 gate, commit/deploy it, then begin explicit first-draft generation and the immutable Initial AI draft checkpoint.
+Run the full Slice 5 gate, commit/deploy it, then add credential-free mocked guided-flow Playwright coverage and responsive assistant access.
 
 ## Known issues and setup state
 
@@ -185,5 +192,5 @@ Run the full Slice 4 gate, commit/deploy it, then begin explicit first-draft gen
 
 ## Next tasks
 
-1. Run the full Phase 2 Slice 4 gate, commit, push, and verify deployment.
-2. Begin Slice 5 with explicit complete-draft generation from the current brief and durable conversation.
+1. Run the full Phase 2 Slice 5 gate, commit, push, and verify deployment.
+2. Begin Slice 6 with deterministic mocked guided-flow Playwright coverage and responsive conversation/brief access.

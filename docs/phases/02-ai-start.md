@@ -55,6 +55,22 @@ Deployment checkpoint: commit `6341184` passed GitHub Actions run `33535177840` 
 
 Slice 4 is locally complete. The next coherent slice is explicit complete-draft generation from the current brief and conversation, followed by an immutable `Initial AI draft` checkpoint.
 
+Deployment checkpoint: brief commit `7946398` passed GitHub Actions run `33536313416` in 1m26s, including browser tests and production build. Vercel deployment `dpl_4hSqBBPq4hyVT2x6wGzPNNQhU1RL` reached Ready on the canonical Production alias.
+
+## Slice 5 validation — 2026-09-01
+
+- Added explicit `article-first-draft/v1`, which uses the current brief and durable conversation, preserves Tim's uncertainty/evidence, forbids invented facts, and returns one H1 title plus supported Markdown without a rigid template.
+- Added a deterministic Markdown-to-canonical-Tiptap boundary with focused title, semantic formatting, and unsupported-content validation tests. Prompts do not implement serialization.
+- Added a single-use owner/revision/status/empty-document guard. Draft generation cannot replace manual editor prose, and the client refuses to begin while local editor changes exist.
+- The draft streams visibly into a temporarily read-only editor. Preview updates do not enter recovery/autosave; provider, parse, interruption, or conflict failure restores the exact pre-stream empty editor.
+- Completion uses one database CTE to update the canonical article, set `drafting`, create the immutable `Initial AI draft` version with its run, and complete the article-start session. Migration `0008_sloppy_randall_flagg.sql` adds the version/run reference.
+- Conversation and brief remain accessible after the session is completed. The answer form disappears and the explicit action becomes `Draft saved`.
+- Authenticated browser QA stopped after the premise alone, streamed visible prose into the editor, and completed a 7,529-character draft with title, `drafting` status, AI-linked checkpoint, and completed session. A fresh tab restored the exact title/body plus conversation and brief with zero errors.
+- Database inspection confirmed the checkpoint reason/label/run and exact plain-text length. A redundant preview-triggered autosave advanced the article revision without changing content; draft preview callbacks are now explicitly excluded from autosave so the generated checkpoint remains the canonical completion revision.
+- Exact fixture cleanup removed its article and two AI runs, restoring 82 articles and zero sessions, messages, or briefs. Drizzle validation, ESLint, standalone TypeScript, and 47 unit tests pass before the final gate.
+
+Slice 5 is locally complete. Slice 6 should add deterministic mocked guided-flow Playwright coverage and responsive access to conversation/brief before closing Phase 2.
+
 ## Key decisions to validate
 
 - Tim can stop the interview at any time.
