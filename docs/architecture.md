@@ -41,12 +41,12 @@ Local `gh` and `vercel` commands bootstrap and operate the project. Deployed cod
 Autosave follows this sequence:
 
 1. Tiptap emits a document update.
-2. The client serializes a local recovery envelope containing article ID, revision timestamp, and document JSON.
+2. The client serializes a versioned, per-article/tab local recovery envelope containing the article ID, integer server revision, local change revision, title, and document JSON.
 3. A debounced, authenticated server operation validates and saves the document and plain-text projection.
 4. The response identifies the persisted update so stale responses cannot mark newer content as saved.
 5. Local recovery data is cleared only after the matching server revision succeeds.
 
-Use optimistic concurrency through `updatedAt` or an explicit revision token. A later tab must not silently overwrite a newer server document.
+Optimistic concurrency uses an explicit integer article revision. The owner-scoped update matches the expected revision and increments it atomically; `updatedAt` is display metadata, not a lock. A later tab cannot silently overwrite a newer server document and must explicitly resolve the conflict.
 
 ### Database domain
 
@@ -209,4 +209,4 @@ OpenAI and publisher variables are documented but not required until their phase
 11. Phase acceptance criteria gate later work.
 12. Article operations are owner-scoped at the query boundary. Blank articles are created through authenticated server actions with application-generated UUIDs, stable initial slugs, and an explicit versioned empty document.
 13. The editor crosses the server boundary as normalized, versioned Tiptap JSON. Server saves validate the supported schema and derive plain text; deterministic Markdown is generated only when a consumer needs it.
-14. Slice 2 uses explicit manual saves. Local-first recovery, debouncing, and optimistic server concurrency arrive together in Slice 3 so partial autosave semantics are not mistaken for safety.
+14. Slice 3 writes a validated local recovery envelope before a 900 ms server debounce. Server saves use an explicit integer revision; late acknowledgements never claim newer local edits, offline changes retry on reconnection, and stale tabs require explicit conflict resolution.

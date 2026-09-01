@@ -28,7 +28,11 @@ export async function createBlankArticleAction() {
 export async function saveArticleAction(input: unknown): Promise<SaveArticleResult> {
   const session = await getAllowedSession();
   if (!session) {
-    return { ok: false, message: "Your session has expired. Sign in and try again." };
+    return {
+      ok: false,
+      code: "unauthorized",
+      message: "Your session has expired. Sign in and try again.",
+    };
   }
 
   const parsedInput = saveArticleInputSchema.safeParse(input);
@@ -36,6 +40,7 @@ export async function saveArticleAction(input: unknown): Promise<SaveArticleResu
     const issuePath = parsedInput.error.issues[0]?.path.join(".");
     return {
       ok: false,
+      code: "invalid",
       message: issuePath
         ? `The article contains unsupported content at ${issuePath}.`
         : "The article contains unsupported content.",
@@ -50,14 +55,27 @@ export async function saveArticleAction(input: unknown): Promise<SaveArticleResu
   });
 
   if (!article) {
-    return { ok: false, message: "This article could not be saved." };
+    return {
+      ok: false,
+      code: "not-found",
+      message: "This article could not be saved.",
+    };
+  }
+
+  if (article.status === "conflict") {
+    return {
+      ok: false,
+      code: "conflict",
+      currentRevision: article.currentRevision,
+      message: "A newer version was saved elsewhere.",
+    };
   }
 
   revalidatePath("/");
-  revalidatePath(`/articles/${parsedInput.data.articleId}`);
 
   return {
     ok: true,
-    savedAt: article.updatedAt.toISOString(),
+    revision: article.article.revision,
+    savedAt: article.article.updatedAt.toISOString(),
   };
 }

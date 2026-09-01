@@ -26,6 +26,14 @@ import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { articleDisplayTitle, articleStatusLabel, type ArticleStatus } from "@/articles/model";
+import { hasChangesAfterSaveStarted } from "@/articles/save";
+import {
+  ARTICLE_RECOVERY_STORAGE_PREFIX,
+  ARTICLE_RECOVERY_VERSION,
+  articleRecoveryStorageKey,
+  decideArticleRecovery,
+  parseArticleRecoveryEnvelope,
+} from "@/articles/recovery";
 import { saveArticleAction } from "@/app/actions/articles";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,13 +63,17 @@ const editorExtensions = [
   }),
 ];
 
-type SaveState = "saved" | "unsaved" | "saving" | "error";
+const AUTOSAVE_DELAY_MS = 900;
+const RECOVERY_CLIENT_KEY_PREFIX = "turbo-timmy:article-recovery-client:";
+
+type SaveState = "saved" | "offline" | "saving" | "conflict" | "error";
 
 type ArticleEditorProps = {
   articleId: string;
   initialTitle: string;
   initialDocument: ArticleDocument;
   status: ArticleStatus;
+  revision: number;
   updatedAt: string;
 };
 
@@ -109,6 +121,7 @@ export function ArticleEditor({
   initialTitle,
   initialDocument,
   status,
+  revision,
   updatedAt,
 }: ArticleEditorProps) {
   const [title, setTitle] = useState(initialTitle);
@@ -117,7 +130,85 @@ export function ArticleEditor({
   const [saveMessage, setSaveMessage] = useState("");
   const [, setToolbarRevision] = useState(0);
   const titleRef = useRef<HTMLTextAreaElement>(null);
+  const titleValueRef = useRef(initialTitle);
   const changeRevisionRef = useRef(0);
+  const serverRevisionRef = useRef(revision);
+  const conflictRevisionRef = useRef<number | null>(null);
+  const recoveryKeyRef = useRef<string | null>(null);
+  const recoveryClientIdRef = useRef<string | null>(null);
+  const recoveryAppliedRef = useRef(false);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveInFlightRef = useRef(false);
+  const queuedSaveRef = useRef(false);
+  const requestSaveRef = useRef<() => void>(() => undefined);
+
+  const ensureRecoveryIdentity = useCallback(() => {
+    if (recoveryClientIdRef.current && recoveryKeyRef.current) {
+      return {
+        clientId: recoveryClientIdRef.current,
+        storageKey: recoveryKeyRef.current,
+      };
+    }
+
+    const sessionKey = `${RECOVERY_CLIENT_KEY_PREFIX}${articleId}`;
+    let clientId = sessionStorage.getItem(sessionKey);
+    if (!clientId) {
+      clientId = crypto.randomUUID();
+      sessionStorage.setItem(sessionKey, clientId);
+    }
+
+    const storageKey = articleRecoveryStorageKey(articleId, clientId);
+    recoveryClientIdRef.current = clientId;
+    recoveryKeyRef.current = storageKey;
+    return { clientId, storageKey };
+  }, [articleId]);
+
+  const persistRecovery = useCallback((rawDocument: unknown) => {
+    const parsedDocument = normalizeArticleDocument(rawDocument);
+    if (!parsedDocument.success) return false;
+
+    try {
+      const { clientId, storageKey } = ensureRecoveryIdentity();
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          version: ARTICLE_RECOVERY_VERSION,
+          articleId,
+          clientId,
+          baseRevision: serverRevisionRef.current,
+          changeRevision: changeRevisionRef.current,
+          documentVersion: ARTICLE_DOCUMENT_VERSION,
+          title: titleValueRef.current,
+          documentJson: parsedDocument.data,
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }, [articleId, ensureRecoveryIdentity]);
+
+  const scheduleAutosave = useCallback((delay = AUTOSAVE_DELAY_MS) => {
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(() => requestSaveRef.current(), delay);
+  }, []);
+
+  const markLocalChange = useCallback((rawDocument: unknown) => {
+    changeRevisionRef.current += 1;
+    const recovered = persistRecovery(rawDocument);
+    if (conflictRevisionRef.current !== null) {
+      setSaveState("conflict");
+      setSaveMessage("Your local changes conflict with a newer saved version.");
+      return;
+    }
+
+    setSaveState(recovered ? "offline" : "error");
+    setSaveMessage(
+      recovered ? "" : "Local recovery is unavailable. Save to the server now.",
+    );
+    scheduleAutosave();
+  }, [persistRecovery, scheduleAutosave]);
 
   const editor = useEditor({
     extensions: editorExtensions,
@@ -129,17 +220,15 @@ export function ArticleEditor({
         "aria-label": "Article body",
       },
     },
-    onUpdate: () => {
-      changeRevisionRef.current += 1;
-      setSaveState("unsaved");
-      setSaveMessage("");
-    },
+    onUpdate: ({ editor: updatedEditor }) => markLocalChange(updatedEditor.getJSON()),
     onSelectionUpdate: () => setToolbarRevision((revision) => revision + 1),
     onTransaction: () => setToolbarRevision((revision) => revision + 1),
   });
 
   const saveArticle = useCallback(async () => {
-    if (!editor || saveState === "saving") {
+    if (!editor) return;
+    if (saveInFlightRef.current) {
+      queuedSaveRef.current = true;
       return;
     }
 
@@ -152,33 +241,155 @@ export function ArticleEditor({
       return;
     }
 
+    if (!persistRecovery(parsedDocument.data)) {
+      setSaveState("error");
+      setSaveMessage("Local recovery is unavailable. The server save will still be attempted.");
+    }
+
+    if (!navigator.onLine) {
+      setSaveState("offline");
+      setSaveMessage("Offline changes — waiting for a connection.");
+      return;
+    }
+
+    saveInFlightRef.current = true;
+    queuedSaveRef.current = false;
     setSaveState("saving");
     setSaveMessage("");
-    const revisionAtSave = changeRevisionRef.current;
+    const changeRevisionAtSave = changeRevisionRef.current;
+    const expectedRevision = serverRevisionRef.current;
+    let shouldSaveAgain = false;
 
     try {
       const result = await saveArticleAction({
         articleId,
         documentVersion: ARTICLE_DOCUMENT_VERSION,
-        title,
+        expectedRevision,
+        title: titleValueRef.current,
         documentJson: parsedDocument.data,
       });
 
       if (!result.ok) {
-        setSaveState("error");
+        if (result.code === "conflict") {
+          conflictRevisionRef.current = result.currentRevision;
+          setSaveState("conflict");
+        } else {
+          setSaveState("error");
+        }
         setSaveMessage(result.message);
         return;
       }
 
+      serverRevisionRef.current = result.revision;
       setSavedAt(result.savedAt);
-      setSaveState(
-        changeRevisionRef.current === revisionAtSave ? "saved" : "unsaved",
-      );
+      if (!hasChangesAfterSaveStarted(changeRevisionAtSave, changeRevisionRef.current)) {
+        if (recoveryKeyRef.current) localStorage.removeItem(recoveryKeyRef.current);
+        setSaveState("saved");
+        setSaveMessage("");
+      } else {
+        persistRecovery(editor.getJSON());
+        setSaveState("offline");
+        setSaveMessage("");
+        shouldSaveAgain = true;
+      }
     } catch {
-      setSaveState("error");
-      setSaveMessage("The save failed. Your edits are still open in this tab.");
+      setSaveState("offline");
+      setSaveMessage("Offline changes — the server could not be reached.");
+    } finally {
+      saveInFlightRef.current = false;
+      if (shouldSaveAgain || queuedSaveRef.current) scheduleAutosave(100);
     }
-  }, [articleId, editor, saveState, title]);
+  }, [articleId, editor, persistRecovery, scheduleAutosave]);
+
+  useEffect(() => {
+    requestSaveRef.current = () => void saveArticle();
+  }, [saveArticle]);
+
+  useEffect(() => {
+    if (!editor || recoveryAppliedRef.current) return;
+
+    const { storageKey } = ensureRecoveryIdentity();
+    const articlePrefix = `${ARTICLE_RECOVERY_STORAGE_PREFIX}${articleId}:`;
+    const recoveryEntries: Array<{ key: string; value: NonNullable<ReturnType<typeof parseArticleRecoveryEnvelope>> }> = [];
+
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (!key?.startsWith(articlePrefix)) continue;
+      const value = parseArticleRecoveryEnvelope(localStorage.getItem(key));
+      if (value?.articleId === articleId) recoveryEntries.push({ key, value });
+    }
+
+    const ownRecovery = recoveryEntries.find((entry) => entry.key === storageKey);
+    const selectedRecovery =
+      ownRecovery ??
+      recoveryEntries.sort(
+        (left, right) => Date.parse(right.value.updatedAt) - Date.parse(left.value.updatedAt),
+      )[0];
+
+    if (!selectedRecovery) {
+      recoveryAppliedRef.current = true;
+      return;
+    }
+
+    const decision = decideArticleRecovery(selectedRecovery.value, {
+      articleId,
+      revision,
+      title: initialTitle,
+      documentJson: initialDocument,
+    });
+
+    if (decision.kind === "discard") {
+      localStorage.removeItem(selectedRecovery.key);
+      recoveryAppliedRef.current = true;
+      return;
+    }
+
+    const restoreTimer = setTimeout(() => {
+      recoveryAppliedRef.current = true;
+      recoveryKeyRef.current = selectedRecovery.key;
+      recoveryClientIdRef.current = selectedRecovery.value.clientId;
+      titleValueRef.current = decision.envelope.title;
+      setTitle(decision.envelope.title);
+      changeRevisionRef.current = decision.envelope.changeRevision;
+      editor.commands.setContent(decision.envelope.documentJson, { emitUpdate: false });
+
+      if (decision.kind === "recover") {
+        setSaveState("offline");
+        setSaveMessage("Recovered local changes.");
+        scheduleAutosave(250);
+      } else {
+        conflictRevisionRef.current = revision;
+        setSaveState("conflict");
+        setSaveMessage("Recovered local changes conflict with a newer saved version.");
+      }
+    }, 0);
+
+    return () => clearTimeout(restoreTimer);
+  }, [
+    articleId,
+    editor,
+    ensureRecoveryIdentity,
+    initialDocument,
+    initialTitle,
+    revision,
+    scheduleAutosave,
+  ]);
+
+  useEffect(() => {
+    function handleOnline() {
+      if (saveState === "offline") scheduleAutosave(100);
+    }
+
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [saveState, scheduleAutosave]);
+
+  useEffect(
+    () => () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     function handleSaveShortcut(event: KeyboardEvent) {
@@ -191,6 +402,20 @@ export function ArticleEditor({
     window.addEventListener("keydown", handleSaveShortcut);
     return () => window.removeEventListener("keydown", handleSaveShortcut);
   }, [saveArticle]);
+
+  function keepLocalCopy() {
+    if (conflictRevisionRef.current === null) return;
+    serverRevisionRef.current = conflictRevisionRef.current;
+    conflictRevisionRef.current = null;
+    setSaveState("offline");
+    setSaveMessage("Keeping this tab's copy. Saving it as the newest revision…");
+    void saveArticle();
+  }
+
+  function reloadSavedCopy() {
+    if (recoveryKeyRef.current) localStorage.removeItem(recoveryKeyRef.current);
+    window.location.reload();
+  }
 
   useLayoutEffect(() => {
     if (!titleRef.current) return;
@@ -221,11 +446,15 @@ export function ArticleEditor({
   const statusText =
     saveState === "saving"
       ? "Saving…"
-      : saveState === "unsaved"
-        ? "Unsaved changes"
+      : saveState === "offline"
+        ? saveMessage || "Offline changes"
+        : saveState === "conflict"
+          ? saveMessage || "Save conflict"
         : saveState === "error"
           ? saveMessage
           : `Saved at ${formatSavedAt(savedAt)}`;
+
+  const statusIsWarning = saveState === "error" || saveState === "conflict";
 
   return (
     <>
@@ -237,7 +466,7 @@ export function ArticleEditor({
         </Button>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{articleDisplayTitle(title)}</p>
-          <p className={`truncate text-xs ${saveState === "error" ? "text-red-700" : "text-muted-foreground"}`}>
+          <p className={`truncate text-xs ${statusIsWarning ? "text-amber-700" : "text-muted-foreground"}`}>
             {statusText}
           </p>
         </div>
@@ -302,6 +531,18 @@ export function ArticleEditor({
         </ToolbarButton>
       </div>
 
+      {saveState === "conflict" ? (
+        <div className="flex flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 sm:px-6">
+          <span className="mr-auto">A newer version was saved elsewhere. Your local copy is still safe.</span>
+          <Button variant="outline" size="sm" type="button" onClick={reloadSavedCopy}>
+            Reload saved copy
+          </Button>
+          <Button size="sm" type="button" onClick={keepLocalCopy}>
+            Keep this copy
+          </Button>
+        </div>
+      ) : null}
+
       <article className="mx-auto w-full max-w-[800px] flex-1 px-6 py-12 sm:px-12 sm:py-16">
         <label htmlFor="article-title" className="sr-only">Article title</label>
         <textarea
@@ -312,10 +553,10 @@ export function ArticleEditor({
           maxLength={200}
           placeholder="Untitled article"
           onChange={(event) => {
-            setTitle(event.target.value);
-            changeRevisionRef.current += 1;
-            setSaveState("unsaved");
-            setSaveMessage("");
+            const nextTitle = event.target.value;
+            titleValueRef.current = nextTitle;
+            setTitle(nextTitle);
+            markLocalChange(editor?.getJSON() ?? initialDocument);
           }}
           className="block w-full resize-none overflow-hidden border-0 bg-transparent font-serif text-4xl leading-[1.08] font-medium tracking-[-0.035em] outline-none placeholder:text-muted-foreground/55 sm:text-[3.35rem]"
         />
@@ -326,7 +567,7 @@ export function ArticleEditor({
 
       <footer className="flex min-h-11 items-center border-t border-border px-4 py-2 text-xs text-muted-foreground sm:px-6">
         <span>Quiet theme</span>
-        <span className={`ml-auto ${saveState === "error" ? "text-red-700" : ""}`}>
+        <span className={`ml-auto ${statusIsWarning ? "text-amber-700" : ""}`}>
           {statusText} · ⌘S
         </span>
       </footer>

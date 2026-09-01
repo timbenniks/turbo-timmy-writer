@@ -39,6 +39,7 @@ If the chosen Auth.js adapter requires standard account/session tables, add `acc
 | `document_json` | jsonb | Canonical Tiptap document |
 | `plain_text` | text | Derived projection |
 | `metadata` | jsonb | Versioned core metadata extension |
+| `revision` | integer | Monotonic optimistic-concurrency token, defaults to 1 |
 | `hero_asset_id` | uuid nullable | Added once assets exist |
 | `published_at` | timestamptz nullable | Canonical publication time |
 | `created_at` | timestamptz | Creation time |
@@ -55,6 +56,7 @@ Phase 1 Slice 1 implementation details:
 - Every create/list/reopen operation derives `user_id` from the authenticated server session. Reopen queries constrain both article ID and owner ID.
 - Canonical editor JSON uses document version 1 and accepts only the deliberately supported semantic node/mark set. The application normalizes ProseMirror attribute maps to plain JSON before server transport, validates again on the server, and derives `plain_text` in the same owner-scoped save operation.
 - Markdown is deterministic but derived on demand; it is not duplicated on the mutable article row. Stable Markdown belongs on immutable versions or publication output when those features arrive.
+- Slice 3 saves require the caller's expected `revision` in the same owner-scoped update that increments it. A zero-row update is distinguished as missing ownership or a stale-write conflict; `updated_at` remains display metadata rather than the concurrency token.
 
 ## Writing core tables
 

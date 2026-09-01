@@ -87,6 +87,7 @@ type SaveArticleForUserInput = {
   documentJson: typeof articles.$inferInsert.documentJson;
   plainText: string;
   documentVersion: 1;
+  expectedRevision: number;
 };
 
 export async function saveArticleForUser(input: SaveArticleForUserInput) {
@@ -98,10 +99,29 @@ export async function saveArticleForUser(input: SaveArticleForUserInput) {
       documentJson: input.documentJson,
       plainText: input.plainText,
       metadata: { version: input.documentVersion },
+      revision: input.expectedRevision + 1,
       updatedAt: savedAt,
     })
-    .where(and(eq(articles.id, input.articleId), eq(articles.userId, input.userId)))
-    .returning({ updatedAt: articles.updatedAt });
+    .where(
+      and(
+        eq(articles.id, input.articleId),
+        eq(articles.userId, input.userId),
+        eq(articles.revision, input.expectedRevision),
+      ),
+    )
+    .returning({ revision: articles.revision, updatedAt: articles.updatedAt });
 
-  return article ?? null;
+  if (article) {
+    return { status: "saved" as const, article };
+  }
+
+  const [currentArticle] = await getDatabase()
+    .select({ revision: articles.revision })
+    .from(articles)
+    .where(and(eq(articles.id, input.articleId), eq(articles.userId, input.userId)))
+    .limit(1);
+
+  return currentArticle
+    ? { status: "conflict" as const, currentRevision: currentArticle.revision }
+    : null;
 }

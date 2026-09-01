@@ -1,5 +1,6 @@
 import {
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -32,6 +33,7 @@ export const articles = pgTable(
     documentJson: jsonb("document_json").$type<ArticleDocument>().notNull(),
     plainText: text("plain_text").notNull(),
     metadata: jsonb("metadata").$type<ArticleMetadata>().notNull(),
+    revision: integer("revision").default(1).notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()

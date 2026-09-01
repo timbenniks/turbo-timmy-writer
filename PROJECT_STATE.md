@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slices 1-2 are complete. Phase 1, Slice 3 (local recovery, debounced autosave, optimistic concurrency, and truthful save state), is next.
+Phase 0 and Phase 1 Slices 1-2 are complete. Phase 1, Slice 3 (local recovery, debounced autosave, optimistic concurrency, and truthful save state), is implemented locally and awaiting the Production validation checkpoint.
 
 ## Completed work
 
@@ -65,10 +65,18 @@ Phase 0 and Phase 1 Slices 1-2 are complete. Phase 1, Slice 3 (local recovery, d
 - Passed the Slice 2 local gate: Drizzle schema check, ESLint, standalone TypeScript, eleven unit tests, and the Next.js production build.
 - GitHub Actions run `33490541452` passed the Slice 2 gate in 49 seconds, and Vercel deployed commit `f842847` successfully to the canonical Production URL.
 - Tim edited the title and body, used semantic formatting, explicitly saved, reloaded the article in Production, and approved the Slice 2 checkpoint.
+- Added an explicit monotonic article revision and generated additive migration `0002_tranquil_celestials.sql`. Applied it through the direct migration URL and queried through the pooled runtime connection to confirm `revision` is a non-null integer with default 1.
+- Made owner-scoped saves atomic on article ID, owner ID, and expected revision. Successful writes increment and return the revision; stale writes return the current revision without overwriting newer content.
+- Added validated, versioned per-article/tab recovery envelopes in local storage. Every editor change writes locally before the 900 ms server debounce; acknowledged saves clear only the matching recovery copy.
+- Added truthful `Saving…`, `Saved`, `Offline changes`, recovery, error, and conflict states. Offline work retries when connectivity returns, ⌘/Ctrl-S remains available, and conflicts require an explicit choice between the saved copy and the current tab's copy.
+- Added focused recovery, save-contract, and late-acknowledgement tests. A save response cannot mark the editor saved if a newer local change occurred while that request was in flight.
+- Drove a real authenticated two-tab Chromium flow through normal autosave, immediate-refresh recovery, simulated offline editing/retry, a stale tab save, conflict display, and explicit local-copy resolution. The test article advanced from revision 1 to 6, and the pooled database query matched its final title, canonical body projection, and metadata version.
+- Visual inspection at 1440 × 1000 and 390 × 844 caught a save/recovery refresh race; recovery is now evaluated once per editor mount and the open editor remains stable across save revalidation. The final saved and conflict layouts are readable at both widths.
+- Passed the Slice 3 local gate: Drizzle schema check, ESLint, standalone TypeScript, seventeen unit tests, and the Next.js production build.
 
 ## Current validation checkpoint
 
-Implement Slice 3, then validate recovery and save-state behavior across refreshes, network failure, delayed responses, and competing tabs before moving to the remaining writing-core controls.
+Deploy Slice 3 through the connected Git workflow, then have Tim validate autosave and refresh recovery in Production before beginning Slice 4 writing controls.
 
 ## Known issues and setup state
 
@@ -84,8 +92,8 @@ Implement Slice 3, then validate recovery and save-state behavior across refresh
 - Preview deployments intentionally have no GitHub OAuth credentials because GitHub OAuth Apps support one callback URL. Local and production use separate applications; choose a preview strategy later only if preview login becomes necessary.
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
-- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migration `0001` was therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Slice 2 intentionally saves only through the button or ⌘/Ctrl-S. Local recovery, debounced autosave, server revision tokens, and multi-tab conflict handling are Slice 3 and must not be inferred from the current `Saved` state.
+- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` and `0002` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
+- Production commit `f842847` still saves only through the button or ⌘/Ctrl-S. Slice 3 autosave and recovery are local until its Git-connected deployment passes.
 
 ## Important architecture decisions
 
@@ -111,7 +119,6 @@ Implement Slice 3, then validate recovery and save-state behavior across refresh
 
 ## Next tasks
 
-1. Define the server revision token and optimistic-concurrency contract for article saves.
-2. Persist a versioned local recovery envelope before any debounced network save.
-3. Add debounced autosave with truthful saving, saved, offline, recovery, and conflict states while retaining an explicit save shortcut.
-4. Exercise refresh, network-failure, delayed-response, and multi-tab conflict paths, then inspect the responsive editor before the Production checkpoint.
+1. Commit and push Slice 3, then confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
+2. Have Tim type without pressing Save, wait for `Saved`, refresh, and confirm the content survives in Production.
+3. After approval, begin Slice 4 with status controls, tags, word count, reading time, and manual version checkpoints.

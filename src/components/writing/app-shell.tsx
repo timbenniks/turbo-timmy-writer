@@ -39,6 +39,7 @@ type SelectedArticle = ArticleSummary & {
   slug: string;
   documentJson: ArticleDocument;
   metadata: ArticleMetadata;
+  revision: number;
   publishedAt: Date | null;
 };
 
@@ -297,6 +298,7 @@ function ArticleWorkspace({ article }: { article: SelectedArticle }) {
       initialTitle={article.title}
       initialDocument={article.documentJson}
       status={article.status}
+      revision={article.revision}
       updatedAt={article.updatedAt.toISOString()}
     />
   );

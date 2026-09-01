@@ -39,6 +39,18 @@ Checkpoint approved: GitHub Actions and the Git-connected Vercel deployment pass
 
 Checkpoint approved: GitHub Actions run `33490541452` and the Git-connected Vercel deployment passed. Tim edited the title and body, used semantic formatting, explicitly saved, and reloaded the article successfully in Production on 2026-09-01. Slice 3 may begin.
 
+## Slice 3 validation — 2026-09-01
+
+- Added additive migration `0002_tranquil_celestials.sql` with a non-null integer article revision defaulting existing and new rows to 1.
+- Owner-scoped saves now atomically match and increment the expected revision. A stale tab receives a conflict and cannot silently overwrite newer content.
+- Added validated, versioned per-article/tab local recovery before a 900 ms autosave debounce, connectivity-aware retry, and protection against late acknowledgements falsely covering newer work.
+- Added visible saving, saved, offline, recovered, error, and conflict states. Conflict resolution explicitly reloads the saved copy or keeps the current tab's locally preserved copy.
+- A real authenticated Chromium flow passed normal autosave, immediate-refresh recovery, offline editing/retry, two-tab conflict detection, and explicit conflict resolution. The final pooled database read matched revision 6, document metadata version 1, and the expected plain-text projection.
+- Inspected saved and conflict states at 1440 × 1000 and 390 × 844. A revalidation/recovery race found during inspection was fixed by evaluating recovery once per editor mount.
+- Passed Drizzle schema validation, ESLint, standalone TypeScript, seventeen unit tests, and the Next.js production build.
+
+Checkpoint: deploy through Git, then Tim types without pressing Save, waits for `Saved`, reloads the article, and confirms the content survives in Production. Do not begin Slice 4 until autosave/recovery confidence is approved.
+
 ## Key decisions to validate
 
 - Tiptap JSON remains canonical and projections are deterministic.
