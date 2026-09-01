@@ -79,7 +79,24 @@ Deployment checkpoint: draft commit `8e56452` passed GitHub Actions run `3353732
 - The drawer exposes Conversation, the complete editable Brief, and draft state; it closes by button, backdrop, or Escape and introduces no horizontal page overflow.
 - Authenticated 390 × 844 browser QA confirmed one trigger, the streamed question, Conversation/Brief access, exact premise content, close/reopen state, 390 px document width, and zero errors. Exact cleanup restored 82 articles and zero guided-flow records.
 
-Slice 6 remains open for deterministic mocked guided-flow Playwright coverage. Do not close Phase 2 until that acceptance coverage passes.
+### Deterministic acceptance coverage
+
+- Added a Vercel-disabled deterministic provider selected only by an explicit local/test environment flag. Interview text, structured brief output, and draft Markdown traverse the same runtime, run store, route, parser, editor, and database boundaries without calling OpenAI.
+- Added an authenticated guided-flow Playwright suite that creates a short-lived encrypted NextAuth cookie from ignored local configuration and the one allowlisted database user. It does not read browser cookies or require OAuth interaction.
+- The suite creates its own premise article, awaits the one-question interview, answers it, verifies brief revision 2, explicitly drafts, verifies title/body/status, reloads, verifies retained conversation, then deletes its exact AI runs/article in `finally`.
+- The deterministic suite passed at desktop and 390 × 844: six tests passed (four auth-boundary plus two full guided-flow cases), six unrelated fixture-dependent writing-core tests skipped. Post-run counts were exactly 82 articles and zero sessions, messages, briefs, or article-skill AI runs.
+- The default suite still has no live credential path; CI never calls paid OpenAI APIs. Instructions for the local deterministic acceptance command live in `tests/e2e/README.md`.
+
+## Phase 2 acceptance checkpoint
+
+- A premise alone starts a useful conversation: passed in live OpenAI and deterministic browser flows.
+- The agent asks one useful question at a time with no fixed count: enforced by `article-interview/v1`, unit-tested, and observed live.
+- Tim can end whenever desired: the explicit `Draft article` action passed directly after the premise/first question.
+- The visible brief evolves and remains manually editable: AI revision 2 and manual revision 3 were persisted and reloaded.
+- The draft incorporates interview intent/evidence: live and deterministic drafts used the saved brief/conversation; unsupported or invented structure is constrained at skill and parser boundaries.
+- Conversation history remains after drafting: passed on fresh-tab reload at desktop and mobile.
+
+All Phase 2 acceptance criteria pass. Phase 2 is complete pending the final commit/CI/deployment record; Phase 3 may begin afterward.
 
 ## Key decisions to validate
 

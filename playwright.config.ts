@@ -8,6 +8,9 @@ const chromiumExecutable = [
   "/usr/bin/google-chrome-stable",
   "/usr/bin/chromium",
 ].find((candidate): candidate is string => Boolean(candidate && existsSync(candidate)));
+const guidedMockEnabled = process.env.PLAYWRIGHT_GUIDED_AI_MOCK === "1";
+const playwrightPort = Number(process.env.PLAYWRIGHT_PORT ?? 3001);
+const baseUrl = `http://localhost:${playwrightPort}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -17,7 +20,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL: baseUrl,
     trace: "retain-on-failure",
     launchOptions: chromiumExecutable ? { executablePath: chromiumExecutable } : undefined,
   },
@@ -26,9 +29,11 @@ export default defineConfig({
     { name: "mobile", use: { viewport: { width: 390, height: 844 } } },
   ],
   webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:3001/sign-in",
-    reuseExistingServer: !process.env.CI,
+    command: guidedMockEnabled
+      ? `pnpm build && AI_PROVIDER_MODE=guided-test pnpm exec next start --port ${playwrightPort}`
+      : "pnpm dev",
+    url: `${baseUrl}/sign-in`,
+    reuseExistingServer: !process.env.CI && !guidedMockEnabled,
     timeout: 120_000,
   },
 });

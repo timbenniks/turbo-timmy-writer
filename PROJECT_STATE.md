@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phases 0 and 1 are complete. Phase 2 Slice 5 is deployed; Slice 6 responsive assistant access is implemented and locally validated. Deterministic mocked guided-flow Playwright coverage remains before the phase closes.
+Phases 0, 1, and 2 are complete locally. The complete premise → one-question interview → revisioned brief → explicit first draft milestone now passes live-provider QA and deterministic desktop/mobile acceptance coverage; final CI/deployment recording remains.
 
 ## Completed work
 
@@ -148,10 +148,14 @@ Phases 0 and 1 are complete. Phase 2 Slice 5 is deployed; Slice 6 responsive ass
 - Draft commit `8e56452` passed GitHub Actions run `33537323515`; Vercel deployment `dpl_3kgefqkFUYnMpD12NiaES5Vy5d86` reached Ready on the canonical Production alias.
 - Replaced the desktop-only assistant with one responsive client instance: an `xl` rail and a smaller-screen overlay drawer. This avoids mounting two interview clients and therefore avoids duplicate automatic first-question requests.
 - Authenticated 390 × 844 QA confirmed Conversation and editable Brief access, close/reopen controls, exact premise state, no horizontal overflow, and zero errors. Exact fixture/run cleanup restored the 82-article baseline.
+- Added a Vercel-disabled deterministic guided-flow provider and Playwright suite. It signs a short-lived local NextAuth test cookie from ignored configuration, traverses the real runtime/routes/database/editor without OAuth or OpenAI, and deletes each exact fixture in `finally`.
+- Deterministic acceptance passed at desktop and 390 × 844: six browser tests passed and six unrelated designated-fixture tests skipped. The flow covered premise persistence, one question, answer/brief revision, explicit draft, canonical editor status/content, reload, and retained conversation.
+- Post-suite pooled counts confirmed exact cleanup: 82 articles and zero writing sessions, writing messages, article briefs, or article-skill AI runs.
+- Every Phase 2 acceptance criterion now passes. Tim can draft immediately after the first question, the brief is visible/evolving/manual, the resulting draft uses durable intent, and conversation remains available after completion.
 
 ## Current validation checkpoint
 
-Commit/deploy responsive assistant access, then add deterministic mocked guided-flow Playwright coverage before closing Phase 2.
+Run the final Phase 2 gate, commit/deploy the deterministic acceptance slice, then begin Phase 3 precision AI.
 
 ## Known issues and setup state
 
@@ -195,5 +199,5 @@ Commit/deploy responsive assistant access, then add deterministic mocked guided-
 
 ## Next tasks
 
-1. Run the responsive-assistant gate, commit, push, and verify deployment.
-2. Add deterministic mocked guided-flow Playwright coverage without paid OpenAI calls, then evaluate all Phase 2 acceptance criteria.
+1. Run the final Phase 2 gate, commit, push, and verify CI/deployment.
+2. Begin Phase 3 with reviewable selection-based AI suggestions; never mutate canonical prose without explicit acceptance.

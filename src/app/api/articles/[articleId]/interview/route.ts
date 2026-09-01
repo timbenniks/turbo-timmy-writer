@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { executeStructuredSkill, streamTextSkill } from "@/ai/runtime/executor";
-import { createOpenAiProvider } from "@/ai/runtime/openai-provider";
+import { createWritingProvider } from "@/ai/runtime/provider-factory";
 import {
   interviewSkill,
   isCompleteInterviewResponse,
@@ -83,7 +83,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   const abortController = new AbortController();
   const signal = AbortSignal.any([request.signal, abortController.signal]);
-  const provider = createOpenAiProvider({ apiKey: environment.apiKey });
+  const provider = createWritingProvider(environment.apiKey);
   const sessionId = articleStart.session.id;
   const userId = session.user.id;
   const messages = articleStart.messages.map((message) => ({

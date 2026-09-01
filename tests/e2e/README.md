@@ -17,3 +17,15 @@ pnpm test:e2e
 ```
 
 The authenticated suite requires a disposable, single-paragraph, tag-free article whose title starts with `Playwright fixture`. It round-trips a 1,200-word document through autosave and reload, restores and reloads the original fixture in `finally`, verifies theme/focus changes leave prose unchanged, and exercises the reusable taxonomy picker before clearing its assignment. Never point it at authored or imported content: browser text replacement does not preserve rich document structure. `.auth/`, traces, screenshots, and reports are ignored. Never commit the storage state; it contains an authenticated session.
+
+## Guided flow with deterministic AI
+
+The guided premise → interview → brief → draft suite never calls OpenAI. It builds a local production server with a deterministic provider, creates a short-lived signed test session from the ignored local auth/database configuration, and cleans up each exact fixture. It can run beside the normal port-3001 development server:
+
+```bash
+PLAYWRIGHT_GUIDED_AI_MOCK=1 \
+PLAYWRIGHT_PORT=3002 \
+pnpm test:e2e -- guided-flow.authenticated.spec.ts
+```
+
+Vercel ignores `AI_PROVIDER_MODE`; the deterministic provider is available only in local/test processes.
