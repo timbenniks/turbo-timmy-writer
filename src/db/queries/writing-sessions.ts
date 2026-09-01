@@ -9,10 +9,12 @@ import {
   createWritingMessageText,
   writingMessageTextSchema,
 } from "@/ai/conversation/model";
+import { createPremiseBrief } from "@/ai/brief/model";
 import { emptyArticleMetadata, untitledArticleSlug } from "@/articles/model";
 import { getDatabase } from "@/db/client";
 import {
   articles,
+  articleBriefs,
   writingMessages,
   writingSessions,
 } from "@/db/schema";
@@ -59,6 +61,13 @@ export async function createArticleStartForUser(input: {
       contentJson: createWritingMessageText(premise),
       plainText: premise,
       sequence: 1,
+      createdAt: now,
+    }),
+    database.insert(articleBriefs).values({
+      articleId,
+      revision: 1,
+      briefJson: createPremiseBrief(premise),
+      source: "system",
       createdAt: now,
     }),
   ]);

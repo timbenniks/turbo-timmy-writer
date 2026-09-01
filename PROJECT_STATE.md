@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phases 0 and 1 are complete. Phase 2 Slices 2 and 3 are implemented and locally validated: immediate premise persistence, durable article-start sessions/messages, the live Responses API adapter, and the dynamic one-question interview.
+Phases 0 and 1 are complete. Phase 2 Slice 4 is implemented and locally validated: the guided interview now maintains an immutable structured working brief with AI-linked and manual revisions.
 
 ## Completed work
 
@@ -131,10 +131,17 @@ Phases 0 and 1 are complete. Phase 2 Slices 2 and 3 are implemented and locally 
 - Removed the two exact disposable QA articles and their four AI runs after validation. Production data returned to 82 articles, zero article-start sessions, and zero writing messages.
 - Phase 2 Slices 2–3 local gate passes: Drizzle schema validation, ESLint, standalone TypeScript, 41 unit tests, and the production build.
 - Guided-interview commit `6341184` passed GitHub Actions run `33535177840` in 1m22s. Vercel deployment `dpl_CgZSrGPpb6oE3soz2Pm26WTP47Y8` reached Ready on the canonical Production alias with the OpenAI key stored as a Secret and the shared model stored as Config.
+- Added the complete validated `ArticleBrief` boundary and deterministic premise-only revision 1. Optional short fields use explicit nulls to satisfy OpenAI strict JSON Schema without inventing absent content.
+- Added immutable `article_briefs` with system/AI/user sources and optional run linkage in additive migration `0007_exotic_enchantress.sql`. Applied it through the direct URL and confirmed all seven columns through the pooled runtime URL.
+- Added structured `article-brief-update/v1`. It preserves premise and uncertainty, admits only Tim's words as evidence, and returns a whole validated brief after each answered interview turn.
+- Added Conversation/Brief tabs and a full manual editor. Manual Save appends an owner-scoped revision and detects stale expected revisions instead of overwriting newer AI or user work.
+- A focused provider probe caught OpenAI's requirement that every strict response-schema property be required. Required nullable optional fields now pass live structured generation; no paid calls occur in automated tests.
+- Authenticated browser QA proved system revision 1, AI-linked revision 2, manual revision 3, exact reload persistence, and zero fresh-tab browser errors. Exact fixture cleanup returned to 82 articles and zero conversations/briefs.
+- Phase 2 Slice 4 current gate passes Drizzle schema validation, ESLint, standalone TypeScript, and 44 unit tests.
 
 ## Current validation checkpoint
 
-Begin Phase 2 Slice 4's structured revisioned brief and collapsible manual editor from the deployed guided-interview checkpoint.
+Run the full Slice 4 gate, commit/deploy it, then begin explicit first-draft generation and the immutable Initial AI draft checkpoint.
 
 ## Known issues and setup state
 
@@ -178,5 +185,5 @@ Begin Phase 2 Slice 4's structured revisioned brief and collapsible manual edito
 
 ## Next tasks
 
-1. Begin Phase 2 Slice 4 with structured, revisioned brief updates and a collapsible manual brief editor.
-2. Preserve every AI and manual brief change as a new revision linked to its generating run when applicable.
+1. Run the full Phase 2 Slice 4 gate, commit, push, and verify deployment.
+2. Begin Slice 5 with explicit complete-draft generation from the current brief and durable conversation.

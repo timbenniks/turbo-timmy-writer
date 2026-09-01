@@ -86,6 +86,8 @@ The live OpenAI adapter uses the Responses API through the Vercel AI SDK, disabl
 
 The article-start route authenticates and owner-scopes the session before accepting input. It stores each user turn first, streams newline-delimited safe UI events from the interview skill, and stores the complete assistant turn with its AI run ID. A visibly incomplete response is not committed as a conversation turn. The client can retry while the already-saved user text remains durable.
 
+Every guided article starts with a deterministic premise-only brief before the first model call. After an answer and its next question are safely stored, a separate structured skill derives the complete next brief from the current revision and conversation. This intentionally keeps archive retrieval, interview phrasing, and brief evidence separate. AI and manual changes append immutable revisions; a failed brief refresh never rolls back the stored conversation turn.
+
 AI output can create a first draft when explicitly requested. After a canonical draft exists, transformations create suggestions and never directly change the article.
 
 ### Search and memory
@@ -221,3 +223,4 @@ OpenAI and publisher variables are documented but not required until their phase
 16. Slice 5 keeps versioned theme settings and per-user preferences outside articles. Validated settings become scoped CSS variables in a client workspace provider, so switching is immediate and cannot enter the canonical document or autosave path. Focus mode changes workspace chrome without unmounting the editor.
 17. Phase 2 starts behind a provider-neutral AI boundary. Skills declare a version and model purpose; the executor validates inputs and resolved context before starting a run, records safe status/usage/outcome metadata, validates structured output, and treats an abandoned text stream as cancelled. Provider prompts and generated content are not retained in `ai_runs`.
 18. The default new-article action opens an immediate-persistence premise flow. A durable owner-scoped article-start session replays ordered user and assistant messages. The OpenAI Responses adapter remains server-only, uses `store: false`, and accepts one shared generative model with optional purpose overrides.
+19. Working briefs are append-only structured revisions. Revision 1 is deterministic from the saved premise, interview evidence creates an AI-linked revision, and manual changes create user revisions. Nullable optional strings keep the schema compatible with strict provider JSON Schema without inventing absent content.

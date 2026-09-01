@@ -13,6 +13,7 @@ import {
 } from "@/db/queries/article-organization";
 import { listThemesForUser } from "@/db/queries/themes";
 import { getArticleStartForUser } from "@/db/queries/writing-sessions";
+import { getCurrentArticleBriefForUser } from "@/db/queries/article-briefs";
 
 export const dynamic = "force-dynamic";
 
@@ -32,13 +33,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const articleId = parsedArticleId.data;
-  const [article, recentArticles, organization, themes, taxonomyTags, articleStart] = await Promise.all([
+  const [article, recentArticles, organization, themes, taxonomyTags, articleStart, articleBrief] = await Promise.all([
     getArticleForUser(articleId, session.user.id),
     listRecentArticlesForUser(session.user.id),
     getArticleOrganizationForUser(articleId, session.user.id),
     listThemesForUser(session.user.id),
     listTaxonomyTagsForUser(session.user.id),
     getArticleStartForUser(articleId, session.user.id),
+    getCurrentArticleBriefForUser(articleId, session.user.id),
   ]);
 
   if (!article) {
@@ -62,6 +64,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 role: message.role,
                 text: message.plainText,
               })),
+            }
+          : null
+      }
+      selectedArticleBrief={
+        articleBrief
+          ? {
+              revision: articleBrief.revision,
+              brief: articleBrief.briefJson,
+              source: articleBrief.source,
+              savedAt: articleBrief.createdAt.toISOString(),
             }
           : null
       }

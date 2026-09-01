@@ -41,6 +41,20 @@ Slices 2 and 3 are locally complete. The next coherent slice is the structured, 
 
 Deployment checkpoint: commit `6341184` passed GitHub Actions run `33535177840` in 1m22s, including four credential-free browser tests and the production build. Vercel deployment `dpl_CgZSrGPpb6oE3soz2Pm26WTP47Y8` reached Ready and owns `https://turbo-timmy-writer.vercel.app`; Production has the OpenAI key as a Secret and the shared model as Config.
 
+## Slice 4 validation — 2026-09-01
+
+- Added the strict complete `ArticleBrief` boundary. Optional thesis/takeaway values use explicit nulls, arrays use bounded evidence items, and premise-only revision 1 exists before the first provider call.
+- Added immutable `article_briefs` revisions in migration `0007_exotic_enchantress.sql`, with per-article monotonic uniqueness, source (`system`, `ai`, or `user`), and optional generating run.
+- Added evidence-only structured skill `article-brief-update/v1`. It returns the whole brief, preserves Tim's premise and uncertainty, treats only Tim's words as evidence, and leaves unknown fields empty rather than inventing content.
+- After an answer, the route stores the streamed question first and then attempts the brief update. Structured failure cannot erase the conversation; success streams the new revision into the workspace.
+- Added Conversation/Brief tabs and a complete manual brief editor. Each field is visible and editable; lists use one item per line; Save appends a user revision with conflict detection.
+- The first provider check revealed OpenAI strict JSON Schema requires every property in `required`. Replacing omitted optional strings with required nullable strings fixed the schema while retaining optional semantics; a focused live structured-output probe passes.
+- Authenticated browser QA created revision 1 from the premise, revision 2 from a specific answer with its AI run attached, and revision 3 from a manual thesis edit without an AI run. A fresh tab restored revision 3 exactly with zero new browser errors.
+- Cleanup removed the exact disposable article and its three runs. Pooled counts returned to 82 articles and zero sessions, messages, or briefs.
+- Drizzle schema validation, ESLint, standalone TypeScript, and 44 unit tests pass. Migration `0007_exotic_enchantress.sql` applied successfully and pooled inspection confirmed its seven columns.
+
+Slice 4 is locally complete. The next coherent slice is explicit complete-draft generation from the current brief and conversation, followed by an immutable `Initial AI draft` checkpoint.
+
 ## Key decisions to validate
 
 - Tim can stop the interview at any time.

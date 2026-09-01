@@ -24,6 +24,7 @@ import {
   InterviewAssistant,
   type InterviewMessage,
 } from "@/components/writing/interview-assistant";
+import type { ArticleBriefSnapshot } from "@/components/writing/article-brief-editor";
 import { TagManager } from "@/components/tags/tag-manager";
 import { WritingWorkspaceProvider } from "@/components/themes/writing-workspace-provider";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ type AppShellProps = {
     status: "active" | "completed" | "cancelled";
     messages: InterviewMessage[];
   } | null;
+  selectedArticleBrief?: ArticleBriefSnapshot | null;
   themes: WritingTheme[];
   taxonomyTags: TagTaxonomyItem[];
 };
@@ -109,6 +111,7 @@ export function AppShell({
   selectedArticle,
   selectedArticleOrganization,
   selectedArticleStart,
+  selectedArticleBrief,
   themes,
   taxonomyTags,
 }: AppShellProps) {
@@ -227,6 +230,7 @@ export function AppShell({
             <InterviewAssistant
               articleId={selectedArticle.id}
               initialMessages={selectedArticleStart.messages}
+              initialBrief={selectedArticleBrief ?? undefined}
             />
           ) : (
             <div className="flex flex-1 items-center px-7">

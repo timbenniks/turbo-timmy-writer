@@ -78,6 +78,8 @@ Stores every working-brief revision rather than overwriting history.
 
 Unique `(article_id, revision)`; index `(article_id, created_at desc)`.
 
+Phase 2 Slice 4 implements this in additive migration `0007_exotic_enchantress.sql`. Guided creation writes revision 1 from the premise with source `system`; structured interview updates append source `ai` revisions with their run ID; manual edits append source `user` revisions without overwriting prior evidence. Optional short fields are stored as `null` when unknown so OpenAI strict structured output can require every JSON Schema property, while empty collections remain arrays.
+
 ### `article_versions`
 
 | Column | Type | Notes |

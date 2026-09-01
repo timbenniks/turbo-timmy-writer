@@ -1,14 +1,19 @@
 import { z } from "zod";
 
-import { streamTextSkill } from "@/ai/runtime/executor";
+import { executeStructuredSkill, streamTextSkill } from "@/ai/runtime/executor";
 import { createOpenAiProvider } from "@/ai/runtime/openai-provider";
 import {
   interviewSkill,
   isCompleteInterviewResponse,
 } from "@/ai/skills/interview";
+import { briefUpdateSkill } from "@/ai/skills/brief";
 import { articleIdSchema } from "@/articles/model";
 import { getAllowedSession } from "@/auth/session";
 import { databaseAiRunStore } from "@/db/queries/ai-runs";
+import {
+  createArticleBriefRevisionForUser,
+  getCurrentArticleBriefForUser,
+} from "@/db/queries/article-briefs";
 import {
   appendWritingMessageForUser,
   getArticleStartForUser,
@@ -135,6 +140,70 @@ export async function POST(request: Request, context: RouteContext) {
             },
           }),
         );
+
+        if (body.data.answer) {
+          try {
+            const currentBrief = await getCurrentArticleBriefForUser(
+              articleId.data,
+              userId,
+            );
+            if (!currentBrief) throw new Error("The working brief is missing.");
+
+            const updated = await executeStructuredSkill(
+              {
+                provider,
+                runStore: databaseAiRunStore,
+                models: environment.models,
+              },
+              {
+                userId,
+                articleId: articleId.data,
+                skill: briefUpdateSkill,
+                input: {
+                  currentBrief: currentBrief.briefJson,
+                  messages: [
+                    ...messages,
+                    { role: "assistant" as const, text: assistantText },
+                  ],
+                },
+                signal,
+              },
+            );
+            const savedBrief = await createArticleBriefRevisionForUser({
+              articleId: articleId.data,
+              userId,
+              expectedRevision: currentBrief.revision,
+              brief: updated.output,
+              source: "ai",
+              aiRunId: updated.runId,
+            });
+            const brief =
+              savedBrief?.status === "created"
+                ? savedBrief.brief
+                : savedBrief?.status === "conflict"
+                  ? savedBrief.current
+                  : null;
+            if (!brief) throw new Error("The working brief could not be saved.");
+            controller.enqueue(
+              streamLine({
+                type: "brief",
+                brief: {
+                  revision: brief.revision,
+                  brief: brief.briefJson,
+                  source: brief.source,
+                  savedAt: brief.createdAt.toISOString(),
+                },
+              }),
+            );
+          } catch {
+            controller.enqueue(
+              streamLine({
+                type: "brief-error",
+                error: "The question was saved, but the brief could not be refreshed.",
+              }),
+            );
+          }
+        }
         controller.close();
       } catch {
         if (!signal.aborted) {
