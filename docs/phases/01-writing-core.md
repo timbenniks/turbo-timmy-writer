@@ -62,7 +62,7 @@ Checkpoint approved: GitHub Actions run `33492576830` and Vercel deployment `dpl
 - Inspected the workflow at 1440 × 1000 and 390 × 844. The metadata strip now remains single-row on desktop and wraps into two readable rows on phones.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-one unit tests, and the Next.js production build.
 
-Checkpoint: deploy through Git, then Tim changes status, adds tags, observes live metrics, creates a labeled checkpoint, reloads, and confirms persistence in Production. Do not begin Slice 5 until the writing-organization workflow is approved.
+Checkpoint: GitHub Actions run `33505029706` and Vercel deployment `dpl_8TRMjj4vWmFbMMG7jNXEWmGJTG94` passed. Tim now changes status, adds tags, observes live metrics, creates a labeled checkpoint, reloads, and confirms persistence in Production. Do not begin Slice 5 until the writing-organization workflow is approved.
 
 ## Key decisions to validate
 

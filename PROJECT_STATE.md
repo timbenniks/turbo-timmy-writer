@@ -84,10 +84,11 @@ Phase 0 and Phase 1 Slices 1-3 are complete. Phase 1, Slice 4 (status controls, 
 - Inspected the complete Slice 4 workspace at 1440 × 1000 and 390 × 844. The first mobile pass hid metrics/checkpoints off-screen; the metadata strip now wraps into two compact rows on phones while remaining a single calm row on desktop.
 - Added the app's existing T mark as a route-native SVG icon after browser inspection exposed the otherwise harmless missing-icon resource request.
 - Passed the Slice 4 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-one unit tests, and the Next.js production build.
+- GitHub Actions run `33505029706` passed the Slice 4 gate in 49 seconds, and Vercel deployed commit `549ff07` successfully to the canonical Production URL.
 
 ## Current validation checkpoint
 
-Deploy Slice 4 through the connected Git workflow, then have Tim validate status, tags, live metrics, and one durable manual checkpoint in Production before beginning the workspace/theme slice.
+Have Tim validate status, tags, live metrics, and one durable manual checkpoint in Production before beginning the workspace/theme slice.
 
 ## Known issues and setup state
 
@@ -104,7 +105,7 @@ Deploy Slice 4 through the connected Git workflow, then have Tim validate status
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0003` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production commit `842875a` includes the validated Slice 3 autosave, recovery, offline retry, and optimistic concurrency behavior.
+- Production commit `549ff07` includes Slice 4 status controls, tags, live metrics, and immutable manual checkpoints. Its final checkpoint still requires Tim's real Production workflow validation.
 
 ## Important architecture decisions
 
@@ -130,6 +131,5 @@ Deploy Slice 4 through the connected Git workflow, then have Tim validate status
 
 ## Next tasks
 
-1. Commit and push Slice 4, then confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
-2. Have Tim change an article status, add tags, confirm live metrics, create a labeled checkpoint, reload, and confirm the values survive in Production.
-3. After approval, begin Slice 5 with starter themes, theme persistence/editing, instant switching, and focus mode.
+1. Have Tim change an article status, add tags, confirm live metrics, create a labeled checkpoint, reload, and confirm the values survive in Production.
+2. After approval, begin Slice 5 with starter themes, theme persistence/editing, instant switching, and focus mode.
