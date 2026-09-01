@@ -1,10 +1,10 @@
 # Project state
 
-Last updated: 2026-08-31
+Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0: foundation. Slices A-D are complete. Slice E (Vercel deployment) is the next checkpoint.
+Phase 0: foundation is complete. Phase 1, Slice 1 (article lifecycle and library flows), is the next checkpoint.
 
 ## Completed work
 
@@ -37,10 +37,18 @@ Phase 0: foundation. Slices A-D are complete. Slice E (Vercel deployment) is the
 - Initialized Git on `main` and created the public `timbenniks/turbo-timmy-writer` GitHub repository with an HTTPS remote.
 - Pushed foundation commit `96ae01f` after confirming ignored secrets and completing a staged secret scan.
 - GitHub Actions CI run `33393486442` passed install, lint, typecheck, three unit tests, and production build in 40 seconds.
+- Connected the public GitHub repository to the linked Vercel project and deployed a Ready production build at `https://turbo-timmy-writer.vercel.app`.
+- Verified production route protection (`/` redirects to `/sign-in`), the sign-in page, CSRF endpoint, and GitHub provider endpoint all respond correctly.
+- Exercised the production OAuth start: it redirects to GitHub and advertises the exact callback `https://turbo-timmy-writer.vercel.app/api/auth/callback/github`.
+- Changed `AUTH_GITHUB_SECRET` from a readable Vercel Config value to a Vercel Secret for Production and Preview without changing its value.
+- Tim completed the real Production GitHub OAuth flow and confirmed the protected writing shell works at the canonical URL.
+- Queried Neon after the Production login and confirmed the allowlisted user's `updated_at` advanced to `2026-09-01T08:19:00.283Z`, proving the deployed authentication callback synchronized through the pooled runtime database connection.
+- Inspected the Production request logs: sign-in, CSRF, provider, callback, and authenticated-root requests completed successfully. The callback returned the expected redirect and the authenticated root returned 200.
+- Passed the final Phase 0 quality gate: Drizzle schema check, ESLint, standalone TypeScript, three unit tests, and the Next.js production build.
 
 ## Current validation checkpoint
 
-Deploy the linked Vercel project and validate Production OAuth, Neon connectivity, route protection, and the application shell.
+Begin Phase 1 with article lifecycle persistence and the first real library flows, then validate that slice before adding the editor.
 
 ## Known issues and setup state
 
@@ -50,11 +58,12 @@ Deploy the linked Vercel project and validate Production OAuth, Neon connectivit
 - GitHub CLI is configured for SSH, but this environment has no usable SSH key/askpass. HTTPS cloning and GitHub API calls work. Use HTTPS for bootstrap or repair SSH deliberately.
 - Vercel CLI 59.10.0 is authenticated as `timbenniks`.
 - Neon is provisioned, connected, migrated, and reachable.
-- Development GitHub OAuth credentials are configured locally and the real login flow passes. Production/Preview credentials exist in Vercel but require deployment-time callback validation.
+- Development and Production GitHub OAuth flows pass for the allowlisted account. Preview OAuth remains deliberately unsupported.
 - The public GitHub repository is `https://github.com/timbenniks/turbo-timmy-writer`.
 - ESLint 10 currently breaks the React plugin used by `eslint-config-next` 16.3.3 despite its broad peer range. The official scaffold's deprecated ESLint 9.39.5 line remains until the plugin chain is compatible.
 - Preview deployments intentionally have no GitHub OAuth credentials because GitHub OAuth Apps support one callback URL. Local and production use separate applications; choose a preview strategy later only if preview login becomes necessary.
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
+- NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 
 ## Important architecture decisions
 
@@ -80,8 +89,7 @@ Deploy the linked Vercel project and validate Production OAuth, Neon connectivit
 
 ## Next tasks
 
-1. Deploy through the linked Vercel project.
-2. Inspect deployment output and runtime logs.
-3. Validate the production sign-in page, GitHub callback, allowed login, sign-out, Neon connectivity, and writing shell.
-4. Validate denied login with a non-allowlisted account when practical; automated policy coverage already passes.
-5. Run the final Phase 0 quality gate, update docs, and commit the completed phase.
+1. Start Phase 1, Slice 1: add article lifecycle queries and authenticated ownership boundaries.
+2. Build the first real library view plus blank-article creation and reopen flows.
+3. Apply and validate the article migration through the branch-first database workflow.
+4. Run focused tests and the full baseline, manually inspect the slice, and stop for validation before beginning the Tiptap editor slice.

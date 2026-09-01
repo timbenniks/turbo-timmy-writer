@@ -84,6 +84,18 @@ Validation recorded 2026-08-31:
 
 Checkpoint: all Phase 0 acceptance criteria pass in the deployed environment.
 
+Validation completed 2026-09-01:
+
+- Connected `timbenniks/turbo-timmy-writer` to the Vercel project and deployed the canonical Production alias at `https://turbo-timmy-writer.vercel.app`.
+- Confirmed the deployment is Ready, protected root routing redirects to sign-in, and the sign-in, provider, and CSRF routes respond successfully.
+- Confirmed the OAuth start redirects to GitHub with the exact production callback URL.
+- Stored the GitHub client secret as a Vercel Secret.
+- Tim completed the real Production GitHub OAuth flow and confirmed the protected writing shell works.
+- Confirmed the corresponding Neon user synchronization advanced `updated_at` during the Production callback, using the pooled runtime connection while the migration configuration remains direct/unpooled.
+- Inspected Production request logs and confirmed successful sign-in, callback redirect, and authenticated-root responses. Only a non-blocking NextAuth.js dependency deprecation warning was emitted.
+- Re-ran the Drizzle schema check and the full lint, standalone typecheck, three-test, and production-build quality gate successfully.
+- A real second-account denial remains impractical; the server-side allowlist policy is covered by unit tests and every protected route checks the same policy.
+
 ## Acceptance criteria
 
 - The app runs locally.
