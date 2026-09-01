@@ -90,8 +90,9 @@ Checkpoint approved: Slice 5, Night's corrected icon rail, and live custom-theme
 - Round-tripped a 1,200-word document through autosave and reload on desktop and mobile, restored the original in `finally`, reloaded again, and asserted the exact original title/body. Theme switching and focus mode left prose identical.
 - The authenticated suite passed all eight scenarios. The credential-free suite passed four and explicitly skipped four authenticated scenarios, matching CI's security boundary.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-four unit tests, the Next.js production build, and both Playwright modes.
+- The first clean-runner browser pass exposed Next.js's additional empty route-announcer `role="alert"`; the test now targets the exact visible error copy. Corrective commit `aa57be0` passed GitHub Actions run `33509578244` in 56 seconds, including four Playwright passes/four intentional auth skips, and reached Ready in Vercel deployment `dpl_C5LW7xjtdpFcRzzsJWMwVkCaf1hp`.
 
-Checkpoint: deploy the coverage milestone, confirm CI runs the credential-free browser suite, then have Tim complete one comfortable extended writing session before closing Phase 1.
+Checkpoint: coverage is deployed and the clean CI browser boundary passes. Have Tim complete one comfortable extended writing session before closing Phase 1.
 
 ## Key decisions to validate
 

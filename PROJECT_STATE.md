@@ -106,10 +106,11 @@ Phase 0 and Phase 1 Slices 1-5 are complete. Phase 1, Slice 6 (reusable browser 
 - Added a safe local auth-state recorder and browser-test instructions. No authenticated state, OAuth secret, or database credential enters Git or CI.
 - Authenticated Playwright round-tripped 1,200 words through autosave/reload at both widths, restored and reloaded the exact original in `finally`, and passed all eight scenarios. Credential-free mode passed four scenarios and skipped the four auth-required cases.
 - Passed the complete Slice 6 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-four unit tests, Next.js production build, and both Playwright modes.
+- The first clean CI browser pass found an ambiguous locator because Next.js adds an empty route-announcer alert. Corrective commit `aa57be0` targets the exact visible message; GitHub Actions run `33509578244` then passed in 56 seconds with four browser passes/four intentional auth skips, and Vercel deployment `dpl_C5LW7xjtdpFcRzzsJWMwVkCaf1hp` reached Ready.
 
 ## Current validation checkpoint
 
-Push and deploy Slice 6, confirm the credential-free browser suite runs in CI, then have Tim complete one comfortable extended writing session before closing Phase 1.
+Have Tim complete one comfortable extended Production writing session before closing Phase 1.
 
 ## Known issues and setup state
 
@@ -126,7 +127,7 @@ Push and deploy Slice 6, confirm the credential-free browser suite runs in CI, t
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0004` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production includes the approved Slice 5 themes/focus mode, corrected Night rail, and live previews through commit `e65d5e0`. Slice 6 browser coverage remains local until pushed.
+- Production includes Slice 6 browser coverage through corrective commit `aa57be0`; its final checkpoint is Tim's comfortable extended writing session.
 
 ## Important architecture decisions
 
@@ -152,6 +153,5 @@ Push and deploy Slice 6, confirm the credential-free browser suite runs in CI, t
 
 ## Next tasks
 
-1. Commit and push Slice 6; verify CI executes Playwright without secrets and Vercel reaches Ready.
-2. Have Tim complete one extended Production writing session, including reload and focus/theme switching.
-3. After approval, close Phase 1 and begin Phase 2's premise-first AI-assisted start.
+1. Have Tim complete one extended Production writing session, including reload and focus/theme switching.
+2. After approval, close Phase 1 and begin Phase 2's premise-first AI-assisted start.
