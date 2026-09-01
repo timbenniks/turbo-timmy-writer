@@ -2,6 +2,6 @@ import { LibraryPage } from "@/components/library/library-page";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-  return <LibraryPage filter="all" />;
+export default function ArchivePage() {
+  return <LibraryPage filter="archive" />;
 }

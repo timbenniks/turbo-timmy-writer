@@ -6,17 +6,26 @@ import {
   type LucideIcon,
   Send,
 } from "lucide-react";
+import type { Route } from "next";
+
+import type { LibraryFilter } from "@/articles/model";
 
 export type LibraryDestination = {
   label: string;
-  href: string;
+  href: Route;
   icon: LucideIcon;
+  filter: LibraryFilter;
 };
 
 export const libraryDestinations: LibraryDestination[] = [
-  { label: "Library", href: "/", icon: Library },
-  { label: "Drafts", href: "/drafts", icon: FileText },
-  { label: "Ideas", href: "/ideas", icon: Lightbulb },
-  { label: "Published", href: "/published", icon: Send },
-  { label: "Archive", href: "/archive", icon: Archive },
+  { label: "Library", href: "/", icon: Library, filter: "all" },
+  { label: "Drafts", href: "/drafts" as Route, icon: FileText, filter: "drafts" },
+  { label: "Ideas", href: "/ideas" as Route, icon: Lightbulb, filter: "ideas" },
+  {
+    label: "Published",
+    href: "/published" as Route,
+    icon: Send,
+    filter: "published",
+  },
+  { label: "Archive", href: "/archive" as Route, icon: Archive, filter: "archive" },
 ];

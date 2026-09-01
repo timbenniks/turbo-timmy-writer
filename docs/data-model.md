@@ -48,6 +48,12 @@ Article status values are `idea`, `interviewing`, `drafting`, `editing`, `ready`
 
 Phase 0 may create only `users` and enough auth tables if articles are not yet exercised. The initial migration should still establish extensions and enums needed by the planned schema only when safe and useful.
 
+Phase 1 Slice 1 implementation details:
+
+- Blank manual articles begin in `drafting` with an empty title, empty plain-text projection, canonical `{ type: "doc", content: [{ type: "paragraph" }] }` JSON, and metadata `{ version: 1 }`.
+- The application generates the UUID before insertion and uses `untitled-<uuid>` as the collision-safe initial slug. A blank title is rendered as `Untitled article`; display fallback text is never persisted as authored content.
+- Every create/list/reopen operation derives `user_id` from the authenticated server session. Reopen queries constrain both article ID and owner ID.
+
 ## Writing core tables
 
 ### `article_briefs`

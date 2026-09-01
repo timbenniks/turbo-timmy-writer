@@ -207,3 +207,4 @@ OpenAI and publisher variables are documented but not required until their phase
 9. Existing writing-voice content is copied as curated seed data later, never fetched at runtime.
 10. Publication is previewed, validated, and user-confirmed.
 11. Phase acceptance criteria gate later work.
+12. Article operations are owner-scoped at the query boundary. Blank articles are created through authenticated server actions with application-generated UUIDs, stable initial slugs, and an explicit versioned empty document.

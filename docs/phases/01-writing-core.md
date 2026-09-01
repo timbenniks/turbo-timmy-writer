@@ -13,6 +13,19 @@ Make Turbo Timmy Writer useful as a comfortable manual writing application befor
 5. Add the writing workspace, starter themes, theme editing/persistence, and focus mode.
 6. Add unit, integration, and Playwright coverage; test extended writing and recovery manually.
 
+## Slice 1 validation — 2026-09-01
+
+- Implemented the full lifecycle vocabulary and explicit transition/filter rules in framework-independent domain code.
+- Generated and applied `0001_busy_tony_stark.sql`: owner-linked articles, canonical JSONB, plain text, versioned metadata, lifecycle enum, timestamps, publication time, and the planned ownership/library indexes.
+- Kept runtime reads and writes on the pooled Neon URL and migration execution on the verified direct/unpooled URL.
+- Added authenticated, owner-scoped create, list, recent, and reopen operations. User ownership comes only from the server session.
+- Replaced mocked writing with real Library, Drafts, Ideas, Published, and Archive views. A blank-article server action persists and redirects into a reopenable workspace.
+- Confirmed the authenticated create action returns 303, the resulting record has the expected empty canonical document, reopen returns 200, and malformed/unknown IDs return 404.
+- Passed Drizzle schema validation, ESLint, standalone TypeScript, six unit tests, and the Next.js production build.
+- Inspected the populated library at 1440 × 1000 and the reopened blank article at 390 × 844.
+
+Checkpoint: deploy through Git, then Tim creates and reopens a blank article in Production. Do not begin Slice 2 until that flow is approved.
+
 ## Key decisions to validate
 
 - Tiptap JSON remains canonical and projections are deterministic.

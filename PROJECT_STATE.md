@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0: foundation is complete. Phase 1, Slice 1 (article lifecycle and library flows), is the next checkpoint.
+Phase 0 is complete. Phase 1, Slice 1 (article lifecycle and library flows), is implemented locally and awaiting the Production validation checkpoint.
 
 ## Completed work
 
@@ -45,10 +45,18 @@ Phase 0: foundation is complete. Phase 1, Slice 1 (article lifecycle and library
 - Queried Neon after the Production login and confirmed the allowlisted user's `updated_at` advanced to `2026-09-01T08:19:00.283Z`, proving the deployed authentication callback synchronized through the pooled runtime database connection.
 - Inspected the Production request logs: sign-in, CSRF, provider, callback, and authenticated-root requests completed successfully. The callback returned the expected redirect and the authenticated root returned 200.
 - Passed the final Phase 0 quality gate: Drizzle schema check, ESLint, standalone TypeScript, three unit tests, and the Next.js production build.
+- Added the article lifecycle domain with seven validated states, explicit transitions, library-filter mappings, stable untitled slugs, display fallbacks, and focused unit coverage.
+- Added the owner-linked `articles` schema and generated migration `0001_busy_tony_stark.sql` with canonical JSONB, plain-text projection, versioned metadata, lifecycle enum, per-user slug uniqueness, and library indexes.
+- Verified the migration URL is direct/unpooled, applied the migration successfully, and queried through the pooled runtime connection to confirm all 11 columns and four indexes exist.
+- Added owner-scoped create, list, recent, and reopen queries. Resource lookup combines article ID and the authenticated database user ID; malformed and unknown article IDs return 404.
+- Replaced the mocked recent writing and document content with the real library, Drafts, Ideas, Published, and Archive views plus an authenticated blank-article server action and reopen workspace.
+- Exercised the real local server action with an authenticated session: it returned a 303 to the new article, persisted the canonical empty document in Neon, appeared in Drafts/Recent writing, and reopened successfully.
+- Rendered and inspected the populated library at 1440 × 1000 and the reopened article at 390 × 844. The writing-first layout remains calm and usable at both widths.
+- Passed the Slice 1 local gate: Drizzle schema check, ESLint, standalone TypeScript, six unit tests, and the Next.js production build with all library and article routes dynamic.
 
 ## Current validation checkpoint
 
-Begin Phase 1 with article lifecycle persistence and the first real library flows, then validate that slice before adding the editor.
+Deploy Slice 1 through the connected Git workflow and have Tim create and reopen a blank article in Production before beginning the Tiptap editor slice.
 
 ## Known issues and setup state
 
@@ -64,6 +72,7 @@ Begin Phase 1 with article lifecycle persistence and the first real library flow
 - Preview deployments intentionally have no GitHub OAuth credentials because GitHub OAuth Apps support one callback URL. Local and production use separate applications; choose a preview strategy later only if preview login becomes necessary.
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
+- The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migration `0001` was therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
 
 ## Important architecture decisions
 
@@ -89,7 +98,6 @@ Begin Phase 1 with article lifecycle persistence and the first real library flow
 
 ## Next tasks
 
-1. Start Phase 1, Slice 1: add article lifecycle queries and authenticated ownership boundaries.
-2. Build the first real library view plus blank-article creation and reopen flows.
-3. Apply and validate the article migration through the branch-first database workflow.
-4. Run focused tests and the full baseline, manually inspect the slice, and stop for validation before beginning the Tiptap editor slice.
+1. Push Slice 1 and confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
+2. Have Tim create and reopen a blank article at the Production URL.
+3. After approval, begin Slice 2 with Tiptap and versioned JSON/plain-text/Markdown serialization.
