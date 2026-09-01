@@ -61,6 +61,9 @@ Checkpoint approved: GitHub Actions run `33492576830` and Vercel deployment `dpl
 - A real authenticated Chromium flow changed a drafting article to editing, canonicalized `Performance, Next.js, performance` to `Next.js, Performance`, showed ten words and a one-minute read, created a labeled checkpoint, reloaded, and retained every value.
 - Inspected the workflow at 1440 × 1000 and 390 × 844. The metadata strip now remains single-row on desktop and wraps into two readable rows on phones.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-one unit tests, and the Next.js production build.
+- Replaced the comma-separated tag field with a searchable multi-select backed by the existing owner taxonomy. Tim can reuse any existing tag, remove selections as chips, or create and assign a new tag without leaving the editor.
+- Turned the sidebar cog into a real taxonomy manager with usage counts, create, rename, collision-safe merge, and confirmed deletion. The username and logout action now share the same account row; only the 72 px minimal rail stacks its two icon actions deliberately.
+- Authenticated Chromium exercised all taxonomy selection and management operations, restored the disposable article to zero tags, removed its temporary taxonomy entry, and left the imported dataset at 82 articles, 95 tags, and 477 assignments.
 
 Checkpoint approved: GitHub Actions run `33505029706` and Vercel deployment `dpl_8TRMjj4vWmFbMMG7jNXEWmGJTG94` passed. Tim validated the complete writing-organization workflow in Production on 2026-09-01. Slice 5 may begin.
 

@@ -61,4 +61,58 @@ test.describe("authenticated writing core", () => {
     await expect(page.locator(".workspace-assistant")).toBeHidden();
     await expect(body).toHaveText(originalBody);
   });
+
+  test("selects reusable tags and keeps account actions aligned", async ({ page }) => {
+    await page.goto(`/articles/${articleId}`);
+
+    if ((page.viewportSize()?.width ?? 0) >= 1_024) {
+      const manageTags = page.getByRole("button", { name: "Manage tags" });
+      const signOut = page.getByRole("button", { name: "Sign out" });
+      const [manageBox, signOutBox] = await Promise.all([
+        manageTags.boundingBox(),
+        signOut.boundingBox(),
+      ]);
+      expect(manageBox).not.toBeNull();
+      expect(signOutBox).not.toBeNull();
+      expect(Math.abs(
+        (manageBox?.y ?? 0) + (manageBox?.height ?? 0) / 2
+          - ((signOutBox?.y ?? 0) + (signOutBox?.height ?? 0) / 2),
+      )).toBeLessThan(1);
+
+      await manageTags.focus();
+      await manageTags.press("Enter");
+      await expect(page.getByRole("dialog", { name: "Manage tag taxonomy" })).toBeVisible();
+      await page.getByLabel("Find tags").fill("ai");
+      await expect(page.getByText("ai", { exact: true }).last()).toBeVisible();
+
+      const temporaryTag = `Playwright ${Date.now()}`;
+      const renamedTag = `${temporaryTag} renamed`;
+      await page.getByLabel("New tag name").fill(temporaryTag);
+      await page.getByRole("button", { name: "Add", exact: true }).click();
+      await expect(page.getByText("Tag saved.")).toBeVisible();
+      await page.getByLabel("Find tags").fill(temporaryTag);
+      await page.getByRole("button", { name: `Rename ${temporaryTag}` }).click();
+      await page.getByLabel(`Rename ${temporaryTag}`).fill(renamedTag);
+      await page.getByRole("button", { name: `Save ${temporaryTag}` }).click();
+      await expect(page.getByText("Tag renamed.")).toBeVisible();
+      await page.getByLabel("Find tags").fill(renamedTag);
+      page.once("dialog", (dialog) => void dialog.accept());
+      await page.getByRole("button", { name: `Delete ${renamedTag}` }).click();
+      await expect(page.getByText("Tag deleted from the taxonomy and its articles.")).toBeVisible();
+      await page.getByRole("button", { name: "Close tag manager" }).click();
+    }
+
+    const pickerButton = page.getByRole("button", { name: "Choose article tags" });
+    await expect(pickerButton).toContainText("Add tags");
+    await pickerButton.click();
+    const picker = page.getByRole("dialog", { name: "Choose article tags" });
+    await picker.getByRole("button", { name: "Select ai", exact: true }).click();
+    await picker.getByRole("button", { name: "Save tags" }).click();
+    await expect(page.getByText("Tags saved.")).toBeVisible();
+
+    await pickerButton.click();
+    await picker.getByRole("button", { name: "Remove ai", exact: true }).click();
+    await picker.getByRole("button", { name: "Save tags" }).click();
+    await expect(page.getByText("Tags cleared.")).toBeVisible();
+  });
 });

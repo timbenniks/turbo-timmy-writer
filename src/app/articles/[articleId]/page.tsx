@@ -7,7 +7,10 @@ import {
   getArticleForUser,
   listRecentArticlesForUser,
 } from "@/db/queries/articles";
-import { getArticleOrganizationForUser } from "@/db/queries/article-organization";
+import {
+  getArticleOrganizationForUser,
+  listTaxonomyTagsForUser,
+} from "@/db/queries/article-organization";
 import { listThemesForUser } from "@/db/queries/themes";
 
 export const dynamic = "force-dynamic";
@@ -28,11 +31,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const articleId = parsedArticleId.data;
-  const [article, recentArticles, organization, themes] = await Promise.all([
+  const [article, recentArticles, organization, themes, taxonomyTags] = await Promise.all([
     getArticleForUser(articleId, session.user.id),
     listRecentArticlesForUser(session.user.id),
     getArticleOrganizationForUser(articleId, session.user.id),
     listThemesForUser(session.user.id),
+    listTaxonomyTagsForUser(session.user.id),
   ]);
 
   if (!article) {
@@ -48,6 +52,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       selectedArticle={article}
       selectedArticleOrganization={organization}
       themes={themes}
+      taxonomyTags={taxonomyTags}
     />
   );
 }

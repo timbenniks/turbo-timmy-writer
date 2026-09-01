@@ -20,7 +20,6 @@ import {
   Quote,
   Redo2,
   Save,
-  Tag,
   Undo2,
 } from "lucide-react";
 import Link from "next/link";
@@ -33,7 +32,6 @@ import {
   type ArticleStatus,
 } from "@/articles/model";
 import { calculateWritingMetrics } from "@/articles/metrics";
-import { updateArticleTagsInputSchema } from "@/articles/organization";
 import { hasChangesAfterSaveStarted } from "@/articles/save";
 import {
   ARTICLE_RECOVERY_STORAGE_PREFIX,
@@ -45,9 +43,9 @@ import {
 import {
   createManualCheckpointAction,
   updateArticleStatusAction,
-  updateArticleTagsAction,
 } from "@/app/actions/article-organization";
 import { saveArticleAction } from "@/app/actions/articles";
+import { ArticleTagPicker } from "@/components/tags/article-tag-picker";
 import { Button } from "@/components/ui/button";
 import {
   WorkspaceAppearanceButtons,
@@ -92,6 +90,7 @@ type ArticleEditorProps = {
   initialDocument: ArticleDocument;
   status: ArticleStatus;
   initialTags: string[];
+  availableTags: string[];
   initialVersionCount: number;
   initialLatestVersionAt: string | null;
   revision: number;
@@ -143,6 +142,7 @@ export function ArticleEditor({
   initialDocument,
   status,
   initialTags,
+  availableTags,
   initialVersionCount,
   initialLatestVersionAt,
   revision,
@@ -155,8 +155,6 @@ export function ArticleEditor({
   const [saveMessage, setSaveMessage] = useState("");
   const [articleStatus, setArticleStatus] = useState(status);
   const [statusSaving, setStatusSaving] = useState(false);
-  const [tagsDraft, setTagsDraft] = useState(initialTags.join(", "));
-  const [tagsSaving, setTagsSaving] = useState(false);
   const [versionCount, setVersionCount] = useState(initialVersionCount);
   const [latestVersionAt, setLatestVersionAt] = useState(initialLatestVersionAt);
   const [checkpointSaving, setCheckpointSaving] = useState(false);
@@ -168,8 +166,6 @@ export function ArticleEditor({
   const [, setToolbarRevision] = useState(0);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const titleValueRef = useRef(initialTitle);
-  const savedTagsDraftRef = useRef(initialTags.join(", "));
-  const skipNextTagSaveRef = useRef(false);
   const changeRevisionRef = useRef(0);
   const serverRevisionRef = useRef(revision);
   const conflictRevisionRef = useRef<number | null>(null);
@@ -499,44 +495,6 @@ export function ArticleEditor({
     }
   }
 
-  async function saveTags() {
-    if (tagsSaving) return;
-    if (tagsDraft.trim() === savedTagsDraftRef.current) return;
-    const rawTags = tagsDraft
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean);
-    const parsed = updateArticleTagsInputSchema.safeParse({ articleId, tags: rawTags });
-    if (!parsed.success) {
-      setOrganizationError(true);
-      setOrganizationMessage(
-        "Use up to ten comma-separated tags, each at most 40 characters.",
-      );
-      return;
-    }
-
-    setTagsSaving(true);
-    setOrganizationMessage("");
-    try {
-      const result = await updateArticleTagsAction(parsed.data);
-      if (!result.ok) {
-        setOrganizationError(true);
-        setOrganizationMessage(result.message);
-        return;
-      }
-      const canonicalDraft = result.tags.join(", ");
-      savedTagsDraftRef.current = canonicalDraft;
-      setTagsDraft(canonicalDraft);
-      setOrganizationError(false);
-      setOrganizationMessage(result.tags.length ? "Tags saved." : "Tags cleared.");
-    } catch {
-      setOrganizationError(true);
-      setOrganizationMessage("The tags could not be updated.");
-    } finally {
-      setTagsSaving(false);
-    }
-  }
-
   async function createCheckpoint() {
     if (saveState !== "saved" || checkpointSaving) return;
     const label = window.prompt("Checkpoint label (optional)", "Manual checkpoint");
@@ -699,36 +657,16 @@ export function ArticleEditor({
           </select>
         </label>
         <span className="h-5 w-px shrink-0 bg-border" />
-        <label className="flex min-w-[190px] max-w-sm flex-1 items-center gap-2">
-          <Tag className="size-3.5 shrink-0" />
-          <span className="sr-only">Article tags, comma separated</span>
-          <input
-            aria-label="Article tags"
-            value={tagsDraft}
-            disabled={tagsSaving}
-            placeholder="Add tags, separated by commas"
-            onChange={(event) => setTagsDraft(event.target.value)}
-            onBlur={() => {
-              if (skipNextTagSaveRef.current) {
-                skipNextTagSaveRef.current = false;
-                return;
-              }
-              void saveTags();
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                event.currentTarget.blur();
-              }
-              if (event.key === "Escape") {
-                skipNextTagSaveRef.current = true;
-                setTagsDraft(savedTagsDraftRef.current);
-                event.currentTarget.blur();
-              }
-            }}
-            className="h-7 w-full min-w-0 rounded-md border border-transparent bg-transparent px-2 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-border focus:bg-surface disabled:opacity-50"
-          />
-        </label>
+        <ArticleTagPicker
+          key={availableTags.join("\0")}
+          articleId={articleId}
+          initialTags={initialTags}
+          availableTags={availableTags}
+          onMessage={(message, isError) => {
+            setOrganizationError(isError);
+            setOrganizationMessage(message);
+          }}
+        />
         <span className="h-5 w-px shrink-0 bg-border" />
         <span className="shrink-0 tabular-nums">
           {metrics.wordCount} {metrics.wordCount === 1 ? "word" : "words"}

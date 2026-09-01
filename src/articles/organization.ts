@@ -29,6 +29,26 @@ export const createCheckpointInputSchema = z.object({
   label: z.string().trim().max(80).optional(),
 });
 
+export const createTaxonomyTagInputSchema = z.object({
+  label: tagLabelSchema,
+});
+
+export const renameTaxonomyTagInputSchema = z.object({
+  tagId: z.uuid(),
+  label: tagLabelSchema,
+});
+
+export const deleteTaxonomyTagInputSchema = z.object({
+  tagId: z.uuid(),
+});
+
+export type TagTaxonomyItem = {
+  id: string;
+  label: string;
+  normalizedName: string;
+  usageCount: number;
+};
+
 export function normalizeTagName(value: string) {
   return value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
 }

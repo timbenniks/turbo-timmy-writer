@@ -4,11 +4,119 @@ import { randomUUID } from "node:crypto";
 
 import { and, asc, count, eq, inArray, max, sql } from "drizzle-orm";
 
-import { canonicalizeTagLabels } from "@/articles/organization";
+import {
+  canonicalizeTagLabels,
+  normalizeTagName,
+  type TagTaxonomyItem,
+} from "@/articles/organization";
 import type { ArticleStatus } from "@/articles/model";
 import { getDatabase } from "@/db/client";
 import { articleTags, articleVersions, articles, tags } from "@/db/schema";
 import { articleDocumentToMarkdown } from "@/editor/serialization/markdown";
+
+export async function listTaxonomyTagsForUser(
+  userId: string,
+): Promise<TagTaxonomyItem[]> {
+  const rows = await getDatabase()
+    .select({
+      id: tags.id,
+      label: tags.label,
+      normalizedName: tags.normalizedName,
+      usageCount: count(articleTags.articleId),
+    })
+    .from(tags)
+    .leftJoin(articleTags, eq(articleTags.tagId, tags.id))
+    .where(eq(tags.userId, userId))
+    .groupBy(tags.id, tags.label, tags.normalizedName)
+    .orderBy(asc(tags.normalizedName));
+
+  return rows.map((row) => ({ ...row, usageCount: Number(row.usageCount) }));
+}
+
+export async function createTaxonomyTagForUser(input: {
+  userId: string;
+  label: string;
+}) {
+  const normalizedName = normalizeTagName(input.label);
+  const [tag] = await getDatabase()
+    .insert(tags)
+    .values({
+      id: randomUUID(),
+      userId: input.userId,
+      normalizedName,
+      label: input.label,
+    })
+    .onConflictDoUpdate({
+      target: [tags.userId, tags.normalizedName],
+      set: { label: input.label, updatedAt: new Date() },
+    })
+    .returning({ id: tags.id });
+  return tag ?? null;
+}
+
+export async function renameTaxonomyTagForUser(input: {
+  userId: string;
+  tagId: string;
+  label: string;
+}) {
+  const database = getDatabase();
+  const [source] = await database
+    .select({ id: tags.id })
+    .from(tags)
+    .where(and(eq(tags.id, input.tagId), eq(tags.userId, input.userId)))
+    .limit(1);
+  if (!source) return null;
+
+  const normalizedName = normalizeTagName(input.label);
+  const [target] = await database
+    .select({ id: tags.id })
+    .from(tags)
+    .where(
+      and(
+        eq(tags.userId, input.userId),
+        eq(tags.normalizedName, normalizedName),
+      ),
+    )
+    .limit(1);
+
+  if (!target || target.id === source.id) {
+    await database
+      .update(tags)
+      .set({ normalizedName, label: input.label, updatedAt: new Date() })
+      .where(and(eq(tags.id, source.id), eq(tags.userId, input.userId)));
+    return { merged: false } as const;
+  }
+
+  const copyAssignments = database
+    .insert(articleTags)
+    .select(
+      database
+        .select({
+          articleId: articleTags.articleId,
+          tagId: sql<string>`${target.id}`.as("tag_id"),
+          position: articleTags.position,
+        })
+        .from(articleTags)
+        .where(eq(articleTags.tagId, source.id)),
+    )
+    .onConflictDoNothing();
+  await database.batch([
+    copyAssignments,
+    database.delete(articleTags).where(eq(articleTags.tagId, source.id)),
+    database
+      .delete(tags)
+      .where(and(eq(tags.id, source.id), eq(tags.userId, input.userId))),
+  ]);
+  return { merged: true } as const;
+}
+
+export async function deleteTaxonomyTagForUser(tagId: string, userId: string) {
+  const [deleted] = await getDatabase()
+    .delete(tags)
+    .where(and(eq(tags.id, tagId), eq(tags.userId, userId)))
+    .returning({ id: tags.id });
+  return Boolean(deleted);
+}
 
 export async function getArticleOrganizationForUser(
   articleId: string,

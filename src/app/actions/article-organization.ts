@@ -4,16 +4,73 @@ import { revalidatePath } from "next/cache";
 
 import { canTransitionArticleStatus, type ArticleStatus } from "@/articles/model";
 import {
+  createTaxonomyTagInputSchema,
   createCheckpointInputSchema,
+  deleteTaxonomyTagInputSchema,
+  renameTaxonomyTagInputSchema,
   updateArticleStatusInputSchema,
   updateArticleTagsInputSchema,
 } from "@/articles/organization";
 import { getAllowedSession } from "@/auth/session";
 import {
+  createTaxonomyTagForUser,
   createManualCheckpointForUser,
+  deleteTaxonomyTagForUser,
+  listTaxonomyTagsForUser,
+  renameTaxonomyTagForUser,
   updateArticleStatusForUser,
   updateArticleTagsForUser,
 } from "@/db/queries/article-organization";
+
+export async function createTaxonomyTagAction(input: unknown) {
+  const session = await getAllowedSession();
+  const parsed = createTaxonomyTagInputSchema.safeParse(input);
+  if (!session || !parsed.success) {
+    return { ok: false as const, message: "Enter a tag of at most 40 characters." };
+  }
+  await createTaxonomyTagForUser({ userId: session.user.id, ...parsed.data });
+  revalidatePath("/");
+  return {
+    ok: true as const,
+    tags: await listTaxonomyTagsForUser(session.user.id),
+    message: "Tag saved.",
+  };
+}
+
+export async function renameTaxonomyTagAction(input: unknown) {
+  const session = await getAllowedSession();
+  const parsed = renameTaxonomyTagInputSchema.safeParse(input);
+  if (!session || !parsed.success) {
+    return { ok: false as const, message: "That tag name is invalid." };
+  }
+  const result = await renameTaxonomyTagForUser({
+    userId: session.user.id,
+    ...parsed.data,
+  });
+  if (!result) return { ok: false as const, message: "That tag was not found." };
+  revalidatePath("/");
+  return {
+    ok: true as const,
+    tags: await listTaxonomyTagsForUser(session.user.id),
+    message: result.merged ? "Tags merged." : "Tag renamed.",
+  };
+}
+
+export async function deleteTaxonomyTagAction(input: unknown) {
+  const session = await getAllowedSession();
+  const parsed = deleteTaxonomyTagInputSchema.safeParse(input);
+  if (!session || !parsed.success) {
+    return { ok: false as const, message: "That tag could not be deleted." };
+  }
+  const deleted = await deleteTaxonomyTagForUser(parsed.data.tagId, session.user.id);
+  if (!deleted) return { ok: false as const, message: "That tag was not found." };
+  revalidatePath("/");
+  return {
+    ok: true as const,
+    tags: await listTaxonomyTagsForUser(session.user.id),
+    message: "Tag deleted from the taxonomy and its articles.",
+  };
+}
 
 export type UpdateArticleStatusResult =
   | { ok: true; status: ArticleStatus; updatedAt: string }
@@ -66,7 +123,7 @@ export async function updateArticleTagsAction(
   if (!parsed.success) {
     return {
       ok: false,
-      message: "Use up to ten comma-separated tags, each at most 40 characters.",
+      message: "Choose up to ten tags, each at most 40 characters.",
     };
   }
 

@@ -113,6 +113,9 @@ Phase 0 is complete. Phase 1 Slices 1-6 are implemented, tested, and deployed; t
 - Added two focused import-conversion tests and passed ESLint, standalone TypeScript, 26 unit tests, and the production build after the import tooling change.
 - Converted the writing shell from page-height growth to a dynamic-viewport app frame. Navigation/editor footers, headers, toolbars, and assistant chrome stay visible; only the library body or article canvas scrolls. The authenticated 1,200-word flow passed all eight desktop/mobile scenarios and explicitly verified that the editor footer remains visible at the bottom of the scrolled canvas.
 - Hardened authenticated browser coverage to require a disposable single-paragraph article titled with the `Playwright fixture` prefix before any mutation. This prevents the plain-text restore mechanism from being pointed at authored rich content.
+- Promoted the existing tags table into a reusable owner taxonomy without a migration. Replaced comma-separated article tag editing with a searchable multi-select and create-on-demand flow; added a real cog-powered manager with usage counts, create, rename, merge-on-collision, and confirmed deletion.
+- Consolidated the sidebar account controls into one row: the functional taxonomy cog, `@timbenniks`, and logout align together. Night's 72 px minimal rail stacks only its icon actions to stay within the deliberate narrow treatment.
+- Authenticated Playwright passed ten desktop/mobile scenarios, including taxonomy selection/clear, manager create/rename/delete, account-row alignment, and fixed-footer scrolling. Cleanup returned Production data to exactly 82 articles, 95 tags, and 477 assignments.
 
 ## Current validation checkpoint
 

@@ -5,7 +5,6 @@ import {
   MoreHorizontal,
   Plus,
   Search,
-  Settings,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
@@ -18,9 +17,11 @@ import {
   type ArticleStatus,
   type LibraryFilter,
 } from "@/articles/model";
+import type { TagTaxonomyItem } from "@/articles/organization";
 import { createBlankArticleAction } from "@/app/actions/articles";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ArticleEditor } from "@/components/editor/article-editor";
+import { TagManager } from "@/components/tags/tag-manager";
 import { WritingWorkspaceProvider } from "@/components/themes/writing-workspace-provider";
 import { Button } from "@/components/ui/button";
 import type { ArticleDocument } from "@/editor/document";
@@ -57,6 +58,7 @@ type AppShellProps = {
     latestVersionAt: Date | null;
   };
   themes: WritingTheme[];
+  taxonomyTags: TagTaxonomyItem[];
 };
 
 const filterTitles: Record<LibraryFilter, string> = {
@@ -98,6 +100,7 @@ export function AppShell({
   selectedArticle,
   selectedArticleOrganization,
   themes,
+  taxonomyTags,
 }: AppShellProps) {
   return (
     <WritingWorkspaceProvider themes={themes}>
@@ -176,11 +179,9 @@ export function AppShell({
                 ⌘K
               </span>
             </button>
-            <button aria-label="Settings" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
-              <Settings className="size-4" />
-              <span className="workspace-footer-label min-w-0 flex-1 truncate text-left">@{githubLogin}</span>
-            </button>
-            <div className="workspace-sign-out flex justify-end">
+            <div className="workspace-account-row flex h-9 w-full items-center gap-1 rounded-lg px-1 text-sm text-muted-foreground">
+              <TagManager initialTags={taxonomyTags} />
+              <span className="workspace-footer-label min-w-0 flex-1 truncate">@{githubLogin}</span>
               <SignOutButton />
             </div>
           </div>
@@ -195,6 +196,7 @@ export function AppShell({
                 versionCount: 0,
                 latestVersionAt: null,
               }}
+              taxonomyTags={taxonomyTags}
             />
           ) : (
             <Library articles={articles} filter={activeFilter} />
@@ -313,9 +315,11 @@ function Library({
 function ArticleWorkspace({
   article,
   organization,
+  taxonomyTags,
 }: {
   article: SelectedArticle;
   organization: NonNullable<AppShellProps["selectedArticleOrganization"]>;
+  taxonomyTags: TagTaxonomyItem[];
 }) {
   return (
     <ArticleEditor
@@ -324,6 +328,7 @@ function ArticleWorkspace({
       initialDocument={article.documentJson}
       status={article.status}
       initialTags={organization.tags}
+      availableTags={taxonomyTags.map((tag) => tag.label)}
       initialVersionCount={organization.versionCount}
       initialLatestVersionAt={organization.latestVersionAt?.toISOString() ?? null}
       revision={article.revision}

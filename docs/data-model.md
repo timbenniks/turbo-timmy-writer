@@ -124,6 +124,8 @@ Keeping preferences separate lets immutable built-in themes be favourited and se
 
 `tags` contains `id`, `user_id`, `normalized_name`, display `label`, and timestamps with unique `(user_id, normalized_name)`. `article_tags` contains `article_id`, `tag_id`, and `position`, with a composite primary key. Slice 4 replaces assignments in one Neon HTTP transaction after confirming article ownership; tag identity is case-insensitive while the first canonical display label remains readable.
 
+The tags table is also the reusable owner-scoped taxonomy. The editor searches and selects from it, while still allowing a new label to be created and assigned in one save. Taxonomy management exposes usage counts, creation, rename, merge-on-normalized-name-collision, and confirmed deletion. A merge copies non-duplicate assignments before deleting the source tag; deletion intentionally cascades its assignments and never affects article content.
+
 ## Conversation and AI tables
 
 ### `writing_sessions`
