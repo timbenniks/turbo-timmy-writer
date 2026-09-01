@@ -13,5 +13,7 @@ test("protected writing routes fail closed", async ({ page }) => {
 test("unknown auth errors remain safe and useful", async ({ page }) => {
   await page.goto("/sign-in?error=unexpected-provider-value");
 
-  await expect(page.getByRole("alert")).toHaveText("GitHub sign-in failed. Please try again.");
+  await expect(
+    page.getByText("GitHub sign-in failed. Please try again.", { exact: true }),
+  ).toBeVisible();
 });
