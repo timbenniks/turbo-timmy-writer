@@ -5,7 +5,6 @@ import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 import {
-  emptyArticleDocument,
   emptyArticleMetadata,
   statusesForLibraryFilter,
   untitledArticleSlug,
@@ -13,6 +12,7 @@ import {
 } from "@/articles/model";
 import { getDatabase } from "@/db/client";
 import { articles } from "@/db/schema";
+import { emptyArticleDocument } from "@/editor/document";
 
 const articleSummarySelection = {
   id: articles.id,
@@ -78,4 +78,30 @@ export async function createBlankArticleForUser(userId: string) {
   }
 
   return article;
+}
+
+type SaveArticleForUserInput = {
+  articleId: string;
+  userId: string;
+  title: string;
+  documentJson: typeof articles.$inferInsert.documentJson;
+  plainText: string;
+  documentVersion: 1;
+};
+
+export async function saveArticleForUser(input: SaveArticleForUserInput) {
+  const savedAt = new Date();
+  const [article] = await getDatabase()
+    .update(articles)
+    .set({
+      title: input.title,
+      documentJson: input.documentJson,
+      plainText: input.plainText,
+      metadata: { version: input.documentVersion },
+      updatedAt: savedAt,
+    })
+    .where(and(eq(articles.id, input.articleId), eq(articles.userId, input.userId)))
+    .returning({ updatedAt: articles.updatedAt });
+
+  return article ?? null;
 }

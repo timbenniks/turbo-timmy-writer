@@ -53,6 +53,8 @@ Phase 1 Slice 1 implementation details:
 - Blank manual articles begin in `drafting` with an empty title, empty plain-text projection, canonical `{ type: "doc", content: [{ type: "paragraph" }] }` JSON, and metadata `{ version: 1 }`.
 - The application generates the UUID before insertion and uses `untitled-<uuid>` as the collision-safe initial slug. A blank title is rendered as `Untitled article`; display fallback text is never persisted as authored content.
 - Every create/list/reopen operation derives `user_id` from the authenticated server session. Reopen queries constrain both article ID and owner ID.
+- Canonical editor JSON uses document version 1 and accepts only the deliberately supported semantic node/mark set. The application normalizes ProseMirror attribute maps to plain JSON before server transport, validates again on the server, and derives `plain_text` in the same owner-scoped save operation.
+- Markdown is deterministic but derived on demand; it is not duplicated on the mutable article row. Stable Markdown belongs on immutable versions or publication output when those features arrive.
 
 ## Writing core tables
 

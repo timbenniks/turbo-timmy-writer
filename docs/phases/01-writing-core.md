@@ -26,6 +26,19 @@ Make Turbo Timmy Writer useful as a comfortable manual writing application befor
 
 Checkpoint approved: GitHub Actions and the Git-connected Vercel deployment passed. Tim created and reopened a blank article in Production successfully on 2026-09-01. Slice 2 may begin.
 
+## Slice 2 validation — 2026-09-01
+
+- Installed a matched Tiptap 3.30.6 package set and used the documented Next.js boundary: a focused client component with immediate server rendering disabled.
+- Added the version-1 canonical JSON boundary with strict supported-node/mark validation, safe URL rules, bounded input, and plain-object normalization before React server-action transport.
+- Added deterministic, fixture-tested plain-text and Markdown projections. Plain text persists alongside canonical JSON; Markdown remains derived on demand.
+- Added editable title/body UI for paragraphs, H2, H3, bold, italic, inline code, code blocks, blockquotes, ordered/unordered lists, links, horizontal rules, and external images. Arbitrary visual formatting is unavailable.
+- Added authenticated, owner-scoped explicit saving through the Save button and ⌘/Ctrl-S. Autosave and local recovery remain deliberately out of scope until Slice 3.
+- A real authenticated Chromium flow typed a title, paragraph, H2, and second paragraph; Save persisted the exact versioned JSON and derived plain text, and a reload reconstructed the same editor document.
+- Passed Drizzle schema validation, ESLint, standalone TypeScript, eleven unit tests, and the Next.js production build.
+- Inspected the editor at 1440 × 1000 and 390 × 844. The mobile pass caught and resolved title clipping with an auto-growing title field and hidden toolbar scrollbar.
+
+Checkpoint: deploy through Git, then Tim edits, saves, and reloads an article in Production. Do not begin Slice 3 until persistence and editor comfort are approved.
+
 ## Key decisions to validate
 
 - Tiptap JSON remains canonical and projections are deterministic.

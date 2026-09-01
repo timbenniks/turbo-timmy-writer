@@ -208,3 +208,5 @@ OpenAI and publisher variables are documented but not required until their phase
 10. Publication is previewed, validated, and user-confirmed.
 11. Phase acceptance criteria gate later work.
 12. Article operations are owner-scoped at the query boundary. Blank articles are created through authenticated server actions with application-generated UUIDs, stable initial slugs, and an explicit versioned empty document.
+13. The editor crosses the server boundary as normalized, versioned Tiptap JSON. Server saves validate the supported schema and derive plain text; deterministic Markdown is generated only when a consumer needs it.
+14. Slice 2 uses explicit manual saves. Local-first recovery, debouncing, and optimistic server concurrency arrive together in Slice 3 so partial autosave semantics are not mistaken for safety.

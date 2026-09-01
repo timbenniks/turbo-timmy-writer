@@ -25,18 +25,8 @@ export const libraryFilters = [
 export const libraryFilterSchema = z.enum(libraryFilters);
 export type LibraryFilter = z.infer<typeof libraryFilterSchema>;
 
-export type ArticleDocument = {
-  type: "doc";
-  content: Array<Record<string, unknown>>;
-};
-
 export type ArticleMetadata = {
   version: 1;
-};
-
-export const emptyArticleDocument: ArticleDocument = {
-  type: "doc",
-  content: [{ type: "paragraph" }],
 };
 
 export const emptyArticleMetadata: ArticleMetadata = { version: 1 };

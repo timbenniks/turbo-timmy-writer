@@ -11,9 +11,9 @@ import {
 
 import {
   articleStatuses,
-  type ArticleDocument,
   type ArticleMetadata,
 } from "@/articles/model";
+import type { ArticleDocument } from "@/editor/document";
 
 import { users } from "./users";
 

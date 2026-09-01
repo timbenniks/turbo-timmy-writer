@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slice 1 are complete. Phase 1, Slice 2 (semantic Tiptap editor and versioned serialization), is the next checkpoint.
+Phase 0 and Phase 1 Slice 1 are complete. Phase 1, Slice 2 (semantic Tiptap editor and versioned serialization), is implemented locally and awaiting the Production validation checkpoint.
 
 ## Completed work
 
@@ -55,10 +55,18 @@ Phase 0 and Phase 1 Slice 1 are complete. Phase 1, Slice 2 (semantic Tiptap edit
 - Passed the Slice 1 local gate: Drizzle schema check, ESLint, standalone TypeScript, six unit tests, and the Next.js production build with all library and article routes dynamic.
 - GitHub Actions run `33488297453` passed the Slice 1 lint, typecheck, six unit tests, and production build in 39 seconds; Vercel deployed commit `136c7cb` successfully.
 - Tim created a blank article in Production, returned to the library, reopened it successfully, and approved the Slice 1 checkpoint.
+- Added the matched Tiptap 3.30.6 React, ProseMirror, StarterKit, and Image package set using the official Next.js client-only integration pattern.
+- Added a version-1 canonical document boundary with strict node/mark validation, document depth/node/text limits, safe link/image protocols, JSON normalization for ProseMirror attribute maps, and rejection of unsupported formatting.
+- Added deterministic plain-text and Markdown serializers covering paragraphs, H2/H3, bold, italic, inline/code blocks, blockquotes, ordered/unordered lists, links, horizontal rules, and external images.
+- Added the calm semantic editor with an auto-growing title, limited toolbar, responsive toolbar overflow, visible manual save state, Save button, and ⌘/Ctrl-S shortcut. Strike, underline, H1, arbitrary styling, and base64 images are excluded.
+- Added the authenticated explicit save operation. It validates input, derives plain text on the server, updates only the session owner's article, preserves document metadata version 1, and leaves Markdown as an on-demand projection.
+- Drove a real authenticated Chromium session through title/body editing, H2 creation, explicit save, database inspection, and reload. Neon retained the exact canonical JSON, title, version metadata, and derived plain text.
+- Rendered and inspected the populated editor at 1440 × 1000 and 390 × 844; changed the title control to auto-grow after the first narrow-width inspection exposed clipping.
+- Passed the Slice 2 local gate: Drizzle schema check, ESLint, standalone TypeScript, eleven unit tests, and the Next.js production build.
 
 ## Current validation checkpoint
 
-Implement the semantic Tiptap editor and deterministic versioned projections, then stop for Slice 2 validation before adding autosave.
+Deploy Slice 2 through the connected Git workflow and have Tim edit, explicitly save, and reload an article in Production before beginning autosave/local recovery.
 
 ## Known issues and setup state
 
@@ -75,6 +83,7 @@ Implement the semantic Tiptap editor and deterministic versioned projections, th
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migration `0001` was therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
+- Slice 2 intentionally saves only through the button or ⌘/Ctrl-S. Local recovery, debounced autosave, server revision tokens, and multi-tab conflict handling are Slice 3 and must not be inferred from the current `Saved` state.
 
 ## Important architecture decisions
 
@@ -100,7 +109,6 @@ Implement the semantic Tiptap editor and deterministic versioned projections, th
 
 ## Next tasks
 
-1. Add the deliberately limited Tiptap extension set and editable title/document workspace.
-2. Define and validate the versioned canonical document boundary.
-3. Implement deterministic JSON-to-plain-text and JSON-to-Markdown projections with focused fixtures and tests.
-4. Add an explicit authenticated save operation sufficient to validate editor persistence; debounced/local-first autosave remains Slice 3.
+1. Push Slice 2 and confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
+2. Have Tim edit the title and body, add semantic formatting, save, reload, and confirm the content survives in Production.
+3. After approval, begin Slice 3 with local recovery, debounced autosave, optimistic concurrency, and truthful save-state handling.

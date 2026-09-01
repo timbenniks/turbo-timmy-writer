@@ -1,10 +1,8 @@
 import {
-  ArrowLeft,
   ChevronDown,
   Command,
   FileText,
   MoreHorizontal,
-  PanelRightClose,
   Plus,
   Search,
   Settings,
@@ -16,14 +14,15 @@ import type { Route } from "next";
 import {
   articleDisplayTitle,
   articleStatusLabel,
-  type ArticleDocument,
   type ArticleMetadata,
   type ArticleStatus,
   type LibraryFilter,
 } from "@/articles/model";
 import { createBlankArticleAction } from "@/app/actions/articles";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { ArticleEditor } from "@/components/editor/article-editor";
 import { Button } from "@/components/ui/button";
+import type { ArticleDocument } from "@/editor/document";
 import { libraryDestinations } from "@/lib/navigation";
 
 type ArticleSummary = {
@@ -292,53 +291,13 @@ function Library({
 }
 
 function ArticleWorkspace({ article }: { article: SelectedArticle }) {
-  const title = articleDisplayTitle(article.title);
-
   return (
-    <>
-      <header className="flex h-16 items-center gap-3 border-b border-border px-4 sm:px-6">
-        <Button variant="outline" size="icon" asChild aria-label="Back to library">
-          <Link href="/">
-            <ArrowLeft />
-          </Link>
-        </Button>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{title}</p>
-          <p className="text-xs text-muted-foreground">
-            Reopened · {formatUpdatedAt(article.updatedAt)}
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="hidden rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-muted-foreground sm:inline">
-            {articleStatusLabel(article.status)}
-          </span>
-          <Button variant="ghost" size="icon" aria-label="Close assistant">
-            <PanelRightClose />
-          </Button>
-        </div>
-      </header>
-
-      <article className="mx-auto w-full max-w-[760px] flex-1 px-6 py-14 sm:px-12 sm:py-20">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          Blank article
-        </p>
-        <h1 className="mt-5 font-serif text-4xl leading-[1.08] font-medium tracking-[-0.035em] text-balance sm:text-[3.35rem]">
-          {title}
-        </h1>
-        <div className="mt-12 border-l-2 border-accent-soft pl-5">
-          <p className="font-serif text-[1.2rem] leading-8 text-copy sm:text-[1.32rem] sm:leading-9">
-            A blank page, safely stored and ready for a first sentence.
-          </p>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            The semantic editor and document serialization arrive in Slice 2.
-          </p>
-        </div>
-      </article>
-
-      <footer className="flex h-11 items-center border-t border-border px-4 text-xs text-muted-foreground sm:px-6">
-        <span>Quiet theme</span>
-        <span className="ml-auto">Stored in your library</span>
-      </footer>
-    </>
+    <ArticleEditor
+      articleId={article.id}
+      initialTitle={article.title}
+      initialDocument={article.documentJson}
+      status={article.status}
+      updatedAt={article.updatedAt.toISOString()}
+    />
   );
 }
