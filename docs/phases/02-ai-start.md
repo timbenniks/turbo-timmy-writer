@@ -96,7 +96,7 @@ Deployment checkpoint: draft commit `8e56452` passed GitHub Actions run `3353732
 - The draft incorporates interview intent/evidence: live and deterministic drafts used the saved brief/conversation; unsupported or invented structure is constrained at skill and parser boundaries.
 - Conversation history remains after drafting: passed on fresh-tab reload at desktop and mobile.
 
-All Phase 2 acceptance criteria pass. Phase 2 is complete pending the final commit/CI/deployment record; Phase 3 may begin afterward.
+All Phase 2 acceptance criteria pass. Final acceptance commit `858e70c` passed GitHub Actions run `33538457443` in 1m31s; Vercel deployment `dpl_cGGwm9JnXzu7W4RwSiinFkPYoFhZ` reached Ready on `https://turbo-timmy-writer.vercel.app`. Phase 2 is complete and Phase 3 may begin.
 
 ## Key decisions to validate
 

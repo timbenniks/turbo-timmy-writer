@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phases 0, 1, and 2 are complete locally. The complete premise → one-question interview → revisioned brief → explicit first draft milestone now passes live-provider QA and deterministic desktop/mobile acceptance coverage; final CI/deployment recording remains.
+Phases 0, 1, and 2 are complete and deployed. The premise → one-question interview → revisioned brief → explicit first draft milestone passes live-provider QA and deterministic desktop/mobile acceptance coverage.
 
 ## Completed work
 
@@ -152,10 +152,11 @@ Phases 0, 1, and 2 are complete locally. The complete premise → one-question i
 - Deterministic acceptance passed at desktop and 390 × 844: six browser tests passed and six unrelated designated-fixture tests skipped. The flow covered premise persistence, one question, answer/brief revision, explicit draft, canonical editor status/content, reload, and retained conversation.
 - Post-suite pooled counts confirmed exact cleanup: 82 articles and zero writing sessions, writing messages, article briefs, or article-skill AI runs.
 - Every Phase 2 acceptance criterion now passes. Tim can draft immediately after the first question, the brief is visible/evolving/manual, the resulting draft uses durable intent, and conversation remains available after completion.
+- Phase 2 final commit `858e70c` passed GitHub Actions run `33538457443` in 1m31s. Vercel deployment `dpl_cGGwm9JnXzu7W4RwSiinFkPYoFhZ` reached Ready on the canonical Production alias; protected `/start` still redirects unauthenticated requests to sign-in.
 
 ## Current validation checkpoint
 
-Run the final Phase 2 gate, commit/deploy the deterministic acceptance slice, then begin Phase 3 precision AI.
+Begin Phase 3 precision AI from the clean, deployed Phase 2 checkpoint.
 
 ## Known issues and setup state
 
@@ -199,5 +200,5 @@ Run the final Phase 2 gate, commit/deploy the deterministic acceptance slice, th
 
 ## Next tasks
 
-1. Run the final Phase 2 gate, commit, push, and verify CI/deployment.
-2. Begin Phase 3 with reviewable selection-based AI suggestions; never mutate canonical prose without explicit acceptance.
+1. Read and activate `docs/phases/03-precision-ai.md` before implementation.
+2. Begin with reviewable selection-based AI suggestions; never mutate canonical prose without explicit acceptance.
