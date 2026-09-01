@@ -23,7 +23,7 @@ Implement the premise-to-interview-to-brief-to-first-draft workflow.
 - Generated and applied additive migration `0005_far_loners.sql` through the direct database URL. Pooled inspection confirmed the 14-column `ai_runs` table, all four statuses, and zero synthetic rows.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, 35 unit tests, the Next.js production build, and four credential-free desktop/mobile Playwright checks; six authenticated writing checks skipped intentionally without their local fixture.
 
-Checkpoint: the credential-free runtime boundary is ready. Slice 2 can add the first user-visible premise and persisted writing-session flow without changing provider semantics.
+Checkpoint approved: credential-free runtime commit `a7fbdd8` passed GitHub Actions run `33526595600` and Vercel deployment `dpl_ETgNE3MN7p91DzMpgwGAgf4TLxHm` reached Ready on the canonical Production alias. Slice 2 can add the first user-visible premise and persisted writing-session flow without changing provider semantics.
 
 ## Key decisions to validate
 

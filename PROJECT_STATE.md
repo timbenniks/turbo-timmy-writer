@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phases 0 and 1 are complete. Phase 2 Slice 1 is implemented locally: the credential-free AI runtime, central model configuration, safe run logging, deterministic mock provider, and additive `ai_runs` migration.
+Phases 0 and 1 are complete. Phase 2 Slice 1 is implemented, tested, migrated, and deployed: the credential-free AI runtime, central model configuration, safe run logging, and deterministic mock provider.
 
 ## Completed work
 
@@ -122,10 +122,11 @@ Phases 0 and 1 are complete. Phase 2 Slice 1 is implemented locally: the credent
 - Added a deterministic mock provider and eight focused tests covering configuration, preflight validation, successful structured and streamed work, parse failure, provider failure, and abandoned-stream cancellation without paid calls.
 - Generated additive migration `0005_far_loners.sql` for `ai_runs`, applied it through the verified direct URL, and confirmed through the pooled runtime URL that all 14 columns and four statuses exist with zero synthetic rows.
 - Passed the Slice 1 local gate: Drizzle schema validation, ESLint, standalone TypeScript, 35 unit tests, the production build, and four credential-free desktop/mobile Playwright checks with six authenticated fixture-dependent checks intentionally skipped.
+- AI runtime commit `a7fbdd8` passed GitHub Actions run `33526595600` in 1m12s. Vercel deployment `dpl_ETgNE3MN7p91DzMpgwGAgf4TLxHm` reached Ready and owns the canonical Production alias; Production `/` still redirects to sign-in and the configured provider endpoint returns 200.
 
 ## Current validation checkpoint
 
-Ship and verify the Phase 2 Slice 1 runtime checkpoint, then begin Slice 2's premise capture and persisted article-start sessions.
+Begin Phase 2 Slice 2's premise capture, immediate persistence, and durable article-start sessions/messages.
 
 ## Known issues and setup state
 
@@ -169,5 +170,5 @@ Ship and verify the Phase 2 Slice 1 runtime checkpoint, then begin Slice 2's pre
 
 ## Next tasks
 
-1. Push Phase 2 Slice 1, verify GitHub Actions and the canonical Vercel deployment, and record the exact evidence.
-2. Begin Phase 2 Slice 2 with immediate premise persistence, article-start sessions, and streamed message storage.
+1. Begin Phase 2 Slice 2 with immediate premise persistence and durable article-start sessions/messages.
+2. Add streamed message storage against the mocked provider before enabling live OpenAI credentials.
