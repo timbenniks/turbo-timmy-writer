@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 is complete. Phase 1, Slice 1 (article lifecycle and library flows), is implemented locally and awaiting the Production validation checkpoint.
+Phase 0 and Phase 1 Slice 1 are complete. Phase 1, Slice 2 (semantic Tiptap editor and versioned serialization), is the next checkpoint.
 
 ## Completed work
 
@@ -53,10 +53,12 @@ Phase 0 is complete. Phase 1, Slice 1 (article lifecycle and library flows), is 
 - Exercised the real local server action with an authenticated session: it returned a 303 to the new article, persisted the canonical empty document in Neon, appeared in Drafts/Recent writing, and reopened successfully.
 - Rendered and inspected the populated library at 1440 × 1000 and the reopened article at 390 × 844. The writing-first layout remains calm and usable at both widths.
 - Passed the Slice 1 local gate: Drizzle schema check, ESLint, standalone TypeScript, six unit tests, and the Next.js production build with all library and article routes dynamic.
+- GitHub Actions run `33488297453` passed the Slice 1 lint, typecheck, six unit tests, and production build in 39 seconds; Vercel deployed commit `136c7cb` successfully.
+- Tim created a blank article in Production, returned to the library, reopened it successfully, and approved the Slice 1 checkpoint.
 
 ## Current validation checkpoint
 
-Deploy Slice 1 through the connected Git workflow and have Tim create and reopen a blank article in Production before beginning the Tiptap editor slice.
+Implement the semantic Tiptap editor and deterministic versioned projections, then stop for Slice 2 validation before adding autosave.
 
 ## Known issues and setup state
 
@@ -98,6 +100,7 @@ Deploy Slice 1 through the connected Git workflow and have Tim create and reopen
 
 ## Next tasks
 
-1. Push Slice 1 and confirm GitHub Actions and the Git-connected Vercel Production deployment pass.
-2. Have Tim create and reopen a blank article at the Production URL.
-3. After approval, begin Slice 2 with Tiptap and versioned JSON/plain-text/Markdown serialization.
+1. Add the deliberately limited Tiptap extension set and editable title/document workspace.
+2. Define and validate the versioned canonical document boundary.
+3. Implement deterministic JSON-to-plain-text and JSON-to-Markdown projections with focused fixtures and tests.
+4. Add an explicit authenticated save operation sufficient to validate editor persistence; debounced/local-first autosave remains Slice 3.

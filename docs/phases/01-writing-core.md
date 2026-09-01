@@ -24,7 +24,7 @@ Make Turbo Timmy Writer useful as a comfortable manual writing application befor
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, six unit tests, and the Next.js production build.
 - Inspected the populated library at 1440 × 1000 and the reopened blank article at 390 × 844.
 
-Checkpoint: deploy through Git, then Tim creates and reopens a blank article in Production. Do not begin Slice 2 until that flow is approved.
+Checkpoint approved: GitHub Actions and the Git-connected Vercel deployment passed. Tim created and reopened a blank article in Production successfully on 2026-09-01. Slice 2 may begin.
 
 ## Key decisions to validate
 
