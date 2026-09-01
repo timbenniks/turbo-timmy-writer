@@ -96,6 +96,7 @@ Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, c
 - Passed the Slice 5 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
 - GitHub Actions run `33506453953` passed the Slice 5 gate in 59 seconds, and Vercel deployment `dpl_CkS4T7dPSEHtkcx66GPMiAQ8E4iD` for commit `5094307` reached Ready on the canonical Production URL.
 - Tim's first Production check caught Night squeezing full sidebar contents into its minimal column. Reworked minimal treatment as a deliberate 72 px icon rail: accessible icon controls remain, recent writing and text labels hide, and measured navigation content stays within 71 px at 1024, 1200, 1280, and 1440 px.
+- Corrective commit `17a9050` passed GitHub Actions run `33507199048` in 46 seconds; Vercel deployment `dpl_CFmkUcy9mv3QZqTNrUfyVQLXQLBC` reached Ready and owns the canonical Production alias.
 
 ## Current validation checkpoint
 
@@ -116,7 +117,7 @@ Have Tim validate instant theme switching, a durable custom/default theme, and f
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0004` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production commit `5094307` includes Slice 5 themes and focus mode. Its final checkpoint requires Tim's real Production workflow validation.
+- Production includes Slice 5 themes/focus mode plus corrective commit `17a9050` for Night's minimal sidebar. Its final checkpoint requires Tim's Production recheck.
 
 ## Important architecture decisions
 

@@ -75,8 +75,9 @@ Checkpoint approved: GitHub Actions run `33505029706` and Vercel deployment `dpl
 - The exact article title, body, save state, and revision remained unchanged through all theme operations. Inspected at 1440 × 1000 and a fresh 390 × 844 load with no horizontal overflow or title clipping.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
 - The first Production check exposed that Night's 92 px minimal sidebar still rendered full-width labels and visibly crushed them. Replaced it with a deliberate 72 px icon rail that hides only brand/navigation/footer labels and recent-writing text; verified exact 72 px navigation width with no content overflow at 1024, 1200, 1280, and 1440 px.
+- Night's corrective commit `17a9050` passed GitHub Actions run `33507199048` in 46 seconds and reached Ready in Vercel deployment `dpl_CFmkUcy9mv3QZqTNrUfyVQLXQLBC` on the canonical Production alias.
 
-Checkpoint: GitHub Actions run `33506453953` and Vercel deployment `dpl_CkS4T7dPSEHtkcx66GPMiAQ8E4iD` passed for commit `5094307`. Tim now switches starters, duplicates/edits one custom theme, reloads to confirm the default, and enters/exits focus mode in Production. Do not begin Slice 6 until the workspace workflow is approved.
+Checkpoint: Slice 5 and the Night sidebar correction are deployed. Tim now rechecks Night, switches starters, duplicates/edits one custom theme, reloads to confirm the default, and enters/exits focus mode in Production. Do not begin Slice 6 until the workspace workflow is approved.
 
 ## Key decisions to validate
 
