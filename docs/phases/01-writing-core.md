@@ -75,7 +75,7 @@ Checkpoint approved: GitHub Actions run `33505029706` and Vercel deployment `dpl
 - The exact article title, body, save state, and revision remained unchanged through all theme operations. Inspected at 1440 × 1000 and a fresh 390 × 844 load with no horizontal overflow or title clipping.
 - Passed Drizzle schema validation, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
 
-Checkpoint: deploy Slice 5, then have Tim switch starters, duplicate/edit one custom theme, reload to confirm the default, and enter/exit focus mode. Do not begin Slice 6 until the workspace workflow is approved.
+Checkpoint: GitHub Actions run `33506453953` and Vercel deployment `dpl_CkS4T7dPSEHtkcx66GPMiAQ8E4iD` passed for commit `5094307`. Tim now switches starters, duplicates/edits one custom theme, reloads to confirm the default, and enters/exits focus mode in Production. Do not begin Slice 6 until the workspace workflow is approved.
 
 ## Key decisions to validate
 

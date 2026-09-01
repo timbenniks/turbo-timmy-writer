@@ -4,7 +4,7 @@ Last updated: 2026-09-01
 
 ## Current phase
 
-Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, custom-theme persistence, instant switching, and focus mode), is implemented locally and awaiting CI/deployment plus the Production validation checkpoint.
+Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, custom-theme persistence, instant switching, and focus mode), is deployed and awaiting the Production validation checkpoint.
 
 ## Completed work
 
@@ -94,10 +94,11 @@ Phase 0 and Phase 1 Slices 1-4 are complete. Phase 1, Slice 5 (starter themes, c
 - Drove an authenticated Chromium flow through Night switching, minimal sidebar styling, focus mode, custom duplication/edit/default/favourite persistence, reload, and deletion. The test theme was removed afterward and preferences returned to a clean fallback state.
 - Confirmed the Slice 4 test article retained revision 2, its exact title and exact ten-word plain text throughout theme operations. Inspected at 1440 × 1000 and 390 × 844 with no horizontal overflow or title clipping.
 - Passed the Slice 5 local gate: Drizzle schema check, ESLint, standalone TypeScript, twenty-four unit tests, and the Next.js production build.
+- GitHub Actions run `33506453953` passed the Slice 5 gate in 59 seconds, and Vercel deployment `dpl_CkS4T7dPSEHtkcx66GPMiAQ8E4iD` for commit `5094307` reached Ready on the canonical Production URL.
 
 ## Current validation checkpoint
 
-Push and deploy Slice 5, then have Tim validate instant theme switching, a durable custom/default theme, and focus mode in Production.
+Have Tim validate instant theme switching, a durable custom/default theme, and focus mode in Production.
 
 ## Known issues and setup state
 
@@ -114,7 +115,7 @@ Push and deploy Slice 5, then have Tim validate instant theme switching, a durab
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0004` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production commit `549ff07` includes the approved Slice 4 status controls, tags, live metrics, and immutable manual checkpoints. Slice 5 remains local until its feature commit is pushed and Vercel reports Ready.
+- Production commit `5094307` includes Slice 5 themes and focus mode. Its final checkpoint requires Tim's real Production workflow validation.
 
 ## Important architecture decisions
 
@@ -140,6 +141,5 @@ Push and deploy Slice 5, then have Tim validate instant theme switching, a durab
 
 ## Next tasks
 
-1. Commit and push Slice 5, verify GitHub Actions and the canonical Vercel Production deployment.
-2. Have Tim switch themes, duplicate and edit one, set it as default, reload, and enter/exit focus mode in Production.
-3. After approval, complete Slice 6 coverage and the extended-writing/recovery validation for Phase 1.
+1. Have Tim switch themes, duplicate and edit one, set it as default, reload, and enter/exit focus mode in Production.
+2. After approval, complete Slice 6 coverage and the extended-writing/recovery validation for Phase 1.
