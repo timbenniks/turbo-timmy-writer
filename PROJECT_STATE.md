@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress. Slices 1 and 2 are pushed, deployed, migrated, and populated; the next work is Slice 3 hybrid retrieval.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress. Slices 1 and 2 are pushed, deployed, migrated, and populated. Slices 3–5 pass the complete local gate; Slice 6 voice profiling remains.
 
 ## Completed work
 
@@ -189,10 +189,14 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in pr
 - The first archive-memory write inserted 156 chunks. Its immediate dry-run repeat found zero inserts, updates, or removals and all 156 rows unchanged.
 - Embedded all 156 chunks with `text-embedding-3-small` at 1,024 dimensions using 105,274 input tokens. A second identical run selected zero rows, made zero model calls, and consumed zero tokens.
 - Final pooled verification found 156 complete current vectors, 156 unique document/ordinal positions covering all 74 archive documents, zero invalid hashes or token counts, and the unchanged 82-article canonical corpus.
+- Added owner-scoped literal, semantic, and hybrid archive retrieval. Hybrid results expose normalized lexical and semantic components plus their explicit weights; active sources can be excluded by document ID or slug.
+- Added protected Archive and Search views with source attribution, explicit retrieval modes, ranked passages, and inspectable ranking explanations. Live probes returned useful attributed results and verified active-source exclusion.
+- Added a bounded related-writing selector and article-workspace “Have I written this before?” panel. Draft generation receives at most four deduplicated attributed excerpts, keeps archive recall separate from voice guidance, and falls back from semantic to literal retrieval if embeddings are unavailable.
+- Inspected Archive and Search at 1440 × 1000 and 390 × 844 plus an article workspace at desktop width. The views have no horizontal overflow or browser errors; the article panel links to the complete memory search.
 
 ## Current validation checkpoint
 
-Phase 4 Slice 2 passes locally, in GitHub Actions, Vercel, and Neon: Drizzle migration-history validation, all 12 migrations against empty in-memory Postgres with pgvector enabled and `archive_chunks.embedding` verified as `vector(1024)`, ESLint, standalone TypeScript, 69 unit tests across 25 files, four credential-free browser checks, the normal production build, migration `0011`, 156 idempotent chunks, and 156 cached vectors. The initial embedding pass used 105,274 input tokens; the repeat used zero.
+Phase 4 Slices 1–2 pass locally and remotely, including the applied archive and vector migrations and fully populated cache. Slices 3–5 pass Drizzle schema validation, ESLint, standalone TypeScript, 74 unit tests across 27 files, and the normal Turbopack production build. A live hybrid query, literal exclusion probe, and responsive authenticated browser inspection also pass.
 
 ## Known issues and setup state
 
@@ -237,6 +241,6 @@ Phase 4 Slice 2 passes locally, in GitHub Actions, Vercel, and Neon: Drizzle mig
 
 ## Next tasks
 
-1. Add literal, semantic, and observable hybrid retrieval behind one server-side interface.
-2. Validate ranking, attribution, owner scoping, and active-article exclusion against the live archive.
-3. Surface the imported archive and attributed passages in the application UI.
+1. Complete the Phase 4 versioned voice profile and connect bounded guidance to drafting without coupling it to archive retrieval.
+2. Run and record the complete Phase 4 gate, then mark the phase complete only if every acceptance criterion passes.
+3. Begin Phase 5 with deterministic source-version/content-hash stale detection and destination-specific variant boundaries.

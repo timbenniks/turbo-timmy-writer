@@ -9,11 +9,13 @@ describe("first draft skill", () => {
     const instructions = draftSkill.buildInstructions({
       brief: createPremiseBrief("A premise"),
       messages: [{ role: "user", text: "A premise" }],
+      archiveEvidence: [],
     });
 
     expect(instructions).toContain("Tim remains the author");
     expect(instructions).toContain("do not invent facts");
     expect(instructions).toContain("first line must be exactly one H1 title");
     expect(instructions).toContain("Do not imitate a rigid template");
+    expect(instructions).toContain("Archive evidence is optional recall");
   });
 });

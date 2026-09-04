@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
+import type { ReactNode } from "react";
 
 import {
   articleDisplayTitle,
@@ -71,8 +72,16 @@ type AppShellProps = {
   selectedArticleSuggestions?: EditorSuggestionSnapshot[];
   selectedArticleReviews?: ArticleReviewSnapshot[];
   selectedArticleAiRuns?: AiRunSnapshot[];
+  selectedArticleRelatedWriting?: {
+    archiveDocumentId: string;
+    title: string;
+    url: string;
+    passage: string;
+  }[];
+  selectedArticleMemoryQuery?: string;
   themes: WritingTheme[];
   taxonomyTags: TagTaxonomyItem[];
+  content?: ReactNode;
 };
 
 const filterTitles: Record<LibraryFilter, string> = {
@@ -120,8 +129,11 @@ export function AppShell({
   selectedArticleSuggestions = [],
   selectedArticleReviews = [],
   selectedArticleAiRuns = [],
+  selectedArticleRelatedWriting = [],
+  selectedArticleMemoryQuery = "",
   themes,
   taxonomyTags,
+  content,
 }: AppShellProps) {
   return (
     <WritingWorkspaceProvider themes={themes}>
@@ -193,13 +205,13 @@ export function AppShell({
           </div>
 
           <div className="workspace-sidebar-footer mt-auto shrink-0 space-y-1 border-t border-border p-3">
-            <button aria-label="Search" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+            <Link href={"/search" as Route} aria-label="Search" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               <Search className="size-4" />
               <span className="workspace-footer-label">Search</span>
               <span className="workspace-footer-label ml-auto rounded border border-border px-1.5 py-0.5 text-[10px]">
                 ⌘K
               </span>
-            </button>
+            </Link>
             <div className="workspace-account-row flex h-9 w-full items-center gap-1 rounded-lg px-1 text-sm text-muted-foreground">
               <TagManager initialTags={taxonomyTags} />
               <span className="workspace-footer-label min-w-0 flex-1 truncate">@{githubLogin}</span>
@@ -209,7 +221,7 @@ export function AppShell({
         </aside>
 
         <section className="flex min-h-0 min-w-0 flex-col overflow-hidden bg-editor">
-          {selectedArticle ? (
+          {content ?? (selectedArticle ? (
             <ArticleWorkspace
               article={selectedArticle}
               organization={selectedArticleOrganization ?? {
@@ -224,13 +236,15 @@ export function AppShell({
             />
           ) : (
             <Library articles={articles} filter={activeFilter} />
-          )}
+          ))}
         </section>
 
         <WorkspaceAssistant
           articleId={selectedArticle?.id}
           articleStart={selectedArticleStart}
           brief={selectedArticleBrief}
+          relatedWriting={selectedArticleRelatedWriting}
+          memoryQuery={selectedArticleMemoryQuery}
         />
       </div>
     </WritingWorkspaceProvider>

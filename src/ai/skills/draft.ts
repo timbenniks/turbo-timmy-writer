@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { articleBriefSchema } from "@/ai/brief/model";
 import type { WritingSkill } from "@/ai/runtime/skill";
+import { archiveEvidenceSchema } from "@/search/retrieval/context";
 
 export const draftInputSchema = z.object({
   brief: articleBriefSchema,
@@ -14,6 +15,7 @@ export const draftInputSchema = z.object({
     )
     .min(1)
     .max(60),
+  archiveEvidence: archiveEvidenceSchema.default([]),
 });
 
 export type DraftInput = z.infer<typeof draftInputSchema>;
@@ -34,6 +36,7 @@ export const draftSkill: WritingSkill<DraftInput> = {
       "Do not add frontmatter, meta commentary, a generic introduction, a forced conclusion heading, or citations that were not supplied.",
       "Prefer direct openings, specific language, varied rhythm, qualified strong claims, and a natural ending. Do not imitate a rigid template or recurring phrase.",
       "Use the brief as intent and the conversation as supporting evidence. If evidence is thin, write honestly around the uncertainty rather than filling gaps.",
+      "Archive evidence is optional recall from Tim's prior published work. Use only relevant excerpts, do not copy their structure, and preserve the supplied source URL when explicitly referring to a prior piece.",
     ].join("\n");
   },
   buildInput(input) {

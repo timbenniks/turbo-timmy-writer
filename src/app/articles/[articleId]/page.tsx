@@ -17,6 +17,8 @@ import { getCurrentArticleBriefForUser } from "@/db/queries/article-briefs";
 import { listEditorSuggestionsForUser } from "@/db/queries/editor-suggestions";
 import { listArticleReviewsForUser } from "@/db/queries/article-reviews";
 import { listAiRunsForArticleForUser } from "@/db/queries/ai-runs";
+import { relatedArchiveQuery } from "@/search/retrieval/model";
+import { retrieveArchiveForUser } from "@/search/retrieval/service";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +54,25 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (!article) {
     notFound();
   }
+
+  const memoryQuery = articleBrief?.briefJson.premise || article.title || article.plainText.slice(0, 300);
+  const relatedQuery = relatedArchiveQuery([
+    article.title,
+    articleBrief?.briefJson.premise,
+    articleBrief?.briefJson.thesis,
+    article.plainText.slice(0, 500),
+  ]);
+  const relatedWriting = relatedQuery
+    ? await retrieveArchiveForUser(session.user.id, {
+        query: relatedQuery,
+        mode: "literal",
+        limit: 6,
+        excludeArchiveSlug: article.slug,
+      })
+    : [];
+  const relatedDocuments = [...new Map(
+    relatedWriting.map((result) => [result.archiveDocumentId, result]),
+  ).values()];
 
   return (
     <AppShell
@@ -114,6 +135,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         createdAt: run.createdAt.toISOString(),
         completedAt: run.completedAt?.toISOString() ?? null,
       }))}
+      selectedArticleRelatedWriting={relatedDocuments.map((result) => ({
+        archiveDocumentId: result.archiveDocumentId,
+        title: result.title,
+        url: result.url,
+        passage: result.passage,
+      }))}
+      selectedArticleMemoryQuery={memoryQuery}
       themes={themes}
       taxonomyTags={taxonomyTags}
     />

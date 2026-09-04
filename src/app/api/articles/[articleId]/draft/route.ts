@@ -10,6 +10,7 @@ import { finalizeInitialDraftForUser } from "@/db/queries/drafts";
 import { getArticleStartForUser } from "@/db/queries/writing-sessions";
 import { generatedMarkdownToArticle } from "@/editor/serialization/markdown-to-document";
 import { readAiEnvironment } from "@/lib/env/server";
+import { retrieveArchiveEvidenceForDraft } from "@/search/retrieval/service";
 
 export const runtime = "nodejs";
 
@@ -53,6 +54,12 @@ export async function POST(request: Request, context: RouteContext) {
   const signal = AbortSignal.any([request.signal, abortController.signal]);
   const provider = createWritingProvider(environment.apiKey);
   const userId = session.user.id;
+  const archiveEvidence = await retrieveArchiveEvidenceForDraft({
+    userId,
+    premise: currentBrief.briefJson.premise,
+    thesis: currentBrief.briefJson.thesis,
+    excludeArchiveSlug: article.slug,
+  });
   const messages = articleStart.messages.map((message) => ({
     role: message.role,
     text: message.plainText,
@@ -68,7 +75,7 @@ export async function POST(request: Request, context: RouteContext) {
             userId,
             articleId: articleId.data,
             skill: draftSkill,
-            input: { brief: currentBrief.briefJson, messages },
+            input: { brief: currentBrief.briefJson, messages, archiveEvidence },
             signal,
           },
         );

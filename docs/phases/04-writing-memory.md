@@ -48,4 +48,24 @@ Tim approved activation on 2026-09-04. Migration `0011` applied through the dire
 
 Final pooled verification found 156 vectors with complete current cache metadata, 156 unique document/ordinal positions across all 74 archive documents, zero invalid token counts or hashes, and all 82 canonical articles intact.
 
-Next: add literal, semantic, and observable hybrid retrieval as Slice 3.
+Slices 3–5 add one owner-scoped retrieval boundary with literal, semantic, and
+hybrid modes. Literal ranking uses PostgreSQL full-text search; semantic ranking
+uses the cached pgvector embeddings; hybrid ranking normalizes and combines both
+components with explicit weights and exposes the component scores for inspection.
+Active archive documents can be excluded by document ID or source slug.
+
+The protected Archive view now lists all imported published sources, while the
+Search view accepts an explicit retrieval mode and renders attributed passages,
+source links, and an expandable ranking explanation. Desktop and 390-pixel browser
+inspection found no overflow or browser errors. Live owner-scoped probes returned
+useful results for both a broad hybrid query and literal search, and verified that
+the active document exclusion removes the otherwise top-ranked source.
+
+Article workspaces surface a bounded, deduplicated “Have I written this before?”
+panel. Draft generation uses a separately selected set of at most four attributed
+archive excerpts instead of the full corpus. Normal generation prefers hybrid
+recall and safely falls back to literal recall; deterministic guided tests remain
+free of paid API calls.
+
+Next: curate and version the initial voice profile as Slice 6 while keeping voice
+guidance separate from archive evidence.

@@ -28,6 +28,18 @@ export type AiEnvironment = {
   models: AiModelConfiguration;
 };
 
+const archiveEmbeddingEnvironmentSchema = z.object({
+  OPENAI_API_KEY: z.string().min(1),
+  OPENAI_MODEL_EMBEDDING: z.string().trim()
+    .regex(/^text-embedding-3-[a-z0-9-]+$/)
+    .max(200),
+});
+
+export type ArchiveEmbeddingEnvironment = {
+  apiKey: string;
+  model: string;
+};
+
 export function getDatabaseUrl() {
   return databaseEnvironmentSchema.parse({
     DATABASE_URL: process.env.DATABASE_URL,
@@ -57,4 +69,14 @@ export function readAiEnvironment(): AiEnvironment | null {
   } catch {
     return null;
   }
+}
+
+export function readArchiveEmbeddingEnvironment(): ArchiveEmbeddingEnvironment | null {
+  const result = archiveEmbeddingEnvironmentSchema.safeParse({
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_MODEL_EMBEDDING: process.env.OPENAI_MODEL_EMBEDDING,
+  });
+  return result.success
+    ? { apiKey: result.data.OPENAI_API_KEY, model: result.data.OPENAI_MODEL_EMBEDDING }
+    : null;
 }
