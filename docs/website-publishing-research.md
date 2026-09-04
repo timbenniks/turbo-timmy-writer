@@ -68,3 +68,37 @@ Across the current non-index files in `content/4.writing`:
 - New publication output emits the current duplicated `head.meta` shape for
   Twitter and keyword metadata.
 - Legacy `id` and `collection_id` are not required for new timbenniks.dev output.
+
+## Local dual-repository verification
+
+The local `/home/timbenniks/Projects/timbenniksdev-2024` and
+`/home/timbenniks/Projects/timbenniks-2026` worktrees were inspected read-only
+on 2026-09-04. Existing uncommitted work in the 2024 repository was left
+untouched.
+
+The repositories consume the same final article body through different source
+paths and frontmatter contracts:
+
+| Target | Publishable path | Target-specific output |
+| --- | --- | --- |
+| `timbenniksdev-2024` | `content/4.writing/<slug>.md` | Nuxt Content frontmatter keeps `slug` and duplicated `head.meta` values. `id` and `collection_id` remain legacy optional fields and are omitted for new articles. |
+| `timbenniks-2026` | `src/content/writing/<slug>.md` | Astro derives the slug from the filename and derives page SEO, Twitter metadata, JSON-LD, feeds, search data, and the public Markdown twin. New source output therefore omits legacy `slug`, `head`, `id`, and `collection_id` fields. |
+
+The 2026 writing schema consumes `title`, `description`, `date`, `image`,
+`tags`, `canonical_url`, `reading_time`, optional `faqs`, and `draft`. Its
+canonical taxonomy contains 17 lowercase kebab-case tags; its normalization
+policy deduplicates, prioritizes, and caps articles at five tags. Turbo Timmy
+Writer validates against that common taxonomy so one metadata selection is safe
+for both repositories.
+
+The 2024 repository's untracked `writing/drafts` workspace is an editorial
+record containing a brief, evidence ledger, facts to verify, working draft, and
+handoff checklist. It must not be written into the site's recursively processed
+`content/4.writing` directory. Turbo Timmy Writer already stores the canonical
+article, revisioned brief, interview, and versions; exporting this redundant
+editorial record is not required for website publication.
+
+Both repositories rely on their GitHub-to-Vercel integration after a commit.
+The publisher must preview both files together, ask for explicit confirmation,
+write and record each repository result independently, and surface partial
+success rather than claiming the two-repository operation was atomic.

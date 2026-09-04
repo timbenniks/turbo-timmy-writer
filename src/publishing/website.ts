@@ -4,17 +4,56 @@ import { z } from "zod";
 import { calculateWritingMetrics } from "@/articles/metrics";
 import { httpUrlSchema } from "@/lib/validation/http-url";
 
-export const TIMBENNIKS_DEV_REPOSITORY = "timbenniks/timbenniksdev-2024";
-export const TIMBENNIKS_DEV_WRITING_DIRECTORY = "content/4.writing";
-export const TIMBENNIKS_DEV_ORIGIN = "https://timbenniks.dev";
+const TIMBENNIKS_DEV_REPOSITORY = "timbenniks/timbenniksdev-2024";
+const TIMBENNIKS_DEV_WRITING_DIRECTORY = "content/4.writing";
+const TIMBENNIKS_DEV_ORIGIN = "https://timbenniks.dev";
 
-export const websitePublicationSlugSchema = z
+const websitePublicationTargets = [
+  "timbenniksdev-2024",
+  "timbenniks-2026",
+] as const;
+
+const websitePublicationTargetProfiles = {
+  "timbenniksdev-2024": {
+    repository: TIMBENNIKS_DEV_REPOSITORY,
+    writingDirectory: TIMBENNIKS_DEV_WRITING_DIRECTORY,
+  },
+  "timbenniks-2026": {
+    repository: "timbenniks/timbenniks-2026",
+    writingDirectory: "src/content/writing",
+  },
+} as const;
+
+const timbenniks2026Tags = [
+  "composable-architecture",
+  "cms",
+  "api-design",
+  "frontend",
+  "performance",
+  "cloud-infra",
+  "developer-experience",
+  "ai-engineering",
+  "craft",
+  "personalization",
+  "devrel",
+  "product-strategy",
+  "content-ops",
+  "career",
+  "media-production",
+  "personal",
+  "opinion",
+] as const;
+
+export type WebsitePublicationTarget =
+  (typeof websitePublicationTargets)[number];
+
+const websitePublicationSlugSchema = z
   .string()
   .trim()
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
   .max(200);
 
-export const websitePublicationFaqSchema = z.object({
+const websitePublicationFaqSchema = z.object({
   question: z.string().trim().min(1).max(300),
   answer: z.string().trim().min(1).max(1_500),
 });
@@ -25,7 +64,8 @@ export const websitePublicationMetadataSchema = z.object({
   description: z.string().trim().min(1).max(1_000),
   date: z.iso.datetime({ offset: true }),
   image: httpUrlSchema,
-  tags: z.array(z.string().trim().min(1).max(80)).min(1).max(20),
+  tags: z.array(z.enum(timbenniks2026Tags)).min(1).max(5)
+    .refine((tags) => new Set(tags).size === tags.length, "Use each tag once."),
   faqs: z.array(websitePublicationFaqSchema).max(8).optional(),
   draft: z.boolean().default(false),
 });
@@ -49,14 +89,29 @@ export type WebsitePublicationFrontmatter = z.output<
   };
 };
 
+export type WebsitePublicationOutput = {
+  target: WebsitePublicationTarget;
+  repository: string;
+  path: string;
+  markdown: string;
+};
+
 export function timbenniksDevCanonicalUrl(slug: string) {
   const validSlug = websitePublicationSlugSchema.parse(slug);
   return `${TIMBENNIKS_DEV_ORIGIN}/writing/${validSlug}`;
 }
 
 export function timbenniksDevWritingPath(slug: string) {
+  return websitePublicationPath("timbenniksdev-2024", slug);
+}
+
+export function websitePublicationPath(
+  target: WebsitePublicationTarget,
+  slug: string,
+) {
+  const validTarget = z.enum(websitePublicationTargets).parse(target);
   const validSlug = websitePublicationSlugSchema.parse(slug);
-  return `${TIMBENNIKS_DEV_WRITING_DIRECTORY}/${validSlug}.md`;
+  return `${websitePublicationTargetProfiles[validTarget].writingDirectory}/${validSlug}.md`;
 }
 
 export function websiteReadingTime(plainText: string) {
@@ -93,19 +148,68 @@ export function websiteFrontmatter(input: {
   };
 }
 
-export function websiteMarkdownFile(input: {
+export function timbenniks2026Frontmatter(input: {
   metadata: WebsitePublicationMetadata;
   plainText: string;
-  bodyMarkdown: string;
 }) {
-  const frontmatter = websiteFrontmatter({
-    metadata: input.metadata,
-    plainText: input.plainText,
-  });
+  const metadata = websitePublicationMetadataSchema.parse(input.metadata);
+  return {
+    title: metadata.title,
+    description: metadata.description,
+    date: metadata.date,
+    canonical_url: timbenniksDevCanonicalUrl(metadata.slug),
+    reading_time: websiteReadingTime(input.plainText),
+    image: metadata.image,
+    tags: metadata.tags,
+    ...(metadata.faqs ? { faqs: metadata.faqs } : {}),
+    draft: metadata.draft,
+  };
+}
+
+function serializeWebsiteMarkdown(frontmatter: object, bodyMarkdown: string) {
   const yaml = stringify(frontmatter, {
     lineWidth: 0,
     defaultKeyType: "PLAIN",
     defaultStringType: "QUOTE_DOUBLE",
   }).trimEnd();
-  return `---\n${yaml}\n---\n\n${input.bodyMarkdown.trim()}\n`;
+  return `---\n${yaml}\n---\n\n${bodyMarkdown.trim()}\n`;
+}
+
+export function websiteMarkdownFile(input: {
+  metadata: WebsitePublicationMetadata;
+  plainText: string;
+  bodyMarkdown: string;
+}) {
+  return websiteMarkdownFileForTarget("timbenniksdev-2024", input);
+}
+
+function websiteMarkdownFileForTarget(
+  target: WebsitePublicationTarget,
+  input: {
+    metadata: WebsitePublicationMetadata;
+    plainText: string;
+    bodyMarkdown: string;
+  },
+) {
+  const frontmatter = target === "timbenniks-2026"
+    ? timbenniks2026Frontmatter(input)
+    : websiteFrontmatter(input);
+  return serializeWebsiteMarkdown(frontmatter, input.bodyMarkdown);
+}
+
+export function websitePublicationOutputs(input: {
+  metadata: WebsitePublicationMetadata;
+  plainText: string;
+  bodyMarkdown: string;
+}): WebsitePublicationOutput[] {
+  const metadata = websitePublicationMetadataSchema.parse(input.metadata);
+  return websitePublicationTargets.map((target) => ({
+    target,
+    repository: websitePublicationTargetProfiles[target].repository,
+    path: websitePublicationPath(target, metadata.slug),
+    markdown: websiteMarkdownFileForTarget(target, {
+      ...input,
+      metadata,
+    }),
+  }));
 }

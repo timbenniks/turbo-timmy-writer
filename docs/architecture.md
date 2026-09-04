@@ -134,6 +134,14 @@ Dev.to `id`/`collection_id` fields out of new output. GitHub write operations
 remain future work and must not trigger a separate deployment because the
 repository already reports Vercel deployment statuses for `main`.
 
+Local verification of the replacement Astro site adds a second explicit
+website publication target: `timbenniks/timbenniks-2026` consumes
+`src/content/writing/<slug>.md`, derives its slug and public SEO/machine-readable
+surfaces, and restricts new writing to its canonical 17-tag vocabulary with a
+five-tag cap. One canonical article body produces a Nuxt 2024 file and an Astro
+2026 file. Preview groups them, while GitHub writes and publication records stay
+per target so partial success remains visible and retryable.
+
 ## Writing-voice source audit
 
 The `timbenniks/timbenniks-writing-voice` repository was inspected on 2026-08-31. It is seed material and is not a runtime dependency.
