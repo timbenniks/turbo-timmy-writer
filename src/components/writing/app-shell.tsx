@@ -19,6 +19,11 @@ import {
 import type { TagTaxonomyItem } from "@/articles/organization";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ArticleEditor } from "@/components/editor/article-editor";
+import type {
+  AiRunSnapshot,
+  ArticleReviewSnapshot,
+  EditorSuggestionSnapshot,
+} from "@/components/editor/precision-ai-panel";
 import type { InterviewMessage } from "@/components/writing/interview-assistant";
 import type { ArticleBriefSnapshot } from "@/components/writing/article-brief-editor";
 import { WorkspaceAssistant } from "@/components/writing/workspace-assistant";
@@ -63,6 +68,9 @@ type AppShellProps = {
     messages: InterviewMessage[];
   } | null;
   selectedArticleBrief?: ArticleBriefSnapshot | null;
+  selectedArticleSuggestions?: EditorSuggestionSnapshot[];
+  selectedArticleReviews?: ArticleReviewSnapshot[];
+  selectedArticleAiRuns?: AiRunSnapshot[];
   themes: WritingTheme[];
   taxonomyTags: TagTaxonomyItem[];
 };
@@ -109,6 +117,9 @@ export function AppShell({
   selectedArticleOrganization,
   selectedArticleStart,
   selectedArticleBrief,
+  selectedArticleSuggestions = [],
+  selectedArticleReviews = [],
+  selectedArticleAiRuns = [],
   themes,
   taxonomyTags,
 }: AppShellProps) {
@@ -207,6 +218,9 @@ export function AppShell({
                 latestVersionAt: null,
               }}
               taxonomyTags={taxonomyTags}
+              suggestions={selectedArticleSuggestions}
+              reviews={selectedArticleReviews}
+              aiRuns={selectedArticleAiRuns}
             />
           ) : (
             <Library articles={articles} filter={activeFilter} />
@@ -312,10 +326,16 @@ function ArticleWorkspace({
   article,
   organization,
   taxonomyTags,
+  suggestions,
+  reviews,
+  aiRuns,
 }: {
   article: SelectedArticle;
   organization: NonNullable<AppShellProps["selectedArticleOrganization"]>;
   taxonomyTags: TagTaxonomyItem[];
+  suggestions: EditorSuggestionSnapshot[];
+  reviews: ArticleReviewSnapshot[];
+  aiRuns: AiRunSnapshot[];
 }) {
   return (
     <ArticleEditor
@@ -327,6 +347,9 @@ function ArticleWorkspace({
       availableTags={taxonomyTags.map((tag) => tag.label)}
       initialVersionCount={organization.versionCount}
       initialLatestVersionAt={organization.latestVersionAt?.toISOString() ?? null}
+      initialSuggestions={suggestions}
+      initialReviews={reviews}
+      initialAiRuns={aiRuns}
       revision={article.revision}
       updatedAt={article.updatedAt.toISOString()}
     />

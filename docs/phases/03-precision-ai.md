@@ -7,11 +7,11 @@ Make AI useful during editing while preserving Tim's control over every prose ch
 ## Planned slices
 
 1. ✅ Capture robust Tiptap selections and expose compact preset/free-form AI actions.
-2. Implement the editor skill and create pending suggestions without changing the document.
-3. Add anchored visual diffs with guarded accept, reject, and superseded states.
-4. Convert editorial seed material into structured, versioned humanizer detections.
-5. Add a read-only whole-article critic and AI run history.
-6. Test concurrent edits, stale selection anchors, failed AI calls, and individual outcomes.
+2. ✅ Implement the editor skill and create pending suggestions without changing the document.
+3. ✅ Add anchored visual diffs with guarded accept, reject, and superseded states.
+4. ✅ Convert editorial seed material into structured, versioned humanizer detections.
+5. ✅ Add a read-only whole-article critic and AI run history.
+6. ✅ Test concurrent edits, stale selection anchors, failed AI calls, and individual outcomes.
 
 ## Key decisions to validate
 
@@ -32,4 +32,10 @@ This is the second major product milestone.
 
 ## Current checkpoint
 
-Slice 1 is complete locally. Text selections are captured as exact original text plus a direction-aware Tiptap bookmark, canonical document version, and source article revision. Empty, structural, whitespace-only, and selections over 8,000 characters are rejected. A responsive bubble menu exposes Tighten, Clarify, Make sharper, Fix rhythm, Alternative, and a bounded free-form Ask AI action. Actions currently prepare the typed payload only and explicitly confirm that article prose was not changed; suggestion generation begins in Slice 2.
+Phase 3 is complete locally. Selection transformations run through `article-selection-editor/v1` and persist reviewable original/suggested diffs without changing canonical prose. Accept reconstructs the exact replacement server-side and atomically advances the article only when its revision and bookmarked passage still match; Reject and superseded outcomes preserve prose. Large accepted replacements receive a pre-change checkpoint.
+
+`article-humanizer-review/v1` uses a curated, versioned subset of the audited editorial pattern catalog and detects before rewriting. Each rewrite is a separate explicit pending suggestion. `article-critic-review/v1` reviews claims, repetition, transitions, contradictions, abstraction, generated prose, opening, ending, and evidence without editing. Revisioned results and safe AI run history remain visible in the editor.
+
+Migration `0009_large_quasar.sql` is additive, applied, and verified. Drizzle validation, ESLint, standalone TypeScript, 58 unit tests, and the normal Turbopack production build pass. Credential-free Playwright passes four auth checks with twelve intentional skips. Deterministic authenticated acceptance passes the guided and precision flows at desktop and 390 × 844; the precision flow proves reject, accept/reload, Humanizer-before-rewrite, Critic, and stale-suggestion refusal. Manual browser inspection found zero horizontal overflow or console errors at both widths. Fixture cleanup restored 82 articles and zero suggestions, reviews, sessions, messages, or briefs.
+
+All acceptance criteria pass. Push the Phase 3 milestone, verify GitHub Actions and Vercel, then begin Phase 4 writing memory.

@@ -79,3 +79,16 @@ export function captureArticleSelection(
     },
   };
 }
+
+export function findTextBookmark(document: ProseMirrorNode, quote: string) {
+  let bookmark: ArticleSelectionBookmark | null = null;
+  document.descendants((node, position) => {
+    if (bookmark || !node.isTextblock) return;
+    const text = node.textBetween(0, node.content.size, "\n", "\n");
+    const index = text.indexOf(quote);
+    if (index < 0) return;
+    const from = position + 1 + index;
+    bookmark = { from, to: from + quote.length, anchor: from, head: from + quote.length };
+  });
+  return bookmark;
+}

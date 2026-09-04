@@ -20,7 +20,6 @@ import {
   Quote,
   Redo2,
   Save,
-  Sparkles,
   Undo2,
 } from "lucide-react";
 import Link from "next/link";
@@ -50,6 +49,13 @@ import {
   SelectionAiMenu,
   type PreparedEditorAction,
 } from "@/components/editor/selection-ai-menu";
+import {
+  PrecisionAiPanel,
+  type AiRunSnapshot,
+  type ArticleReviewSnapshot,
+  type EditorSuggestionSnapshot,
+} from "@/components/editor/precision-ai-panel";
+import type { ReviewKind } from "@/ai/review/model";
 import { ArticleTagPicker } from "@/components/tags/article-tag-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,6 +67,7 @@ import {
   normalizeArticleDocument,
   type ArticleDocument,
 } from "@/editor/document";
+import { findTextBookmark } from "@/editor/selection";
 import { articleDocumentToPlainText } from "@/editor/serialization/plain-text";
 import { generatedMarkdownToArticle } from "@/editor/serialization/markdown-to-document";
 
@@ -99,6 +106,9 @@ type ArticleEditorProps = {
   availableTags: string[];
   initialVersionCount: number;
   initialLatestVersionAt: string | null;
+  initialSuggestions: EditorSuggestionSnapshot[];
+  initialReviews: ArticleReviewSnapshot[];
+  initialAiRuns: AiRunSnapshot[];
   revision: number;
   updatedAt: string;
 };
@@ -151,6 +161,9 @@ export function ArticleEditor({
   availableTags,
   initialVersionCount,
   initialLatestVersionAt,
+  initialSuggestions,
+  initialReviews,
+  initialAiRuns,
   revision,
   updatedAt,
 }: ArticleEditorProps) {
@@ -166,8 +179,11 @@ export function ArticleEditor({
   const [checkpointSaving, setCheckpointSaving] = useState(false);
   const [organizationMessage, setOrganizationMessage] = useState("");
   const [organizationError, setOrganizationError] = useState(false);
-  const [preparedEditorAction, setPreparedEditorAction] =
-    useState<PreparedEditorAction | null>(null);
+  const [suggestions, setSuggestions] = useState(initialSuggestions);
+  const [reviews, setReviews] = useState(initialReviews);
+  const [aiRuns, setAiRuns] = useState(initialAiRuns);
+  const [aiBusyLabel, setAiBusyLabel] = useState<string | null>(null);
+  const [aiMessage, setAiMessage] = useState("");
   const [metrics, setMetrics] = useState(() =>
     calculateWritingMetrics(articleDocumentToPlainText(initialDocument)),
   );
@@ -642,6 +658,178 @@ export function ArticleEditor({
     }
   }
 
+  function recordCompletedRun(input: {
+    id: string;
+    skillId: string;
+    skillVersion: string;
+  }) {
+    setAiRuns((current) => [{
+      id: input.id,
+      skillId: input.skillId,
+      skillVersion: input.skillVersion,
+      model: "configured model",
+      status: "succeeded",
+      durationMs: null,
+      errorCode: null,
+      createdAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+    }, ...current.filter((run) => run.id !== input.id)]);
+  }
+
+  async function generateSuggestion(action: PreparedEditorAction) {
+    if (saveState !== "saved" || aiBusyLabel) {
+      setAiMessage("Save the article before creating a suggestion.");
+      return;
+    }
+    setAiBusyLabel(`Generating ${action.label.toLowerCase()} suggestion…`);
+    setAiMessage("Your article will not change while AI works.");
+    try {
+      const response = await fetch(`/api/articles/${articleId}/suggestions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          actionId: action.actionId,
+          instruction: action.instruction,
+          selection: action.selection,
+        }),
+      });
+      const payload = await response.json() as {
+        suggestion?: EditorSuggestionSnapshot;
+        error?: string;
+      };
+      if (!response.ok || !payload.suggestion) {
+        setAiMessage(payload.error ?? "The suggestion could not be generated.");
+        return;
+      }
+      setSuggestions((current) => [payload.suggestion!, ...current]);
+      recordCompletedRun({
+        id: payload.suggestion.aiRunId,
+        skillId: "article-selection-editor",
+        skillVersion: "v1",
+      });
+      setAiMessage("Suggestion ready for review. Your article has not changed.");
+    } catch {
+      setAiMessage("The suggestion could not be generated. Your article was not changed.");
+    } finally {
+      setAiBusyLabel(null);
+    }
+  }
+
+  async function resolveSuggestion(
+    suggestion: EditorSuggestionSnapshot,
+    action: "accept" | "reject",
+  ) {
+    if (!editor || aiBusyLabel) return;
+    if (action === "accept" && saveState !== "saved") {
+      setAiMessage("Save or reload local changes before accepting this suggestion.");
+      return;
+    }
+    setAiBusyLabel(action === "accept" ? "Applying suggestion…" : "Rejecting suggestion…");
+    try {
+      const response = await fetch(
+        `/api/articles/${articleId}/suggestions/${suggestion.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        },
+      );
+      const payload = await response.json() as {
+        status?: EditorSuggestionSnapshot["status"];
+        document?: ArticleDocument;
+        revision?: number;
+        savedAt?: string;
+        error?: string;
+      };
+      if (!response.ok) {
+        if (payload.status === "superseded") {
+          setSuggestions((current) => current.map((item) => item.id === suggestion.id ? { ...item, status: "superseded", resolvedAt: new Date().toISOString() } : item));
+        }
+        setAiMessage(payload.error ?? "The suggestion could not be resolved.");
+        return;
+      }
+      if (action === "reject") {
+        setSuggestions((current) => current.map((item) => item.id === suggestion.id ? { ...item, status: "rejected", resolvedAt: new Date().toISOString() } : item));
+        setAiMessage("Suggestion rejected. Your article was not changed.");
+        return;
+      }
+      if (!payload.document || !payload.revision || !payload.savedAt) {
+        setAiMessage("The accepted suggestion returned an invalid document. Reload the saved article.");
+        return;
+      }
+      editor.commands.setContent(payload.document, { emitUpdate: false });
+      updateMetrics(payload.document);
+      serverRevisionRef.current = payload.revision;
+      conflictRevisionRef.current = null;
+      if (recoveryKeyRef.current) localStorage.removeItem(recoveryKeyRef.current);
+      setSavedAt(payload.savedAt);
+      setSaveState("saved");
+      setSuggestions((current) => current.map((item) => item.id === suggestion.id ? { ...item, status: "accepted", resolvedAt: payload.savedAt! } : item));
+      setAiMessage("Suggestion accepted and saved.");
+    } catch {
+      setAiMessage("The suggestion could not be resolved. Your article was not changed.");
+    } finally {
+      setAiBusyLabel(null);
+    }
+  }
+
+  async function runArticleReview(kind: ReviewKind) {
+    if (saveState !== "saved" || aiBusyLabel) {
+      setAiMessage("Save the article before requesting a review.");
+      return;
+    }
+    setAiBusyLabel(kind === "humanizer" ? "Scanning for generated prose…" : "Reviewing the full article…");
+    setAiMessage("This is a read-only review. Your article will not change.");
+    try {
+      const response = await fetch(`/api/articles/${articleId}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, sourceRevision: serverRevisionRef.current }),
+      });
+      const payload = await response.json() as { review?: ArticleReviewSnapshot; error?: string };
+      if (!response.ok || !payload.review) {
+        setAiMessage(payload.error ?? "The review could not be completed.");
+        return;
+      }
+      setReviews((current) => [payload.review!, ...current]);
+      recordCompletedRun({
+        id: payload.review.aiRunId,
+        skillId: kind === "humanizer" ? "article-humanizer-review" : "article-critic-review",
+        skillVersion: payload.review.skillVersion,
+      });
+      setAiMessage(`${kind === "humanizer" ? "Humanizer scan" : "Critic review"} completed without changing your article.`);
+    } catch {
+      setAiMessage("The review could not be completed. Your article was not changed.");
+    } finally {
+      setAiBusyLabel(null);
+    }
+  }
+
+  function rewriteHumanizerFinding(review: ArticleReviewSnapshot, findingIndex: number) {
+    if (!editor || review.sourceRevision !== serverRevisionRef.current) {
+      setAiMessage("This finding belongs to an older article revision. Run Humanizer again.");
+      return;
+    }
+    const finding = review.resultJson.findings[findingIndex];
+    if (!finding?.quote) return;
+    const bookmark = findTextBookmark(editor.state.doc, finding.quote);
+    if (!bookmark) {
+      setAiMessage("The reported passage has changed. Run Humanizer again.");
+      return;
+    }
+    void generateSuggestion({
+      actionId: "custom",
+      label: "Humanizer rewrite",
+      instruction: `Rewrite this passage to address the ${finding.categoryId.replaceAll("-", " ")} finding: ${finding.explanation}`,
+      selection: {
+        documentVersion: ARTICLE_DOCUMENT_VERSION,
+        sourceRevision: serverRevisionRef.current,
+        originalText: finding.quote,
+        bookmark,
+      },
+    });
+  }
+
   useLayoutEffect(() => {
     if (!titleRef.current) return;
     titleRef.current.style.height = "0px";
@@ -817,24 +1005,18 @@ export function ArticleEditor({
         </div>
       ) : null}
 
-      {preparedEditorAction ? (
-        <div
-          aria-live="polite"
-          className="flex shrink-0 items-center gap-2 border-b border-border bg-accent-soft px-4 py-2 text-xs text-foreground sm:px-6"
-        >
-          <Sparkles className="size-3.5 shrink-0 text-accent" />
-          <span className="min-w-0 truncate">
-            {preparedEditorAction.label} prepared for {preparedEditorAction.selection.originalText.length} selected characters. Your article has not changed.
-          </span>
-          <button
-            type="button"
-            onClick={() => setPreparedEditorAction(null)}
-            className="ml-auto shrink-0 font-medium text-muted-foreground hover:text-foreground"
-          >
-            Dismiss
-          </button>
-        </div>
-      ) : null}
+      <PrecisionAiPanel
+        suggestions={suggestions}
+        reviews={reviews}
+        runs={aiRuns}
+        busyLabel={aiBusyLabel}
+        message={aiMessage}
+        canRun={saveState === "saved" && metrics.wordCount > 0}
+        onReview={(kind) => void runArticleReview(kind)}
+        onAccept={(suggestion) => void resolveSuggestion(suggestion, "accept")}
+        onReject={(suggestion) => void resolveSuggestion(suggestion, "reject")}
+        onRewriteFinding={rewriteHumanizerFinding}
+      />
 
       {saveState === "conflict" ? (
         <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 sm:px-6">
@@ -870,7 +1052,7 @@ export function ArticleEditor({
             <SelectionAiMenu
               editor={editor}
               sourceRevision={getServerRevision}
-              onPrepare={setPreparedEditorAction}
+              onPrepare={(action) => void generateSuggestion(action)}
             />
           ) : null}
           <EditorContent editor={editor} />

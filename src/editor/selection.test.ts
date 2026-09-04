@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   captureArticleSelection,
+  findTextBookmark,
   MAX_AI_SELECTION_CHARACTERS,
 } from "@/editor/selection";
 
@@ -75,5 +76,16 @@ describe("captureArticleSelection", () => {
       ok: false,
       reason: "too-long",
     });
+  });
+
+  it("finds an exact quote inside a text block for an explicit rewrite", () => {
+    const document = articleDocument("Alpha beta.", "Second paragraph.");
+    expect(findTextBookmark(document, "Second")).toEqual({
+      from: 14,
+      to: 20,
+      anchor: 14,
+      head: 20,
+    });
+    expect(findTextBookmark(document, "Missing")).toBeNull();
   });
 });

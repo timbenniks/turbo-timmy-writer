@@ -94,6 +94,8 @@ test.describe("guided article flow with deterministic AI", () => {
     } finally {
       if (articleId && databaseUrl) {
         const sql = neon(databaseUrl);
+        await sql`delete from editor_suggestions where article_id = ${articleId}`;
+        await sql`delete from article_reviews where article_id = ${articleId}`;
         await sql`delete from ai_runs where article_id = ${articleId}`;
         await sql`delete from articles where id = ${articleId}`;
       }

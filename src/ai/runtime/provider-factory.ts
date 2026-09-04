@@ -22,6 +22,41 @@ function guidedTestProvider(): AiProvider {
     async generateStructured<TOutput>(
       request: AiStructuredProviderRequest<TOutput>,
     ) {
+      if (request.outputName.startsWith("article-selection-editor_")) {
+        const parsed = JSON.parse(request.input) as { selectedPassage?: string };
+        return {
+          output: request.outputSchema.parse({
+            suggestedText: `Sharper: ${parsed.selectedPassage ?? "selected passage"}`,
+          }),
+          responseId: "guided-test-editor-response",
+          finishReason: "stop",
+          usage: { inputTokens: 10, outputTokens: 10 },
+        };
+      }
+      if (request.outputName.startsWith("article-humanizer-review_")) {
+        const parsed = JSON.parse(request.input) as { article?: string };
+        const quote = parsed.article?.split(".")[0]?.trim() || "Article";
+        return {
+          output: request.outputSchema.parse({
+            summary: "One generated-writing pattern deserves review.",
+            findings: [{ categoryId: "filler", severity: "warning", quote, explanation: "This passage can say the same thing more directly." }],
+          }),
+          responseId: "guided-test-humanizer-response",
+          finishReason: "stop",
+          usage: { inputTokens: 10, outputTokens: 10 },
+        };
+      }
+      if (request.outputName.startsWith("article-critic-review_")) {
+        return {
+          output: request.outputSchema.parse({
+            summary: "The argument is clear, but one claim needs stronger evidence.",
+            findings: [{ categoryId: "evidence", severity: "note", quote: null, explanation: "Support the central claim with a concrete example." }],
+          }),
+          responseId: "guided-test-critic-response",
+          finishReason: "stop",
+          usage: { inputTokens: 10, outputTokens: 10 },
+        };
+      }
       const parsedInput = JSON.parse(request.input) as unknown;
       const input =
         typeof parsedInput === "object" && parsedInput !== null

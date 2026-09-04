@@ -29,3 +29,13 @@ pnpm test:e2e -- guided-flow.authenticated.spec.ts
 ```
 
 Vercel ignores `AI_PROVIDER_MODE`; the deterministic provider is available only in local/test processes.
+
+## Precision AI with deterministic AI
+
+The same command also runs the disposable Phase 3 suite. It creates its own article, exercises transformation diffs, Reject, guarded Accept, Humanizer, explicit follow-up rewriting, Critic, run history, and stale suggestion handling, then deletes its exact suggestions, reviews, runs, and article:
+
+```bash
+PLAYWRIGHT_GUIDED_AI_MOCK=1 \
+PLAYWRIGHT_PORT=3002 \
+pnpm exec playwright test tests/e2e/precision-ai.authenticated.spec.ts
+```

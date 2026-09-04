@@ -165,11 +165,15 @@ Do not store API keys or raw secret-bearing headers. Prompt/instruction identifi
 
 Phase 2 Slice 1 implements this as additive migration `0005_far_loners.sql`. `outcome_json` is a versioned safe envelope containing only execution mode, optional provider response/finish identifiers, and structured-validation state. Prompt text, retrieved context, and generated content are deliberately excluded. Owner-scoped query code verifies an optional article belongs to the run owner before insert and finalizes only a matching `running` record.
 
-### `ai_suggestions`
+### `editor_suggestions`
 
-Contains `id`, `article_id`, optional `article_version_id`, optional `ai_run_id`, original text, suggested text, instruction, location anchor JSON, status (`pending`, `accepted`, `rejected`, `superseded`), and creation/resolution timestamps.
+Phase 3 migration `0009_large_quasar.sql` adds owner/article/run references, action and optional instruction, source article revision, canonical document version, the direction-aware Tiptap selection positions, exact original and suggested text, status (`pending`, `accepted`, `rejected`, `superseded`), and creation/resolution timestamps.
 
-Location anchors must tolerate document edits. The original text plus a structural selection/bookmark is preferable to raw numeric offsets alone. Accept operations verify that the intended source text still matches before applying.
+Suggestion generation never updates the article. Accept reconstructs the replacement from the saved canonical document and refuses when either the source revision or exact bookmarked passage changed. The article update and outcome transition happen in one guarded database statement; replacements of 1,000 characters or more also create a pre-change article version. Reject changes only the suggestion outcome.
+
+### `article_reviews`
+
+Stores immutable owner/article/run-linked Humanizer and Critic results against an exact source revision. Each row records the review kind, skill version, validated result JSON, and creation time. Humanizer findings use versioned catalog IDs and exact passage quotes. Critic findings may attach to an exact passage or to the article as a whole. Reviews never update canonical prose; a Humanizer rewrite requires a separate explicit request that creates a normal pending editor suggestion.
 
 ## Voice and archive tables
 

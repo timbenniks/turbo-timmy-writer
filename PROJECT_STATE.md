@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, and 2 are complete and deployed. Phase 3 precision AI is active; its first local slice captures bounded editor selections and exposes preset/free-form actions without changing canonical prose.
+Phases 0, 1, and 2 are complete and deployed. Phase 3 precision AI is complete locally and awaiting its CI/Vercel checkpoint.
 
 ## Completed work
 
@@ -157,10 +157,19 @@ Phases 0, 1, and 2 are complete and deployed. Phase 3 precision AI is active; it
 - Added a responsive selection bubble menu with Tighten, Clarify, Make sharper, Fix rhythm, Alternative, and a 500-character free-form Ask AI input. Preparing an action does not call AI, autosave, or mutate article prose.
 - Added four focused selection tests and authenticated desktop/mobile Playwright coverage. Manual Chrome checks at the default desktop width and 390 × 844 confirmed preset/free-form preparation, internal menu scrolling without page overflow, and exact prose invariance.
 - Phase 3 Slice 1 validation passes Drizzle schema validation, ESLint, standalone TypeScript, 51 unit tests, a production Webpack build, and four credential-free desktop/mobile Playwright checks with ten authenticated checks intentionally skipped. The normal Turbopack build reached compilation but its CSS worker could not bind an internal port in this restricted environment; no application compile error was reported.
+- Added `article-selection-editor/v1` for Tighten, Clarify, Make sharper, Fix rhythm, Alternative, and bounded free-form transformations. Generation persists an owner/article/run-linked pending suggestion containing the exact original text, suggested text, instruction, source revision, canonical document version, and direction-aware Tiptap bookmark; canonical prose remains unchanged.
+- Added anchored original/suggested visual diffs and explicit Accept/Reject controls. Accept reconstructs the exact replacement from the saved canonical document, atomically advances the article and outcome only when both the source revision and passage still match, and marks stale requests superseded. Reject changes only the suggestion outcome. Accepted replacements of at least 1,000 characters create `Before accepted AI edit` checkpoints.
+- Converted the audited editorial seed evidence into a curated, versioned Humanizer catalog with stable pattern IDs. `article-humanizer-review/v1` returns only detected issues attached to exact article quotes and never rewrites; `Create rewrite suggestion` is a separate explicit AI request and remains pending until accepted.
+- Added `article-critic-review/v1` for claims, repetition, transitions, contradictions, abstraction, generated prose, opening, ending, and evidence. Critic results are immutable, revision-scoped, read-only records; the editor also exposes safe per-article AI run history and individual suggestion outcomes.
+- Generated and applied additive migration `0009_large_quasar.sql` for `editor_suggestions`, `article_reviews`, and the four-state suggestion enum. Pooled verification confirmed both tables and cleanup returned them to zero rows.
+- Added seven focused model/skill/selection/application tests, bringing the unit suite to 58. Existing runtime tests continue to cover structured parse failure, provider failure, cancellation, and abandoned streams without paid API calls.
+- Added a Vercel-disabled deterministic precision-AI Playwright flow. At desktop and 390 × 844 it proves unchanged prose during generation and review, individual Reject, guarded Accept plus reload persistence, Humanizer-before-rewrite, read-only Critic, run/outcome persistence, and superseded handling after a concurrent revision change.
+- Manual authenticated browser inspection confirmed the review panel remains inside the fixed workspace, scrolls internally, has zero horizontal overflow at 390 × 844, and emits no console warnings or errors. Exact fixture cleanup restored the 82-article baseline with zero suggestions, reviews, sessions, messages, or briefs.
+- Phase 3 local gate passes Drizzle validation, ESLint, standalone TypeScript, 58 unit tests, the normal Turbopack production build, four credential-free browser checks, and deterministic guided/precision acceptance at both widths. All Phase 3 acceptance criteria pass locally.
 
 ## Current validation checkpoint
 
-Phase 3 Slice 1 is implemented and validated locally. Begin Slice 2 by implementing the editor skill and persisting pending suggestions without changing the document. Let CI run the normal Turbopack build because the local restricted environment prevented its CSS worker from binding an internal port; the production Webpack fallback passes.
+Phase 3 is implemented and validated locally. Push the milestone, confirm GitHub Actions and the canonical Vercel deployment, then ask Tim to exercise selection suggestions, individual outcomes, Humanizer, and Critic in Production before beginning Phase 4.
 
 ## Known issues and setup state
 
@@ -204,6 +213,6 @@ Phase 3 Slice 1 is implemented and validated locally. Begin Slice 2 by implement
 
 ## Next tasks
 
-1. Implement the versioned editor skill for preset and free-form transformations.
-2. Persist pending suggestions against the captured original text, bookmark, and source revision without mutating canonical prose.
-3. Render the pending result for review; accept/reject remains the guarded Slice 3 boundary.
+1. Push the complete Phase 3 milestone and monitor GitHub Actions and Vercel to Ready.
+2. Ask Tim to validate precision editing, Humanizer, and Critic against a disposable passage in Production.
+3. Begin Phase 4 writing memory only after the Phase 3 production checkpoint is approved.

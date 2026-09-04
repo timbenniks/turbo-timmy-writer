@@ -188,6 +188,7 @@ Early phases may use Vercel logs. Add a dedicated observability provider only wh
 - Integration tests cover Drizzle queries against a test database and external adapters through mocks.
 - Playwright covers critical user flows with deterministic fixtures and no paid AI calls. Fail-closed auth checks always run in CI; authenticated writing checks require an ignored local storage state and designated test article.
 - The guided-flow suite can synthesize a short-lived encrypted NextAuth cookie from ignored local configuration and the one allowlisted database user. Its explicitly selected deterministic provider is disabled on Vercel, exercises the full premise/interview/brief/draft stack, and cleans exact fixtures in `finally` without OAuth or paid calls.
+- The same Vercel-disabled provider drives Phase 3 acceptance through real routes and database records. Its disposable suite proves pending prose invariance, individual reject/accept outcomes, accepted-content reload, Humanizer-before-rewrite, read-only Critic output, and stale-revision refusal at desktop and phone widths.
 - CI runs lint, typecheck, unit tests, credential-free Playwright checks, and `next build`. Authenticated database/browser suites remain explicit local gates until isolated CI identity and data exist.
 
 ## Deployment and environment strategy

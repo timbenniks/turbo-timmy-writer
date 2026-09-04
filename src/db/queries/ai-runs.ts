@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import type {
   AiRunStore,
@@ -64,3 +64,20 @@ export const databaseAiRunStore: AiRunStore = {
     if (!completed) throw new Error("The AI run was already finalized or missing.");
   },
 };
+
+export async function listAiRunsForArticleForUser(articleId: string, userId: string) {
+  return getDatabase().select({
+    id: aiRuns.id,
+    skillId: aiRuns.skillId,
+    skillVersion: aiRuns.skillVersion,
+    model: aiRuns.model,
+    status: aiRuns.status,
+    durationMs: aiRuns.durationMs,
+    errorCode: aiRuns.errorCode,
+    createdAt: aiRuns.createdAt,
+    completedAt: aiRuns.completedAt,
+  }).from(aiRuns)
+    .where(and(eq(aiRuns.articleId, articleId), eq(aiRuns.userId, userId)))
+    .orderBy(desc(aiRuns.createdAt))
+    .limit(30);
+}
