@@ -67,5 +67,25 @@ archive excerpts instead of the full corpus. Normal generation prefers hybrid
 recall and safely falls back to literal recall; deterministic guided tests remain
 free of paid API calls.
 
-Next: curate and version the initial voice profile as Slice 6 while keeping voice
-guidance separate from archive evidence.
+Slice 6 curates the audited article/editorial sources into eleven validated,
+evidence-backed observations with explicit confidence. It deliberately converts
+the old rigid article formula into optional guidance. Runtime drafting receives a
+bounded projection without evidence notes through `article-first-draft/v2`, while
+archive evidence remains a separate field and retrieval boundary. The app has no
+runtime dependency on the seed repository.
+
+Additive migration `0012_short_lethal_legion.sql` defines owner-scoped, versioned
+profile history with positive version/source counts and one active profile per
+owner/type. It passes the empty-database migration test but remains unapplied until
+Tim explicitly approves the external database change.
+
+All six planned slices and every acceptance criterion pass locally. Published
+writing is visible; literal and semantic retrieval return useful attributed
+results; guided workspaces surface related prior work; AI receives selected
+excerpts rather than the archive; and voice guidance remains a distinct domain.
+
+The final gate passes Drizzle history validation, all 13 migrations against an
+empty Postgres database, ESLint without warnings, standalone TypeScript, 76 unit
+tests across 28 files, and the normal Turbopack production build. Phase 4 is
+complete locally. Slices 3–6 and migration `0012` are not pushed, deployed, or
+applied to Neon.

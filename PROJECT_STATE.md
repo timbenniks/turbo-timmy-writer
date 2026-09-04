@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress. Slices 1 and 2 are pushed, deployed, migrated, and populated. Slices 3–5 pass the complete local gate; Slice 6 voice profiling remains.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is complete locally. Slices 1 and 2 are pushed, deployed, migrated, and populated; Slices 3–6 remain local. Migration `0012` is intentionally unapplied pending Tim's approval. Phase 5 variants is next.
 
 ## Completed work
 
@@ -193,10 +193,13 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in pr
 - Added protected Archive and Search views with source attribution, explicit retrieval modes, ranked passages, and inspectable ranking explanations. Live probes returned useful attributed results and verified active-source exclusion.
 - Added a bounded related-writing selector and article-workspace “Have I written this before?” panel. Draft generation receives at most four deduplicated attributed excerpts, keeps archive recall separate from voice guidance, and falls back from semantic to literal retrieval if embeddings are unavailable.
 - Inspected Archive and Search at 1440 × 1000 and 390 × 844 plus an article workspace at desktop width. The views have no horizontal overflow or browser errors; the article panel links to the complete memory search.
+- Curated the audited article/editorial voice sources into eleven validated observations with evidence and confidence. Rigid formulas and recurring phrases are explicitly non-mandatory, and no runtime request fetches the seed repository.
+- Added bounded article voice guidance as a separate `article-first-draft/v2` input alongside selected archive evidence. The provider sees guidance without internal evidence notes; the brief and Tim's supplied facts remain authoritative.
+- Added owner-scoped versioned `writing_profiles` in additive migration `0012_short_lethal_legion.sql`. All 13 migrations apply from empty state and produce 16 public tables with pgvector and `vector(1024)` intact; the new migration has not been applied to Neon.
 
 ## Current validation checkpoint
 
-Phase 4 Slices 1–2 pass locally and remotely, including the applied archive and vector migrations and fully populated cache. Slices 3–5 pass Drizzle schema validation, ESLint, standalone TypeScript, 74 unit tests across 27 files, and the normal Turbopack production build. A live hybrid query, literal exclusion probe, and responsive authenticated browser inspection also pass.
+Phase 4 passes every local acceptance criterion. The final gate passes Drizzle history validation, all 13 migrations against empty Postgres (16 public tables, pgvector enabled, `vector(1024)` intact), ESLint without warnings, standalone TypeScript, 76 unit tests across 28 files, and the normal Turbopack production build. Live hybrid/literal probes and responsive authenticated browser inspection also pass. Slices 3–6 are local only; migration `0012` is not applied.
 
 ## Known issues and setup state
 
@@ -241,6 +244,6 @@ Phase 4 Slices 1–2 pass locally and remotely, including the applied archive an
 
 ## Next tasks
 
-1. Complete the Phase 4 versioned voice profile and connect bounded guidance to drafting without coupling it to archive retrieval.
-2. Run and record the complete Phase 4 gate, then mark the phase complete only if every acceptance criterion passes.
-3. Begin Phase 5 with deterministic source-version/content-hash stale detection and destination-specific variant boundaries.
+1. Begin Phase 5 with deterministic source-version/content-hash stale detection and destination-specific variant boundaries.
+2. Add editable, protected destination variants plus safe regeneration snapshots and explicit stale choices.
+3. Keep migration `0012` and future Phase 5 migrations local until Tim approves applying them to Neon; no current deployed runtime path queries them.

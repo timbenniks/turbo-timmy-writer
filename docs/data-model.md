@@ -181,6 +181,14 @@ Stores immutable owner/article/run-linked Humanizer and Critic results against a
 
 Contains `id`, `user_id`, profile type/version, observations JSON, evidence summary JSON, analysis window dates, source count, status, and timestamps. Profiles are versioned so an AI run can identify which profile it used.
 
+Phase 4 migration `0012_short_lethal_legion.sql` implements article profiles with
+positive versions/source counts, a unique owner/type/version, and at most one
+active version per owner/type. The initial validated seed remains application code
+until Tim approves applying and populating the migration; `article-first-draft/v2`
+identifies the first bounded article-guidance contract. Runtime guidance omits the
+profile's evidence notes, while stored profile versions retain them for audit and
+future refreshes.
+
 ### `archive_documents`
 
 Contains `id`, `user_id`, stable source key, title, URL, publication date, body text, optional source markup, tags JSON, source, destination, content hash, metadata JSON, and timestamps. Unique `(user_id, source, source_key)` supports idempotent import.
@@ -191,7 +199,10 @@ Phase 4 migration `0010_damp_colonel_america.sql` introduces this table without 
 
 Phase 4 migration `0011_fat_masque.sql` enables pgvector and adds `archive_chunks`; it is applied to the configured Neon database. Each row contains `id`, `archive_document_id`, ordinal, body text, token count, a nullable 1,024-dimension embedding vector, embedding model and dimensions, content hash, chunk metadata JSON, optional embedding timestamp, and row timestamps. Unique `(archive_document_id, ordinal)` makes deterministic replacement safe. The database requires vector, model, dimensions, and embedding timestamp to be either all present or all absent. Create a pgvector index only after testing the dataset and selected distance metric; premature index tuning adds risk without benefit.
 
-Postgres search adds a generated or maintained `tsvector` column on archive documents/chunks with a GIN index. Semantic and literal results retain document and chunk identifiers for citations in the UI.
+Phase 4 literal search computes a weighted title/body `tsvector` in its owner-scoped
+query. With 156 chunks this avoids a premature maintained column and index. Semantic
+and literal results retain document and chunk identifiers for attribution; add a
+GIN or vector index only after query-plan evidence justifies it.
 
 ### `sources` and `article_sources`
 

@@ -1,5 +1,6 @@
 import { streamTextSkill } from "@/ai/runtime/executor";
 import { createWritingProvider } from "@/ai/runtime/provider-factory";
+import { selectArticleVoiceGuidance } from "@/ai/voice/article-profile";
 import { draftSkill } from "@/ai/skills/draft";
 import { articleIdSchema } from "@/articles/model";
 import { getAllowedSession } from "@/auth/session";
@@ -75,7 +76,12 @@ export async function POST(request: Request, context: RouteContext) {
             userId,
             articleId: articleId.data,
             skill: draftSkill,
-            input: { brief: currentBrief.briefJson, messages, archiveEvidence },
+            input: {
+              brief: currentBrief.briefJson,
+              messages,
+              archiveEvidence,
+              voiceGuidance: selectArticleVoiceGuidance(),
+            },
             signal,
           },
         );

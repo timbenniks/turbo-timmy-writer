@@ -98,6 +98,14 @@ AI output can create a first draft when explicitly requested. After a canonical 
 
 Archive documents and voice observations remain separate. Retrieved passages carry source metadata and are selected for relevance. Voice observations carry evidence and confidence, not whole archive bodies.
 
+Phase 4 implements the first article profile as an immutable, validated seed in
+`src/ai/voice`. Runtime guidance strips source notes and passes only bounded,
+versioned observations to `article-first-draft/v2`; archive excerpts remain a
+different input field selected through `src/search/retrieval`. The seed repository
+is never fetched at runtime. Additive migration `0012_short_lethal_legion.sql`
+provides owner-scoped profile history, one active version per profile type, and
+evidence/window metadata for later refreshes.
+
 The Phase 4 repository importer is dry-run-first and owner-scoped. It treats a source filename as stable identity, stores exact Markdown alongside derived plain text, preserves normalized frontmatter, and excludes source-marked drafts. A deterministic content hash drives insert/update/no-op planning; source reconciliation occurs only during an explicit write. Archive imports never mutate canonical article rows.
 
 Archive chunking uses versioned `cl100k_base` token windows targeting 800 tokens with 100-token overlap and a 1,000-token ceiling; a whole short document remains one chunk. The chunk identity hashes its title and body so attribution changes invalidate the cached vector. A provider-neutral embedding boundary requests and validates exactly 1,024 dimensions from a separately configured `text-embedding-3` model. Chunk writes are idempotent, changed chunks clear stale vectors, and embedding retries select only missing or differently configured cache entries. No vector similarity index is created until Phase 4 retrieval validates the distance metric and query shape.
@@ -221,7 +229,7 @@ OpenAI and publisher variables are documented but not required until their phase
 6. User ownership exists from the first migration without multi-user UI.
 7. Local recovery precedes debounced server autosave.
 8. AI skills, voice evidence, archive retrieval, and publishers are independent boundaries.
-9. Existing writing-voice content is copied as curated seed data later, never fetched at runtime.
+9. Existing writing-voice content is curated into validated, versioned seed observations and is never fetched at runtime. Observed formulas remain optional evidence rather than prompt mandates.
 10. Publication is previewed, validated, and user-confirmed.
 11. Phase acceptance criteria gate later work.
 12. Article operations are owner-scoped at the query boundary. Blank articles are created through authenticated server actions with application-generated UUIDs, stable initial slugs, and an explicit versioned empty document.

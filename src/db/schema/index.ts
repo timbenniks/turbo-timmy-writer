@@ -10,3 +10,4 @@ export * from "./tags";
 export * from "./themes";
 export * from "./users";
 export * from "./writing-sessions";
+export * from "./writing-profiles";
