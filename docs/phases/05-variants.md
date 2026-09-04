@@ -21,3 +21,19 @@ Separate canonical writing from destination-specific distribution.
 - Stale variants are clearly identified.
 - Regeneration cannot silently destroy edits.
 - Destination rules remain independent modules.
+
+## Current checkpoint
+
+Phase 5 is in progress. Slice 1 adds four typed destination/content/metadata
+boundaries, deterministic canonical and variant SHA-256 hashes, and a pure stale
+calculation that reports revision and content changes independently. Regeneration
+of an existing variant always requires a snapshot and refuses unconfirmed manual
+edits.
+
+Additive migration `0013_calm_tarantula.sql` adds one owner/article/destination
+variant, its exact source article version/revision/hash, optimistic variant
+revision, manual-edit state, and immutable variant snapshots. All 14 migrations
+pass against empty Postgres and produce 18 public tables. Migration `0013` remains
+local and unapplied.
+
+Next: add independent versioned destination profiles and the repurpose skill.

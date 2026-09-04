@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is complete locally. Slices 1 and 2 are pushed, deployed, migrated, and populated; Slices 3–6 remain local. Migration `0012` is intentionally unapplied pending Tim's approval. Phase 5 variants is next.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is complete locally. Phase 5 variants is in progress with Slice 1 implemented locally. Migrations `0012` and `0013` are intentionally unapplied pending Tim's approval.
 
 ## Completed work
 
@@ -196,6 +196,8 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is compl
 - Curated the audited article/editorial voice sources into eleven validated observations with evidence and confidence. Rigid formulas and recurring phrases are explicitly non-mandatory, and no runtime request fetches the seed repository.
 - Added bounded article voice guidance as a separate `article-first-draft/v2` input alongside selected archive evidence. The provider sees guidance without internal evidence notes; the brief and Tim's supplied facts remain authoritative.
 - Added owner-scoped versioned `writing_profiles` in additive migration `0012_short_lethal_legion.sql`. All 13 migrations apply from empty state and produce 16 public tables with pgvector and `vector(1024)` intact; the new migration has not been applied to Neon.
+- Began Phase 5 with independently typed website, LinkedIn post, LinkedIn article, and newsletter content/metadata, stable canonical/variant content hashing, explicit stale reasons, and a regeneration guard that protects manual edits.
+- Added owner-scoped `publication_variants` with source article version/revision/hash and immutable pre-regeneration snapshots in additive migration `0013_calm_tarantula.sql`. All 14 migrations apply from empty state and produce 18 tables; `0013` is not applied to Neon.
 
 ## Current validation checkpoint
 
@@ -244,6 +246,6 @@ Phase 4 passes every local acceptance criterion. The final gate passes Drizzle h
 
 ## Next tasks
 
-1. Begin Phase 5 with deterministic source-version/content-hash stale detection and destination-specific variant boundaries.
+1. Add independent versioned destination profiles and the structured repurpose skill.
 2. Add editable, protected destination variants plus safe regeneration snapshots and explicit stale choices.
-3. Keep migration `0012` and future Phase 5 migrations local until Tim approves applying them to Neon; no current deployed runtime path queries them.
+3. Keep migrations `0012` and `0013` local until Tim approves applying them to Neon; no current deployed runtime path queries them.

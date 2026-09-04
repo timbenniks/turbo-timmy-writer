@@ -6,6 +6,7 @@ export * from "./article-versions";
 export * from "./archive-chunks";
 export * from "./archive-documents";
 export * from "./editor-suggestions";
+export * from "./publication-variants";
 export * from "./tags";
 export * from "./themes";
 export * from "./users";

@@ -92,6 +92,13 @@
       "when": 1788536469942,
       "tag": "0012_short_lethal_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788536722971,
+      "tag": "0013_calm_tarantula",
+      "breakpoints": true
     }
   ]
 }
