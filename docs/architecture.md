@@ -124,6 +124,16 @@ variant, and replaces it only when both expected revisions still match.
 
 The website adapter performs deterministic transformation and validation before any external write. An explicit preview and confirmation precede GitHub API publication. Idempotent updates use the stored repository path and latest commit/blob information.
 
+Phase 6 repository inspection verified that timbenniks.dev is sourced from the
+public `timbenniks/timbenniksdev-2024` repository. Website articles live under
+`content/4.writing/<slug>.md` and are consumed by a Nuxt 3 + Nuxt Content site.
+New local publication formatting therefore derives
+`https://timbenniks.dev/writing/<slug>`, emits integer `"<minutes> min read"`
+values, duplicates social/keyword metadata into `head.meta`, and leaves legacy
+Dev.to `id`/`collection_id` fields out of new output. GitHub write operations
+remain future work and must not trigger a separate deployment because the
+repository already reports Vercel deployment statuses for `main`.
+
 ## Writing-voice source audit
 
 The `timbenniks/timbenniks-writing-voice` repository was inspected on 2026-08-31. It is seed material and is not a runtime dependency.

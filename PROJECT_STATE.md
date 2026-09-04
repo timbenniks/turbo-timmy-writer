@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phases 4 writing memory and 5 variants are complete locally. The requested full code audit and fixes are complete locally. Migrations `0012` and `0013` are intentionally unapplied pending Tim's approval; no Phase 4–5 work has been pushed or deployed.
+Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 website publishing has started with a read-only inspection of the live timbenniks.dev repository and a first local deterministic formatting slice; no website article, external configuration, or deployment was changed.
 
 ## Completed work
 
@@ -207,7 +207,7 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phases 4 writing memory and 5 v
 
 ## Current validation checkpoint
 
-Phases 4 and 5 plus the audit fixes pass the complete local gate: Drizzle history validation; all 14 migrations against empty Postgres (18 public tables, pgvector enabled, `vector(1024)` intact); ESLint without warnings; standalone TypeScript; 88 tests across 32 files; the normal Turbopack production build; and four credential-free Playwright checks at desktop and phone widths. Local response inspection confirms all four security headers. Authenticated Phase 5 browser QA remains pending because its migrations are deliberately unapplied.
+Phase 6 Slice 1 local gate passes: `pnpm db:check`; `pnpm db:test-migrations` with 14 migrations, 18 public tables, pgvector enabled, and `vector(1024)` intact; `pnpm lint`; `pnpm typecheck`; `pnpm test` with 93 tests across 33 files; and `pnpm build`. Pooled Neon verification on 2026-09-04 found 14 applied migrations, 18 public tables, and the Phase 4/5 tables created by `0012` and `0013`.
 
 ## Known issues and setup state
 
@@ -225,7 +225,10 @@ Phases 4 and 5 plus the audit fixes pass the complete local gate: Drizzle histor
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0005` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
 - Production includes the completed Phase 3 precision-AI workflow through commit `559e6cf`.
-- Phase 4 migrations `0010_damp_colonel_america.sql` and `0011_fat_masque.sql` are applied to the configured Neon database. Its 74 archive documents produce 156 cached 1,024-dimension vectors; the 82 canonical articles remain outside the import/chunk path.
+- Phase 4 migrations `0010_damp_colonel_america.sql` and `0011_fat_masque.sql` are applied to the configured Neon database. Its 74 archive documents produce 156 cached 1,024-dimension vectors; the imported canonical articles remain outside the archive import/chunk path.
+- Phase 4/5 migrations `0012_short_lethal_legion.sql` and `0013_calm_tarantula.sql` are also applied to the configured Neon database. Pooled verification on 2026-09-04 found 14 migration records, 18 public tables, `writing_profiles`, `publication_variants`, and `publication_variant_versions`.
+- The live timbenniks.dev website source is `https://github.com/timbenniks/timbenniksdev-2024`, not a repository named `timbenniks/timbenniks.dev`.
+- The current timbenniks.dev writing source has 83 non-index Markdown files in `content/4.writing`; the prior 82-article number refers to the previously imported canonical corpus in Turbo Timmy Writer, not the current live source count.
 
 ## Important architecture decisions
 
@@ -248,10 +251,10 @@ Phases 4 and 5 plus the audit fixes pass the complete local gate: Drizzle histor
 - `social.md` should seed destination-specific profiles.
 - `blog-structure.md` should seed deterministic serializer/validator tests only after comparison with the live website repository.
 - The old skill's exactly-five-question interview directly conflicts with the dynamic interview required by this product and will not be reused.
-- Sample Unix timestamps and YAML escaping in `blog-structure.md` require verification before Phase 6.
+- Phase 6 verification against `timbenniks/timbenniksdev-2024` confirmed Unix IDs are legacy optional fields rather than required publication data, and YAML apostrophes should be handled by a serializer rather than hand-escaped examples.
 
 ## Next tasks
 
-1. Review the local Phase 4–5 milestones and audit report with Tim.
-2. After explicit approval, push the commits, apply migrations `0012` and `0013`, deploy, and run authenticated desktop/mobile variant QA.
-3. Begin Phase 6 website publishing only after the Phase 5 activation checkpoint.
+1. Review the local Phase 6 Slice 1 commit.
+2. Continue Phase 6 with website metadata editing and exact frontmatter/Markdown preview before adding any GitHub write adapter.
+3. Add the configurable GitHub publisher adapter only after preview validation is in place; keep all external writes confirmation-gated.
