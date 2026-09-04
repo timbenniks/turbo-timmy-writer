@@ -38,4 +38,4 @@ Phase 3 is complete locally. Selection transformations run through `article-sele
 
 Migration `0009_large_quasar.sql` is additive, applied, and verified. Drizzle validation, ESLint, standalone TypeScript, 58 unit tests, and the normal Turbopack production build pass. Credential-free Playwright passes four auth checks with twelve intentional skips. Deterministic authenticated acceptance passes the guided and precision flows at desktop and 390 × 844; the precision flow proves reject, accept/reload, Humanizer-before-rewrite, Critic, and stale-suggestion refusal. Manual browser inspection found zero horizontal overflow or console errors at both widths. Fixture cleanup restored 82 articles and zero suggestions, reviews, sessions, messages, or briefs.
 
-All acceptance criteria pass. Push the Phase 3 milestone, verify GitHub Actions and Vercel, then begin Phase 4 writing memory.
+All acceptance criteria pass. Completion commit `559e6cf` passed GitHub Actions run `33874955804` in 2m22s. Vercel deployment `dpl_EYvVuNMnZNmMXJ675ovM7G3egpBw` reached Ready and owns the canonical Production alias. Tim can run the Production acceptance check before Phase 4 begins.

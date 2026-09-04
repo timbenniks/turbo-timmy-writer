@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, and 2 are complete and deployed. Phase 3 precision AI is complete locally and awaiting its CI/Vercel checkpoint.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 3 precision AI is ready for Tim's Production acceptance test.
 
 ## Completed work
 
@@ -166,10 +166,12 @@ Phases 0, 1, and 2 are complete and deployed. Phase 3 precision AI is complete l
 - Added a Vercel-disabled deterministic precision-AI Playwright flow. At desktop and 390 × 844 it proves unchanged prose during generation and review, individual Reject, guarded Accept plus reload persistence, Humanizer-before-rewrite, read-only Critic, run/outcome persistence, and superseded handling after a concurrent revision change.
 - Manual authenticated browser inspection confirmed the review panel remains inside the fixed workspace, scrolls internally, has zero horizontal overflow at 390 × 844, and emits no console warnings or errors. Exact fixture cleanup restored the 82-article baseline with zero suggestions, reviews, sessions, messages, or briefs.
 - Phase 3 local gate passes Drizzle validation, ESLint, standalone TypeScript, 58 unit tests, the normal Turbopack production build, four credential-free browser checks, and deterministic guided/precision acceptance at both widths. All Phase 3 acceptance criteria pass locally.
+- Phase 3 completion commit `559e6cf` and the preceding selection commit `3d85812` are pushed to `main`. GitHub Actions run `33874955804` passed install, lint, typecheck, 58 unit tests, four browser checks, and the normal production build in 2m22s.
+- Vercel deployment `dpl_EYvVuNMnZNmMXJ675ovM7G3egpBw` reached Ready and owns the canonical Production alias. Production `/` redirects to sign-in, while `/sign-in` and the configured GitHub provider endpoint return 200.
 
 ## Current validation checkpoint
 
-Phase 3 is implemented and validated locally. Push the milestone, confirm GitHub Actions and the canonical Vercel deployment, then ask Tim to exercise selection suggestions, individual outcomes, Humanizer, and Critic in Production before beginning Phase 4.
+Phase 3 is implemented, pushed, green in CI, migrated, and deployed. Tim can now exercise selection suggestions, individual outcomes, Humanizer, and Critic at the canonical Production URL. Begin Phase 4 only after his production checkpoint is approved.
 
 ## Known issues and setup state
 
@@ -186,7 +188,7 @@ Phase 3 is implemented and validated locally. Push the milestone, confirm GitHub
 - Local port 3000 belongs to the Hermes WhatsApp bridge. Turbo Timmy Writer is pinned to port 3001, and the Development OAuth App must use `http://localhost:3001/api/auth/callback/github`.
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0005` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
-- Production includes the completed Phase 1 writing workflow through taxonomy commit `a9f9445`.
+- Production includes the completed Phase 3 precision-AI workflow through commit `559e6cf`.
 
 ## Important architecture decisions
 
@@ -213,6 +215,6 @@ Phase 3 is implemented and validated locally. Push the milestone, confirm GitHub
 
 ## Next tasks
 
-1. Push the complete Phase 3 milestone and monitor GitHub Actions and Vercel to Ready.
-2. Ask Tim to validate precision editing, Humanizer, and Critic against a disposable passage in Production.
-3. Begin Phase 4 writing memory only after the Phase 3 production checkpoint is approved.
+1. Ask Tim to validate precision editing, Humanizer, and Critic against a disposable passage in Production.
+2. Record Tim's Phase 3 production approval.
+3. Begin Phase 4 writing memory only after the production checkpoint is approved.
