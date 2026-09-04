@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress locally; its first archive-import slice has not been applied to Neon or deployed.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress; its first archive-import slice is migrated and populated in Neon but the application changes have not been pushed or deployed.
 
 ## Completed work
 
@@ -174,10 +174,13 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in pr
 - Source filenames provide stable import identity. Deterministic SHA-256 hashes classify inserts, changed updates, unchanged no-ops, and removed source records before an explicit write; unchanged rows keep their IDs and timestamps.
 - The current local timbenniks.dev tree passes dry-run parsing with 74 published documents, three skipped drafts, and 95 unique tags. Empty canonical URLs safely fall back to the slug URL, while duplicate canonical URLs remain valid because URL is attribution rather than identity.
 - Added an in-memory Postgres migration check. All eleven migrations apply successfully from empty state and produce 14 public tables without touching Neon.
+- Tim approved the Phase 4 Slice 1 Neon change on 2026-09-04. Migration `0010_damp_colonel_america.sql` applied successfully through the configured direct connection; pooled verification found all 15 archive columns and the primary, identity, and publication indexes.
+- The first archive write inserted 74 published documents and skipped three drafts. Verification found 74 unique source keys and hashes, zero missing bodies or invalid hashes, valid source/destination/metadata on every row, and all 82 canonical articles intact.
+- The identical second archive write proved idempotency: zero inserts, updates, or removals, 74 unchanged records, and no movement in the latest archive `updated_at` timestamp.
 
 ## Current validation checkpoint
 
-Phase 4 Slice 1 passes locally: Drizzle migration-history validation, all eleven migrations against an empty in-memory Postgres database, ESLint, standalone TypeScript, 62 unit tests across 22 files, and the normal Turbopack production build. Migration `0010` has not been applied, the importer has not written archive rows, and nothing from Phase 4 has been pushed or deployed.
+Phase 4 Slice 1 passes locally and in Neon: Drizzle migration-history validation, all eleven migrations against an empty in-memory Postgres database, ESLint, standalone TypeScript, 62 unit tests across 22 files, the normal Turbopack production build, verified migration `0010`, and an idempotent 74-document archive import. Nothing from Phase 4 has been pushed or deployed.
 
 ## Known issues and setup state
 
@@ -195,7 +198,7 @@ Phase 4 Slice 1 passes locally: Drizzle migration-history validation, all eleven
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0005` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
 - Production includes the completed Phase 3 precision-AI workflow through commit `559e6cf`.
-- Phase 4 migration `0010_damp_colonel_america.sql` exists locally only. Apply it through a disposable/test branch and then the direct Production URL only after Tim explicitly approves external Neon changes.
+- Phase 4 migration `0010_damp_colonel_america.sql` is applied to the configured Neon database. The local branch remains ahead of `origin/main`; no Phase 4 application code has been deployed.
 
 ## Important architecture decisions
 
@@ -222,6 +225,6 @@ Phase 4 Slice 1 passes locally: Drizzle migration-history validation, all eleven
 
 ## Next tasks
 
-1. After Tim approves the external Neon change, apply migration `0010` and run the archive importer twice to prove an unchanged second pass.
-2. Add replaceable 500–1000-token chunks and cached embeddings without coupling archive retrieval to voice guidance.
-3. Add literal, semantic, and observable hybrid retrieval behind one server-side interface.
+1. Add replaceable 500–1000-token chunks and cached embeddings without coupling archive retrieval to voice guidance.
+2. Add literal, semantic, and observable hybrid retrieval behind one server-side interface.
+3. Surface the imported archive and attributed passages in the application UI.
