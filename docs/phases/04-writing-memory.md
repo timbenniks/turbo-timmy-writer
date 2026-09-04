@@ -38,10 +38,14 @@ Tim approved the Neon change on 2026-09-04. Migration `0010` applied successfull
 
 Slice 2 adds versioned, deterministic `cl100k_base` chunking, an idempotent dry-run/write sync, a provider-neutral embedding boundary, and an OpenAI adapter that requests and validates 1,024-dimension vectors. Additive migration `0011_fat_masque.sql` enables pgvector and adds replaceable archive chunks with nullable cache metadata. Changed content invalidates only its affected cached vector; retries select only missing, stale-model, or stale-dimension rows. Tests use mocks and a fake HTTP boundary, so validation makes no paid API calls.
 
-Read-only validation over the 74 imported documents produces 156 chunks with no replacement characters. Token counts range from 328 for a whole short document to 987; every chunk belonging to a split document stays within the planned 500–1,000-token band. All 12 migrations apply from empty state with pgvector enabled and a verified `vector(1024)` column. Migration `0011` has deliberately not been applied to Neon and no archive embedding request has been made.
+Read-only validation over the 74 imported documents produces 156 chunks with no replacement characters. Token counts range from 328 for a whole short document to 987; every chunk belonging to a split document stays within the planned 500–1,000-token band. All 12 migrations apply from empty state with pgvector enabled and a verified `vector(1024)` column.
 
 The complete Slice 2 local gate passes Drizzle migration-history validation, the empty-database migration test, ESLint, standalone TypeScript, 69 unit tests across 25 files, and the normal Turbopack production build.
 
-Slice 2 commit `bcbc2bb` is pushed to `main`. GitHub Actions run `33882574863` passed the complete remote gate in 2m8s, and Vercel deployment `dpl_73cn8iqfvQspJy4BW4SqzabU76UP` reached Ready on the canonical Production alias. These deployed code paths do not query `archive_chunks` at runtime, so Production remains compatible while migration `0011` awaits approval.
+Slice 2 commit `bcbc2bb` is pushed to `main`. GitHub Actions run `33882574863` passed the complete remote gate in 2m8s, and Vercel deployment `dpl_73cn8iqfvQspJy4BW4SqzabU76UP` reached Ready on the canonical Production alias. These deployed code paths do not query `archive_chunks` at runtime, so applying the additive data layer does not alter the current UI.
 
-Next: after explicit approval, apply migration `0011`, write the 156 deterministic chunks, and populate their embedding cache. Then add literal, semantic, and observable hybrid retrieval as Slice 3.
+Tim approved activation on 2026-09-04. Migration `0011` applied through the direct connection; pooled verification found pgvector `0.8.6`, 12 recorded migrations, and an exact `vector(1024)` column. The first chunk write inserted 156 rows, and its dry-run repeat reported all 156 unchanged. The embedding pass populated all 156 rows with `text-embedding-3-small` at 1,024 dimensions using 105,274 input tokens. An identical second embedding pass selected zero rows, made zero model calls, and consumed zero tokens.
+
+Final pooled verification found 156 vectors with complete current cache metadata, 156 unique document/ordinal positions across all 74 archive documents, zero invalid token counts or hashes, and all 82 canonical articles intact.
+
+Next: add literal, semantic, and observable hybrid retrieval as Slice 3.

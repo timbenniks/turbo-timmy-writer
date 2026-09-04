@@ -189,7 +189,7 @@ Phase 4 migration `0010_damp_colonel_america.sql` introduces this table without 
 
 ### `archive_chunks`
 
-Phase 4 migration `0011_fat_masque.sql` enables pgvector and adds `archive_chunks`. Each row contains `id`, `archive_document_id`, ordinal, body text, token count, a nullable 1,024-dimension embedding vector, embedding model and dimensions, content hash, chunk metadata JSON, optional embedding timestamp, and row timestamps. Unique `(archive_document_id, ordinal)` makes deterministic replacement safe. The database requires vector, model, dimensions, and embedding timestamp to be either all present or all absent. Create a pgvector index only after testing the dataset and selected distance metric; premature index tuning adds risk without benefit.
+Phase 4 migration `0011_fat_masque.sql` enables pgvector and adds `archive_chunks`; it is applied to the configured Neon database. Each row contains `id`, `archive_document_id`, ordinal, body text, token count, a nullable 1,024-dimension embedding vector, embedding model and dimensions, content hash, chunk metadata JSON, optional embedding timestamp, and row timestamps. Unique `(archive_document_id, ordinal)` makes deterministic replacement safe. The database requires vector, model, dimensions, and embedding timestamp to be either all present or all absent. Create a pgvector index only after testing the dataset and selected distance metric; premature index tuning adds risk without benefit.
 
 Postgres search adds a generated or maintained `tsvector` column on archive documents/chunks with a GIN index. Semantic and literal results retain document and chunk identifiers for citations in the UI.
 

@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress. Slices 1 and 2 are pushed and deployed; Slice 1's archive-document migration/data are in Neon, while Slice 2's new pgvector migration and embedding work have not touched Neon.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress. Slices 1 and 2 are pushed, deployed, migrated, and populated; the next work is Slice 3 hybrid retrieval.
 
 ## Completed work
 
@@ -185,10 +185,14 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in pr
 - Read-only chunking validation over all 74 imported documents produced 156 chunks, zero replacement characters, and a 328–987 token range. The 328-token chunk is a whole short document; every chunk from a split document satisfies the 500–1,000-token band.
 - Phase 4 Slice 2 commit `bcbc2bb` is pushed to `main`. GitHub Actions run `33882574863` passed install, lint, typecheck, 69 unit tests, four credential-free browser checks, and the production build in 2m8s.
 - Vercel deployment `dpl_73cn8iqfvQspJy4BW4SqzabU76UP` reached Ready and owns the canonical Production alias. The protected root still redirects to sign-in and `/sign-in` returns 200.
+- Tim approved Phase 4 Slice 2 activation on 2026-09-04. Migration `0011_fat_masque.sql` applied through the direct Neon connection; pooled verification found pgvector `0.8.6`, 12 recorded migrations, an exact `vector(1024)` column, 74 archive documents, and all 82 canonical articles intact.
+- The first archive-memory write inserted 156 chunks. Its immediate dry-run repeat found zero inserts, updates, or removals and all 156 rows unchanged.
+- Embedded all 156 chunks with `text-embedding-3-small` at 1,024 dimensions using 105,274 input tokens. A second identical run selected zero rows, made zero model calls, and consumed zero tokens.
+- Final pooled verification found 156 complete current vectors, 156 unique document/ordinal positions covering all 74 archive documents, zero invalid hashes or token counts, and the unchanged 82-article canonical corpus.
 
 ## Current validation checkpoint
 
-Phase 4 Slice 2 passes locally, in GitHub Actions, and in Vercel: Drizzle migration-history validation, all 12 migrations against empty in-memory Postgres with pgvector enabled and `archive_chunks.embedding` verified as `vector(1024)`, ESLint, standalone TypeScript, 69 unit tests across 25 files, four credential-free browser checks, and the normal production build. Tests use mocks/fake HTTP and make no paid API calls. Migration `0011`, chunk writes, and embeddings have not been run against Neon.
+Phase 4 Slice 2 passes locally, in GitHub Actions, Vercel, and Neon: Drizzle migration-history validation, all 12 migrations against empty in-memory Postgres with pgvector enabled and `archive_chunks.embedding` verified as `vector(1024)`, ESLint, standalone TypeScript, 69 unit tests across 25 files, four credential-free browser checks, the normal production build, migration `0011`, 156 idempotent chunks, and 156 cached vectors. The initial embedding pass used 105,274 input tokens; the repeat used zero.
 
 ## Known issues and setup state
 
@@ -206,7 +210,7 @@ Phase 4 Slice 2 passes locally, in GitHub Actions, and in Vercel: Drizzle migrat
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0005` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
 - Production includes the completed Phase 3 precision-AI workflow through commit `559e6cf`.
-- Phase 4 migration `0010_damp_colonel_america.sql` is applied to the configured Neon database and its 74 imported records are intact. Migration `0011_fat_masque.sql` is local-only pending explicit approval; no chunks or paid embeddings have been written to Neon.
+- Phase 4 migrations `0010_damp_colonel_america.sql` and `0011_fat_masque.sql` are applied to the configured Neon database. Its 74 archive documents produce 156 cached 1,024-dimension vectors; the 82 canonical articles remain outside the import/chunk path.
 
 ## Important architecture decisions
 
@@ -233,6 +237,6 @@ Phase 4 Slice 2 passes locally, in GitHub Actions, and in Vercel: Drizzle migrat
 
 ## Next tasks
 
-1. With Tim's explicit approval, apply migration `0011`, write the 156 planned chunks, and populate their 1,024-dimension embedding cache.
-2. Add literal, semantic, and observable hybrid retrieval behind one server-side interface.
+1. Add literal, semantic, and observable hybrid retrieval behind one server-side interface.
+2. Validate ranking, attribution, owner scoping, and active-article exclusion against the live archive.
 3. Surface the imported archive and attributed passages in the application UI.
