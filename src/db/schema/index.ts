@@ -3,6 +3,7 @@ export * from "./article-briefs";
 export * from "./article-reviews";
 export * from "./articles";
 export * from "./article-versions";
+export * from "./archive-documents";
 export * from "./editor-suggestions";
 export * from "./tags";
 export * from "./themes";

@@ -185,6 +185,8 @@ Contains `id`, `user_id`, profile type/version, observations JSON, evidence summ
 
 Contains `id`, `user_id`, stable source key, title, URL, publication date, body text, optional source markup, tags JSON, source, destination, content hash, metadata JSON, and timestamps. Unique `(user_id, source, source_key)` supports idempotent import.
 
+Phase 4 migration `0010_damp_colonel_america.sql` introduces this table without changing canonical articles. For the timbenniks.dev repository importer, the source filename is the stable key, exact Markdown is retained as source markup, and normalized frontmatter is retained as metadata. Only published files enter writing memory. The content hash covers all imported content and attribution fields, so unchanged rows retain their identity and timestamps while changed rows update in place.
+
 ### `archive_chunks`
 
 Contains `id`, `archive_document_id`, ordinal, body text, token count, embedding vector, embedding model, content hash, metadata JSON, and timestamps. Unique `(archive_document_id, ordinal)`. Create a pgvector index only after testing the dataset and selected distance metric; premature index tuning adds risk without benefit.

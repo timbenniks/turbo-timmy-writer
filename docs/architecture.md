@@ -98,6 +98,8 @@ AI output can create a first draft when explicitly requested. After a canonical 
 
 Archive documents and voice observations remain separate. Retrieved passages carry source metadata and are selected for relevance. Voice observations carry evidence and confidence, not whole archive bodies.
 
+The Phase 4 repository importer is dry-run-first and owner-scoped. It treats a source filename as stable identity, stores exact Markdown alongside derived plain text, preserves normalized frontmatter, and excludes source-marked drafts. A deterministic content hash drives insert/update/no-op planning; source reconciliation occurs only during an explicit write. Archive imports never mutate canonical article rows.
+
 ### Publishing
 
 `src/publishing/adapters` contains destination adapters behind a typed contract. Core article services know about a generic variant and publication record, not GitHub paths, LinkedIn limits, or newsletter fields.

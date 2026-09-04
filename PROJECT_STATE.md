@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 3 precision AI is ready for Tim's Production acceptance test.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress locally; its first archive-import slice has not been applied to Neon or deployed.
 
 ## Completed work
 
@@ -169,10 +169,15 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 3 precision AI is ready f
 - Phase 3 completion commit `559e6cf` and the preceding selection commit `3d85812` are pushed to `main`. GitHub Actions run `33874955804` passed install, lint, typecheck, 58 unit tests, four browser checks, and the normal production build in 2m22s.
 - Vercel deployment `dpl_EYvVuNMnZNmMXJ675ovM7G3egpBw` reached Ready and owns the canonical Production alias. Production `/` redirects to sign-in, while `/sign-in` and the configured GitHub provider endpoint return 200.
 - The first authenticated Production inspection exposed a React hydration warning because the client-rendered `Saved at` time used the host's implicit timezone (UTC during Vercel rendering and Europe/Paris in Tim's browser). Formatting now names `Europe/Paris` explicitly so server and client output is deterministic.
+- Began Phase 4 with a separate owner-scoped `archive_documents` schema and additive migration `0010_damp_colonel_america.sql`; canonical article rows remain outside the archive import path.
+- Added a dry-run-first timbenniks.dev importer that excludes drafts, preserves title, canonical/fallback URL, publication date, derived body text, exact Markdown, normalized tags, full normalized frontmatter, source, and destination.
+- Source filenames provide stable import identity. Deterministic SHA-256 hashes classify inserts, changed updates, unchanged no-ops, and removed source records before an explicit write; unchanged rows keep their IDs and timestamps.
+- The current local timbenniks.dev tree passes dry-run parsing with 74 published documents, three skipped drafts, and 95 unique tags. Empty canonical URLs safely fall back to the slug URL, while duplicate canonical URLs remain valid because URL is attribution rather than identity.
+- Added an in-memory Postgres migration check. All eleven migrations apply successfully from empty state and produce 14 public tables without touching Neon.
 
 ## Current validation checkpoint
 
-Phase 3 is implemented, pushed, green in CI, migrated, and deployed. Tim can now exercise selection suggestions, individual outcomes, Humanizer, and Critic at the canonical Production URL. Begin Phase 4 only after his production checkpoint is approved.
+Phase 4 Slice 1 passes locally: Drizzle migration-history validation, all eleven migrations against an empty in-memory Postgres database, ESLint, standalone TypeScript, 62 unit tests across 22 files, and the normal Turbopack production build. Migration `0010` has not been applied, the importer has not written archive rows, and nothing from Phase 4 has been pushed or deployed.
 
 ## Known issues and setup state
 
@@ -190,6 +195,7 @@ Phase 3 is implemented, pushed, green in CI, migrated, and deployed. Tim can now
 - NextAuth.js 4 emits Node's `DEP0169` warning for its legacy `url.parse()` usage during the otherwise successful Production callback. It does not break authentication; reassess when upgrading the auth stack or Node runtime.
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0005` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
 - Production includes the completed Phase 3 precision-AI workflow through commit `559e6cf`.
+- Phase 4 migration `0010_damp_colonel_america.sql` exists locally only. Apply it through a disposable/test branch and then the direct Production URL only after Tim explicitly approves external Neon changes.
 
 ## Important architecture decisions
 
@@ -216,6 +222,6 @@ Phase 3 is implemented, pushed, green in CI, migrated, and deployed. Tim can now
 
 ## Next tasks
 
-1. Ask Tim to validate precision editing, Humanizer, and Critic against a disposable passage in Production.
-2. Record Tim's Phase 3 production approval.
-3. Begin Phase 4 writing memory only after the production checkpoint is approved.
+1. After Tim approves the external Neon change, apply migration `0010` and run the archive importer twice to prove an unchanged second pass.
+2. Add replaceable 500–1000-token chunks and cached embeddings without coupling archive retrieval to voice guidance.
+3. Add literal, semantic, and observable hybrid retrieval behind one server-side interface.

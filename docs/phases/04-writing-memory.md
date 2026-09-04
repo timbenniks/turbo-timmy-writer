@@ -27,3 +27,11 @@ Turn Tim's published archive into searchable context while keeping voice evidenc
 - Guided article creation surfaces related prior work.
 - AI receives selected excerpts rather than the complete archive.
 - Voice and archive retrieval remain separate architectural concerns.
+
+## Current checkpoint
+
+Phase 4 is in progress. Slice 1 adds the separate `archive_documents` boundary and generated additive migration `0010_damp_colonel_america.sql`, plus a dry-run-first timbenniks.dev importer. The importer reads only published Markdown files, retains exact source markup and normalized frontmatter metadata, derives plain body text, and keys records by source filename. A SHA-256 content hash makes unchanged imports no-ops; changed records update in place and records removed from the source set are removed only during an explicit `--write` run.
+
+Focused tests cover parsing, draft exclusion, URL fallback, hashing, and deterministic insert/update/unchanged/removal planning. The actual local source tree passes dry-run inspection with 74 published documents, three skipped drafts, and 95 unique tags. All eleven migrations pass against an empty in-memory Postgres database. The complete local gate passes ESLint, standalone TypeScript, 62 unit tests across 22 files, and the normal Turbopack production build. The Neon migration and archive write have deliberately not run because this checkpoint is local-only.
+
+Next: apply `0010` only after explicit approval for the Neon change, run the archive import twice to verify the second run reports 74 unchanged records, then begin replaceable chunking and cached embeddings.

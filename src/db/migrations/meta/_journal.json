@@ -71,6 +71,13 @@
       "when": 1788525378424,
       "tag": "0009_large_quasar",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788529133695,
+      "tag": "0010_damp_colonel_america",
+      "breakpoints": true
     }
   ]
 }
