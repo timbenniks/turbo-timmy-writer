@@ -1,19 +1,16 @@
 import { z } from "zod";
 
-export const aiModelPurposes = [
-  "interview",
-  "draft",
-  "edit",
-  "review",
-  "repurpose",
-  "embedding",
-] as const;
-
-export type AiModelPurpose = (typeof aiModelPurposes)[number];
+export type AiModelPurpose =
+  | "interview"
+  | "draft"
+  | "edit"
+  | "review"
+  | "repurpose"
+  | "embedding";
 
 const modelNameSchema = z.string().trim().min(1).max(200);
 
-export const aiModelConfigurationSchema = z.object({
+const aiModelConfigurationSchema = z.object({
   interview: modelNameSchema,
   draft: modelNameSchema,
   edit: modelNameSchema,
@@ -52,7 +49,7 @@ export function resolveAiModel(
   return model;
 }
 
-export class AiModelConfigurationError extends Error {
+class AiModelConfigurationError extends Error {
   constructor(public readonly purpose: AiModelPurpose) {
     super(`No AI model is configured for ${purpose}.`);
     this.name = "AiModelConfigurationError";

@@ -45,7 +45,7 @@ type PreparedSkill<TInput, TOutput> = {
   skill: WritingSkill<TInput, TOutput>;
 };
 
-export class AiRuntimeError extends Error {
+class AiRuntimeError extends Error {
   constructor(
     public readonly code: string,
     message = "The AI operation failed.",

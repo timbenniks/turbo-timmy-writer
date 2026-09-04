@@ -17,14 +17,14 @@ import {
   type VariantDestination,
 } from "@/variants/model";
 
-export const repurposeInputSchema = z.object({
+const repurposeInputSchema = z.object({
   canonicalTitle: z.string().max(500),
   canonicalMarkdown: z.string().min(1).max(150_000),
   destinationProfile: destinationProfileSchema,
   voiceGuidance: voiceGuidanceSchema,
 });
 
-export const repurposeOutputSchema = z.object({
+const repurposeOutputSchema = z.object({
   content: variantContentSchema,
   metadata: variantMetadataSchema,
 });

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { WritingSkill } from "@/ai/runtime/skill";
 
-export const interviewInputSchema = z.object({
+const interviewInputSchema = z.object({
   premise: z.string().trim().min(1).max(6_000),
   messages: z
     .array(

@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import { articleIdSchema, articleStatusSchema } from "./model";
 
-export const MAX_ARTICLE_TAGS = 10;
+const MAX_ARTICLE_TAGS = 10;
 
-export const tagLabelSchema = z
+const tagLabelSchema = z
   .string()
   .trim()
   .min(1)

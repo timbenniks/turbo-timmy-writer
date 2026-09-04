@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { AiModelPurpose } from "./model-config";
 
-export const writingContextItemSchema = z.object({
+const writingContextItemSchema = z.object({
   id: z.string().min(1).max(200),
   kind: z.string().min(1).max(100),
   content: z.string().min(1),
@@ -17,7 +17,7 @@ export const writingSkillMetadataSchema = z.object({
   description: z.string().trim().min(1).max(500),
 });
 
-export type WritingContext = z.infer<typeof writingContextSchema>;
+type WritingContext = z.infer<typeof writingContextSchema>;
 
 export interface WritingSkill<TInput, TOutput = string> {
   id: string;

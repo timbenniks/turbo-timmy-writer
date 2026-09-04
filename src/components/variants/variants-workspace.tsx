@@ -4,12 +4,17 @@ import { Check, Clipboard, ExternalLink, LoaderCircle, RefreshCw, Sparkles } fro
 import Link from "next/link";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { savePublicationVariantAction } from "@/app/actions/publication-variants";
 import { Button } from "@/components/ui/button";
+import { httpUrlSchema } from "@/lib/validation/http-url";
 import {
-  variantPayloadSchema,
+  variantFormFromStored,
+  variantPayloadFromForm,
+  type VariantForm,
+} from "@/variants/form";
+import {
   type VariantContent,
   type VariantDestination,
   type VariantMetadata,
@@ -24,6 +29,11 @@ const destinationLabels: Record<VariantDestination, string> = {
 };
 
 const destinations = Object.keys(destinationLabels) as VariantDestination[];
+
+function safeHttpUrl(value: string) {
+  const result = httpUrlSchema.safeParse(value);
+  return result.success ? result.data : null;
+}
 
 export type VariantWorkspaceSnapshot = {
   id: string;
@@ -43,87 +53,6 @@ export type VariantWorkspaceSnapshot = {
   };
 };
 
-type VariantForm = {
-  bodyMarkdown: string;
-  title: string;
-  slug: string;
-  description: string;
-  canonicalUrl: string;
-  publicationUrl: string;
-  subject: string;
-  previewText: string;
-  intro: string;
-  callToAction: string;
-  status: VariantStatus;
-};
-
-function formFromVariant(variant: VariantWorkspaceSnapshot): VariantForm {
-  const content = variant.contentJson;
-  const metadata = variant.metadataJson;
-  return {
-    bodyMarkdown: content.bodyMarkdown,
-    title: "title" in metadata ? metadata.title : "",
-    slug: "slug" in metadata ? metadata.slug : "",
-    description: "description" in metadata ? metadata.description : "",
-    canonicalUrl: "canonicalUrl" in metadata ? metadata.canonicalUrl ?? "" : "",
-    publicationUrl: "publicationUrl" in metadata ? metadata.publicationUrl ?? "" : "",
-    subject: "subject" in metadata ? metadata.subject : "",
-    previewText: "previewText" in metadata ? metadata.previewText : "",
-    intro: "intro" in content ? content.intro ?? "" : "",
-    callToAction: "callToAction" in content ? content.callToAction ?? "" : "",
-    status: variant.status,
-  };
-}
-
-function payloadFromForm(destination: VariantDestination, form: VariantForm) {
-  const base = { version: 1 as const, destination, bodyMarkdown: form.bodyMarkdown };
-  const payload = destination === "website"
-    ? {
-        content: base,
-        metadata: {
-          version: 1 as const,
-          destination,
-          title: form.title,
-          slug: form.slug,
-          description: form.description,
-          canonicalUrl: form.canonicalUrl || null,
-        },
-      }
-    : destination === "linkedin-post"
-      ? {
-          content: base,
-          metadata: {
-            version: 1 as const,
-            destination,
-            publicationUrl: form.publicationUrl || null,
-          },
-        }
-      : destination === "linkedin-article"
-        ? {
-            content: base,
-            metadata: {
-              version: 1 as const,
-              destination,
-              title: form.title,
-              publicationUrl: form.publicationUrl || null,
-            },
-          }
-        : {
-            content: {
-              ...base,
-              intro: form.intro || null,
-              callToAction: form.callToAction || null,
-            },
-            metadata: {
-              version: 1 as const,
-              destination,
-              subject: form.subject,
-              previewText: form.previewText,
-            },
-          };
-  return variantPayloadSchema.parse(payload);
-}
-
 export function VariantsWorkspace({
   articleId,
   articleTitle,
@@ -139,6 +68,7 @@ export function VariantsWorkspace({
   const [selected, setSelected] = useState<VariantDestination>(variants[0]?.destination ?? "website");
   const [busy, setBusy] = useState<VariantDestination | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [dirtyDestination, setDirtyDestination] = useState<VariantDestination | null>(null);
   const current = useMemo(
     () => variants.find(({ destination }) => destination === selected) ?? null,
     [selected, variants],
@@ -172,6 +102,7 @@ export function VariantsWorkspace({
         return;
       }
       setMessage(variant ? "Variant regenerated. Its previous copy is in history." : "Variant created.");
+      setDirtyDestination(null);
       router.refresh();
     } catch {
       setMessage("The variant could not be generated. Nothing was replaced.");
@@ -185,7 +116,16 @@ export function VariantsWorkspace({
       <header className="shrink-0 border-b border-border px-5 py-4 sm:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <Button asChild variant="outline" size="sm">
-            <Link href={`/articles/${articleId}` as Route}>← Article</Link>
+            <Link
+              href={`/articles/${articleId}` as Route}
+              onClick={(event) => {
+                if (dirtyDestination && !window.confirm("Discard unsaved variant changes?")) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              ← Article
+            </Link>
           </Button>
           <div className="min-w-0">
             <h1 className="truncate font-serif text-xl">Variants for {articleTitle || "Untitled article"}</h1>
@@ -201,7 +141,16 @@ export function VariantsWorkspace({
             <button
               key={destination}
               type="button"
-              onClick={() => { setSelected(destination); setMessage(null); }}
+              onClick={() => {
+                if (
+                  dirtyDestination === selected &&
+                  destination !== selected &&
+                  !window.confirm("Discard unsaved changes to this variant?")
+                ) return;
+                setDirtyDestination(null);
+                setSelected(destination);
+                setMessage(null);
+              }}
               className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm ${selected === destination ? "bg-muted font-medium" : "text-muted-foreground hover:bg-muted"}`}
             >
               {destinationLabels[destination]}
@@ -223,6 +172,7 @@ export function VariantsWorkspace({
             busy={busy === selected}
             onRegenerate={() => void generate(current)}
             onMessage={setMessage}
+            onDirtyChange={(dirty) => setDirtyDestination(dirty ? current.destination : null)}
           />
         ) : (
           <section className="mx-auto max-w-2xl rounded-2xl border border-dashed border-border bg-surface px-6 py-16 text-center">
@@ -248,26 +198,41 @@ function VariantEditor({
   busy,
   onRegenerate,
   onMessage,
+  onDirtyChange,
 }: {
   articleId: string;
   variant: VariantWorkspaceSnapshot;
   busy: boolean;
   onRegenerate: () => void;
   onMessage: (message: string) => void;
+  onDirtyChange: (dirty: boolean) => void;
 }) {
   const router = useRouter();
-  const [form, setForm] = useState(() => formFromVariant(variant));
+  const [form, setForm] = useState(() => variantFormFromStored(variant));
   const [saving, setSaving] = useState(false);
   const [kept, setKept] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = true;
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
 
   function update<K extends keyof VariantForm>(key: K, value: VariantForm[K]) {
     setForm((current) => ({ ...current, [key]: value }));
+    setDirty(true);
+    onDirtyChange(true);
   }
 
   async function save() {
     setSaving(true);
     try {
-      const payload = payloadFromForm(variant.destination, form);
+      const payload = variantPayloadFromForm(variant.destination, form);
       const result = await savePublicationVariantAction({
         articleId,
         variantId: variant.id,
@@ -276,7 +241,11 @@ function VariantEditor({
         status: form.status,
       });
       onMessage(result.ok ? "Variant saved without changing the canonical article." : result.message);
-      if (result.ok) router.refresh();
+      if (result.ok) {
+        setDirty(false);
+        onDirtyChange(false);
+        router.refresh();
+      }
     } catch {
       onMessage("Check the destination fields and try again.");
     } finally {
@@ -293,15 +262,35 @@ function VariantEditor({
     }
   }
 
+  function requestRegeneration() {
+    if (dirty && !window.confirm("Discard these unsaved changes and regenerate from the canonical article?")) {
+      return;
+    }
+    onRegenerate();
+  }
+
+  const publishedUrl = safeHttpUrl(form.publicationUrl);
+
   return (
     <section className="mx-auto max-w-4xl space-y-5">
       {variant.freshness.stale && !kept ? (
         <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
           <p className="font-medium">The canonical article changed after this variant was created.</p>
-          <p className="mt-1 text-xs leading-5">Your variant was not overwritten. Review the article, regenerate from revision {variant.sourceArticleRevision}, or keep this copy.</p>
+          <p className="mt-1 text-xs leading-5">Your variant was created from revision {variant.sourceArticleRevision} and was not overwritten. Review the article, regenerate from the current revision, or keep this copy.</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button asChild size="sm" variant="outline"><Link href={`/articles/${articleId}` as Route}>Review article</Link></Button>
-            <Button size="sm" onClick={onRegenerate} disabled={busy}><RefreshCw />Regenerate</Button>
+            <Button asChild size="sm" variant="outline">
+              <Link
+                href={`/articles/${articleId}` as Route}
+                onClick={(event) => {
+                  if (dirty && !window.confirm("Discard unsaved variant changes?")) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                Review article
+              </Link>
+            </Button>
+            <Button size="sm" onClick={requestRegeneration} disabled={busy}><RefreshCw />Regenerate</Button>
             <Button size="sm" variant="ghost" onClick={() => setKept(true)}>Keep current</Button>
           </div>
         </div>
@@ -317,7 +306,7 @@ function VariantEditor({
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => void copy()}><Clipboard />Copy body</Button>
-          <Button variant="outline" size="sm" onClick={onRegenerate} disabled={busy || saving}>
+          <Button variant="outline" size="sm" onClick={requestRegeneration} disabled={busy || saving}>
             {busy ? <LoaderCircle className="animate-spin" /> : <RefreshCw />}
             Regenerate
           </Button>
@@ -359,8 +348,8 @@ function VariantEditor({
             <option value="published">Published manually</option>
           </select>
         </label>
-        {form.publicationUrl ? (
-          <a href={form.publicationUrl} target="_blank" rel="noreferrer" className="self-end text-sm text-accent hover:underline">
+        {publishedUrl ? (
+          <a href={publishedUrl} target="_blank" rel="noreferrer" className="self-end text-sm text-accent hover:underline">
             Open published variant <ExternalLink className="ml-1 inline size-3" />
           </a>
         ) : null}

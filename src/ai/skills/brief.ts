@@ -3,7 +3,7 @@ import { z } from "zod";
 import { articleBriefSchema } from "@/ai/brief/model";
 import type { WritingSkill } from "@/ai/runtime/skill";
 
-export const briefUpdateInputSchema = z.object({
+const briefUpdateInputSchema = z.object({
   currentBrief: articleBriefSchema,
   messages: z
     .array(

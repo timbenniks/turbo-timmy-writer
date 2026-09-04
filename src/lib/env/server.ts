@@ -80,3 +80,8 @@ export function readArchiveEmbeddingEnvironment(): ArchiveEmbeddingEnvironment |
     ? { apiKey: result.data.OPENAI_API_KEY, model: result.data.OPENAI_MODEL_EMBEDDING }
     : null;
 }
+
+export function isLocalGuidedAiTestMode() {
+  const mode = z.literal("guided-test").safeParse(process.env.AI_PROVIDER_MODE);
+  return process.env.VERCEL !== "1" && mode.success;
+}

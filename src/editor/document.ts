@@ -248,7 +248,7 @@ function isValidNode(
   }
 }
 
-export function isArticleDocument(value: unknown): value is ArticleDocument {
+function isArticleDocument(value: unknown): value is ArticleDocument {
   const counter = { count: 0 };
   return isValidNode(value, 0, counter) && value.type === "doc";
 }

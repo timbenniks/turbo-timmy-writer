@@ -53,5 +53,20 @@ explicit browser confirmation, and the server independently enforces the same
 guard. Article or variant changes during generation yield a conflict without
 replacing either document.
 
-Next: complete concurrency/validation coverage, inspect the responsive workflow
-where the unapplied migration permits, and run the final Phase 5 gate.
+Slice 6 covers revision-only/content-only staleness, manual-edit confirmation,
+competing regeneration decisions, destination/schema mismatch, stable hashing,
+form round-trips, and unsafe URLs. Unsaved client edits also block destination
+switches, page exit, and regeneration unless Tim explicitly discards them.
+
+Every Phase 5 acceptance criterion passes locally. One article supports all four
+destination variants; every variant is independently editable; canonical writes
+never touch variants; staleness is derived and visible; regeneration preserves a
+snapshot and cannot silently replace manual edits; and destination profiles remain
+independent modules.
+
+The final gate passes Drizzle history validation, all 14 migrations against empty
+Postgres, ESLint without warnings, standalone TypeScript, 88 tests across 32 files,
+the normal Turbopack production build, and four credential-free browser checks at
+desktop and phone widths. Phase 5 is complete locally. Authenticated variant UI QA
+requires migrations `0012`/`0013`; neither migration was applied, and no Phase 4–5
+commit was pushed or deployed.

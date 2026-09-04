@@ -18,6 +18,7 @@ import {
   planArchiveDocumentImport,
   type ArchiveDocumentImport,
 } from "../src/search/archive/model";
+import { httpUrlSchema } from "../src/lib/validation/http-url";
 
 const frontmatterSchema = z
   .object({
@@ -102,7 +103,7 @@ export function parseArchiveSource(
       `/writing/${parsed.data.slug}`,
       "https://timbenniks.dev",
     ).toString();
-  if (!z.url().safeParse(url).success) {
+  if (!httpUrlSchema.safeParse(url).success) {
     throw new Error(`${sourceFile} has an invalid canonical URL.`);
   }
 

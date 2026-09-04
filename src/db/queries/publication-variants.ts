@@ -12,6 +12,7 @@ import {
   publicationVariants,
 } from "@/db/schema";
 import { articleDocumentToMarkdown } from "@/editor/serialization/markdown";
+import type { ArticleDocument } from "@/editor/document";
 import { hashCanonicalArticle, hashVariant } from "@/variants/hashing";
 import {
   variantFreshness,
@@ -65,6 +66,9 @@ export async function listPublicationVariantsForUser(articleId: string, userId: 
 
   return rows.map((row) => {
     const payload = validatedPayload(row.contentJson, row.metadataJson);
+    if (payload.content.destination !== row.destination) {
+      throw new Error("Stored variant destination mismatch.");
+    }
     const currentSource = {
       sourceArticleRevision: row.currentArticleRevision,
       sourceContentHash: hashCanonicalArticle({
@@ -92,6 +96,9 @@ export async function getPublicationVariantForUser(variantId: string, userId: st
     .limit(1);
   if (!row) return null;
   const payload = validatedPayload(row.contentJson, row.metadataJson);
+  if (payload.content.destination !== row.destination) {
+    throw new Error("Stored variant destination mismatch.");
+  }
   return { ...row, contentJson: payload.content, metadataJson: payload.metadata };
 }
 
@@ -193,7 +200,7 @@ export async function savePublicationVariantForUser(input: {
     contentHash: hashVariant(payload),
     hasManualEdits: true,
     status: input.status,
-    publishedAt: input.status === "published" ? current.publishedAt ?? new Date() : current.publishedAt,
+    publishedAt: input.status === "published" ? current.publishedAt ?? new Date() : null,
     revision: input.expectedRevision + 1,
     updatedAt: new Date(),
   }).where(and(
@@ -314,7 +321,7 @@ export async function regeneratePublicationVariantForUser(input: {
 export function articleVariantSource(article: {
   revision: number;
   title: string;
-  documentJson: Parameters<typeof articleDocumentToMarkdown>[0];
+  documentJson: ArticleDocument;
 }) {
   return {
     sourceArticleRevision: article.revision,

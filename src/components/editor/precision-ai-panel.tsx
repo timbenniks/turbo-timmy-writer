@@ -3,7 +3,6 @@
 import { Check, LoaderCircle, RotateCcw, ShieldCheck, Sparkles, X } from "lucide-react";
 
 import type { ArticleReviewOutput, ReviewKind } from "@/ai/review/model";
-import type { ArticleDocument } from "@/editor/document";
 
 export type EditorSuggestionSnapshot = {
   id: string;
@@ -43,12 +42,6 @@ export type AiRunSnapshot = {
   errorCode: string | null;
   createdAt: string;
   completedAt: string | null;
-};
-
-export type SuggestionAcceptance = {
-  document: ArticleDocument;
-  revision: number;
-  savedAt: string;
 };
 
 type PrecisionAiPanelProps = {

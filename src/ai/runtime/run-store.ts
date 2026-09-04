@@ -1,15 +1,8 @@
 import type { AiTokenUsage } from "./provider";
 
-export const aiRunStatuses = [
-  "running",
-  "succeeded",
-  "failed",
-  "cancelled",
-] as const;
+type AiRunStatus = "running" | "succeeded" | "failed" | "cancelled";
 
-export type AiRunStatus = (typeof aiRunStatuses)[number];
-
-export type AiRunMode = "stream-text" | "structured";
+type AiRunMode = "stream-text" | "structured";
 
 export type AiRunOutcome = {
   version: 1;

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { searchArchiveForUser } from "@/db/queries/archive-search";
-import { readArchiveEmbeddingEnvironment } from "@/lib/env/server";
+import { isLocalGuidedAiTestMode, readArchiveEmbeddingEnvironment } from "@/lib/env/server";
 import { createOpenAiArchiveEmbeddingProvider } from "@/search/embeddings/openai-provider";
 import { selectArchiveEvidence } from "@/search/retrieval/context";
 import {
@@ -42,7 +42,7 @@ export async function retrieveArchiveEvidenceForDraft(input: {
   } as const;
 
   try {
-    const mode = process.env.AI_PROVIDER_MODE === "guided-test"
+    const mode = isLocalGuidedAiTestMode()
       ? "literal" as const
       : "hybrid" as const;
     return selectArchiveEvidence(await retrieveArchiveForUser(input.userId, {

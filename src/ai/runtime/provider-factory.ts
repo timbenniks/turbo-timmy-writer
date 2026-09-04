@@ -2,6 +2,7 @@ import "server-only";
 
 import type { AiProvider, AiStructuredProviderRequest } from "./provider";
 import { createOpenAiProvider } from "./openai-provider";
+import { isLocalGuidedAiTestMode } from "@/lib/env/server";
 
 function guidedTestProvider(): AiProvider {
   return {
@@ -119,10 +120,7 @@ function guidedTestProvider(): AiProvider {
 }
 
 export function createWritingProvider(apiKey: string) {
-  if (
-    process.env.VERCEL !== "1" &&
-    process.env.AI_PROVIDER_MODE === "guided-test"
-  ) {
+  if (isLocalGuidedAiTestMode()) {
     return guidedTestProvider();
   }
   return createOpenAiProvider({ apiKey });

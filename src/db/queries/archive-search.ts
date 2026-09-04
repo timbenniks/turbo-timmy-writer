@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { getDatabase } from "@/db/client";
+import { httpUrlSchema } from "@/lib/validation/http-url";
 import { archiveChunks, archiveDocuments } from "@/db/schema";
 import {
   ARCHIVE_EMBEDDING_DIMENSIONS,
@@ -22,7 +23,7 @@ const rowSchema = z.object({
   archive_document_id: z.uuid(),
   chunk_ordinal: z.coerce.number().int().nonnegative(),
   title: z.string().min(1),
-  url: z.url(),
+  url: httpUrlSchema,
   published_at: z.coerce.date(),
   tags: z.array(z.string()),
   source: z.string().min(1),

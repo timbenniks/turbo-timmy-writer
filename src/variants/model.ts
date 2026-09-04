@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { httpUrlSchema } from "@/lib/validation/http-url";
+
 export const variantDestinations = [
   "website",
   "linkedin-post",
@@ -7,11 +9,6 @@ export const variantDestinations = [
   "newsletter",
 ] as const;
 export const variantStatuses = ["draft", "ready", "published"] as const;
-
-const httpUrlSchema = z.url().refine((value) => {
-  const protocol = new URL(value).protocol;
-  return protocol === "http:" || protocol === "https:";
-}, "Use an HTTP or HTTPS URL.");
 
 const markdownSchema = z.string().max(150_000);
 

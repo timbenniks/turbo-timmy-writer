@@ -1,5 +1,5 @@
 const WORD_PATTERN = /[\p{L}\p{N}]+(?:[’'][\p{L}\p{N}]+)*/gu;
-export const DEFAULT_READING_WORDS_PER_MINUTE = 220;
+const DEFAULT_READING_WORDS_PER_MINUTE = 220;
 
 export type WritingMetrics = {
   wordCount: number;

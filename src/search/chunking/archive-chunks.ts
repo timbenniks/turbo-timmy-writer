@@ -3,8 +3,8 @@ import { createHash } from "node:crypto";
 import { getEncoding } from "js-tiktoken";
 import { z } from "zod";
 
-export const ARCHIVE_CHUNKING_VERSION = 1 as const;
-export const ARCHIVE_CHUNK_TARGET_TOKENS = 800;
+const ARCHIVE_CHUNKING_VERSION = 1 as const;
+const ARCHIVE_CHUNK_TARGET_TOKENS = 800;
 export const ARCHIVE_CHUNK_OVERLAP_TOKENS = 100;
 export const ARCHIVE_CHUNK_MIN_TOKENS = 500;
 export const ARCHIVE_CHUNK_MAX_TOKENS = 1_000;
@@ -12,14 +12,14 @@ export const ARCHIVE_EMBEDDING_DIMENSIONS = 1_024;
 
 const encoding = getEncoding("cl100k_base");
 
-export const archiveChunkMetadataSchema = z.object({
+const archiveChunkMetadataSchema = z.object({
   chunkingVersion: z.literal(ARCHIVE_CHUNKING_VERSION),
   encoding: z.literal("cl100k_base"),
   tokenStart: z.number().int().nonnegative(),
   tokenEnd: z.number().int().positive(),
 });
 
-export const archiveChunkCandidateSchema = z.object({
+const archiveChunkCandidateSchema = z.object({
   archiveDocumentId: z.uuid(),
   ordinal: z.number().int().nonnegative(),
   bodyText: z.string().trim().min(1),

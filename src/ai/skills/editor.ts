@@ -6,7 +6,7 @@ import {
 } from "@/ai/editor/model";
 import type { WritingSkill } from "@/ai/runtime/skill";
 
-export const editorSkillInputSchema = z.object({
+const editorSkillInputSchema = z.object({
   actionId: z.enum(editorActionIds),
   instruction: z.string().trim().min(1).max(500).nullable(),
   originalText: z.string().min(1).max(8_000),

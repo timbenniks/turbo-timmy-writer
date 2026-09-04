@@ -34,7 +34,7 @@ export type WritingTheme = {
   isDefault: boolean;
 };
 
-export const themeIdSchema = z.string().uuid();
+const themeIdSchema = z.string().uuid();
 export const themeNameSchema = z.string().trim().min(1).max(60);
 
 export const duplicateThemeInputSchema = z.object({ themeId: themeIdSchema });

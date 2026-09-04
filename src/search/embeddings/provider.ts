@@ -9,7 +9,7 @@ export type ArchiveEmbeddingRequest = {
   signal?: AbortSignal;
 };
 
-export type ArchiveEmbeddingResponse = {
+type ArchiveEmbeddingResponse = {
   embeddings: number[][];
   inputTokens?: number;
 };

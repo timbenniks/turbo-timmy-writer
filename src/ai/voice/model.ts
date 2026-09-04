@@ -3,7 +3,7 @@ import { z } from "zod";
 export const voiceProfileTypes = ["article"] as const;
 export const voiceProfileStatuses = ["draft", "active", "superseded"] as const;
 
-export const voiceObservationSchema = z.object({
+const voiceObservationSchema = z.object({
   id: z.string().regex(/^[a-z][a-z0-9-]*$/).max(100),
   category: z.enum([
     "title",
@@ -20,7 +20,7 @@ export const voiceObservationSchema = z.object({
   evidence: z.array(z.string().trim().min(1).max(300)).min(1).max(8),
 });
 
-export const voiceEvidenceSummarySchema = z.object({
+const voiceEvidenceSummarySchema = z.object({
   schemaVersion: z.literal(1),
   repository: z.string().trim().min(1).max(200),
   sourceFiles: z.array(z.string().trim().min(1).max(200)).min(1).max(20),

@@ -6,6 +6,8 @@ import GitHubProvider, {
 } from "next-auth/providers/github";
 import { z } from "zod";
 
+import { httpUrlSchema } from "@/lib/validation/http-url";
+
 import { upsertGitHubUser } from "@/db/queries/users";
 import type { AuthEnvironment } from "@/lib/env/server";
 
@@ -16,7 +18,7 @@ const githubProfileSchema = z.object({
   login: z.string().min(1),
   name: z.string().nullable().optional(),
   email: z.email().nullable().optional(),
-  avatar_url: z.url().nullable().optional(),
+  avatar_url: httpUrlSchema.nullable().optional(),
 });
 
 function parseGitHubProfile(profile: unknown) {

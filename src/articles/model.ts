@@ -14,16 +14,7 @@ export const articleStatusSchema = z.enum(articleStatuses);
 export type ArticleStatus = z.infer<typeof articleStatusSchema>;
 export const articleIdSchema = z.uuid();
 
-export const libraryFilters = [
-  "all",
-  "drafts",
-  "ideas",
-  "published",
-  "archive",
-] as const;
-
-export const libraryFilterSchema = z.enum(libraryFilters);
-export type LibraryFilter = z.infer<typeof libraryFilterSchema>;
+export type LibraryFilter = "all" | "drafts" | "ideas" | "published" | "archive";
 
 export type ArticleMetadata = {
   version: 1;

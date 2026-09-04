@@ -15,8 +15,6 @@ export const saveArticleInputSchema = z.object({
   documentJson: articleDocumentSchema,
 });
 
-export type SaveArticleInput = z.infer<typeof saveArticleInputSchema>;
-
 export type SaveArticleResult =
   | {
       ok: true;

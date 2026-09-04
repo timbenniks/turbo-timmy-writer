@@ -3,9 +3,9 @@ import { z } from "zod";
 export const reviewKinds = ["humanizer", "critic"] as const;
 export type ReviewKind = (typeof reviewKinds)[number];
 
-export const findingSeverities = ["note", "warning", "strong"] as const;
+const findingSeverities = ["note", "warning", "strong"] as const;
 
-export const humanizerPatternIds = [
+const humanizerPatternIds = [
   "significance-inflation",
   "vague-attribution",
   "promotional-language",
@@ -69,6 +69,6 @@ export const criticOutputSchema = z.object({
   })).max(40),
 });
 
-export type HumanizerOutput = z.infer<typeof humanizerOutputSchema>;
-export type CriticOutput = z.infer<typeof criticOutputSchema>;
+type HumanizerOutput = z.infer<typeof humanizerOutputSchema>;
+type CriticOutput = z.infer<typeof criticOutputSchema>;
 export type ArticleReviewOutput = HumanizerOutput | CriticOutput;

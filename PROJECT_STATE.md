@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is complete locally. Phase 5 variants Slices 1–5 are implemented locally; final validation remains. Migrations `0012` and `0013` are intentionally unapplied pending Tim's approval.
+Phases 0, 1, 2, and 3 are complete and deployed. Phases 4 writing memory and 5 variants are complete locally. The requested full code audit and fixes are complete locally. Migrations `0012` and `0013` are intentionally unapplied pending Tim's approval; no Phase 4–5 work has been pushed or deployed.
 
 ## Completed work
 
@@ -201,10 +201,13 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is compl
 - Added independent versioned destination modules for website, LinkedIn post, LinkedIn article, and newsletter. `article-repurpose/v1` requests only the selected profile, canonical snapshot, and bounded voice guidance and validates destination-specific structured output.
 - Added the protected variants workspace with editable typed fields and Markdown, formatting preview, clipboard copy, manual publication URL/state tracking, explicit stale choices, and an article-workspace entry point.
 - Added owner-scoped create, manual save, and regeneration operations. Initial generation snapshots its canonical source; regeneration locks both revisions, snapshots the old variant, preserves manual edits unless explicitly confirmed, and never updates the canonical article.
+- Completed Phase 5 concurrency and safety coverage for stale calculations, stable hashes, mismatched destinations, manual regeneration confirmation, competing decisions, form round-trips, and HTTP(S)-only URLs. Unsaved local variant edits warn before switching, leaving, or regenerating.
+- Completed the repository-wide audit recorded in `docs/code-audit-2026-09-04.md`. Production dependency audit reports no known vulnerabilities; Knip reports no unused files/dependencies/exports; JSCPD finds no TypeScript/TSX/CSS/SQL clones; tracked secret and risky-runtime-pattern scans are clean.
+- Audit fixes centralize HTTP(S) URL validation and local AI test-mode validation, add four response security headers, remove framework disclosure, trim 38 unused exports/types, extract tested variant form projection, and harden destination/published-state consistency.
 
 ## Current validation checkpoint
 
-Phase 4 passes every local acceptance criterion. The final gate passes Drizzle history validation, all 13 migrations against empty Postgres (16 public tables, pgvector enabled, `vector(1024)` intact), ESLint without warnings, standalone TypeScript, 76 unit tests across 28 files, and the normal Turbopack production build. Live hybrid/literal probes and responsive authenticated browser inspection also pass. Slices 3–6 are local only; migration `0012` is not applied.
+Phases 4 and 5 plus the audit fixes pass the complete local gate: Drizzle history validation; all 14 migrations against empty Postgres (18 public tables, pgvector enabled, `vector(1024)` intact); ESLint without warnings; standalone TypeScript; 88 tests across 32 files; the normal Turbopack production build; and four credential-free Playwright checks at desktop and phone widths. Local response inspection confirms all four security headers. Authenticated Phase 5 browser QA remains pending because its migrations are deliberately unapplied.
 
 ## Known issues and setup state
 
@@ -249,6 +252,6 @@ Phase 4 passes every local acceptance criterion. The final gate passes Drizzle h
 
 ## Next tasks
 
-1. Complete Phase 5 concurrency/validation coverage and the full local gate.
-2. Audit the completed Phase 4–5 code and the existing codebase for security, ownership, duplication, unused code, and unnecessary complexity; fix validated findings.
-3. Keep migrations `0012` and `0013` local until Tim approves applying them to Neon; do not push or deploy while he is away.
+1. Review the local Phase 4–5 milestones and audit report with Tim.
+2. After explicit approval, push the commits, apply migrations `0012` and `0013`, deploy, and run authenticated desktop/mobile variant QA.
+3. Begin Phase 6 website publishing only after the Phase 5 activation checkpoint.

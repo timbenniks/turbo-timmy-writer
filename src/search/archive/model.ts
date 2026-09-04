@@ -2,13 +2,15 @@ import { createHash } from "node:crypto";
 
 import { z } from "zod";
 
+import { httpUrlSchema } from "@/lib/validation/http-url";
+
 export const ARCHIVE_IMPORT_VERSION = 1 as const;
 export const TIMBENNIKS_ARCHIVE_SOURCE = "timbenniks.dev" as const;
 export const WEBSITE_ARCHIVE_DESTINATION = "website" as const;
 
 const isoTimestampSchema = z.iso.datetime({ offset: true });
 
-export const archiveDocumentMetadataSchema = z.object({
+const archiveDocumentMetadataSchema = z.object({
   importVersion: z.literal(ARCHIVE_IMPORT_VERSION),
   sourceFile: z.string().trim().min(1),
   sourceId: z.string().trim().min(1).nullable(),
@@ -19,7 +21,7 @@ export const archiveDocumentMetadataSchema = z.object({
 export const archiveDocumentImportSchema = z.object({
   sourceKey: z.string().trim().min(1),
   title: z.string().trim().min(1),
-  url: z.url(),
+  url: httpUrlSchema,
   publishedAt: isoTimestampSchema,
   bodyText: z.string().trim().min(1),
   sourceMarkup: z.string().trim().min(1),

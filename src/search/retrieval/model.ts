@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const archiveSearchModes = ["literal", "semantic", "hybrid"] as const;
+const archiveSearchModes = ["literal", "semantic", "hybrid"] as const;
 export const archiveSearchModeSchema = z.enum(archiveSearchModes);
 export type ArchiveSearchMode = z.infer<typeof archiveSearchModeSchema>;
 

@@ -5,7 +5,7 @@ import type { WritingSkill } from "@/ai/runtime/skill";
 import { voiceGuidanceSchema } from "@/ai/voice/model";
 import { archiveEvidenceSchema } from "@/search/retrieval/context";
 
-export const draftInputSchema = z.object({
+const draftInputSchema = z.object({
   brief: articleBriefSchema,
   messages: z
     .array(

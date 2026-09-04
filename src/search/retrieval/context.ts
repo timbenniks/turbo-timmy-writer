@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+import { httpUrlSchema } from "@/lib/validation/http-url";
+
 import type { ArchiveSearchResult } from "./model";
 
 export const archiveEvidenceSchema = z.array(z.object({
   title: z.string().trim().min(1).max(500),
-  url: z.url(),
+  url: httpUrlSchema,
   passage: z.string().trim().min(1).max(1_600),
 })).max(4);
 
