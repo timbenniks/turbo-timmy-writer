@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress. Slice 1 is pushed and its archive-document migration/data are in Neon; Slice 2 is implemented and validated, but its new pgvector migration and embedding work have not touched Neon.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in progress. Slices 1 and 2 are pushed and deployed; Slice 1's archive-document migration/data are in Neon, while Slice 2's new pgvector migration and embedding work have not touched Neon.
 
 ## Completed work
 
@@ -183,10 +183,12 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is in pr
 - Added a provider-neutral archive embedding contract and a tested OpenAI adapter. It accepts only separately configured `text-embedding-3` models, requests exactly 1,024 dimensions, validates every returned vector, and maps failures to safe bounded errors.
 - Added migration `0011_fat_masque.sql`, which enables pgvector and creates `archive_chunks` with deterministic replacement keys and all-or-none embedding cache metadata. The empty-database migration test now verifies both the extension and the exact `vector(1024)` type.
 - Read-only chunking validation over all 74 imported documents produced 156 chunks, zero replacement characters, and a 328–987 token range. The 328-token chunk is a whole short document; every chunk from a split document satisfies the 500–1,000-token band.
+- Phase 4 Slice 2 commit `bcbc2bb` is pushed to `main`. GitHub Actions run `33882574863` passed install, lint, typecheck, 69 unit tests, four credential-free browser checks, and the production build in 2m8s.
+- Vercel deployment `dpl_73cn8iqfvQspJy4BW4SqzabU76UP` reached Ready and owns the canonical Production alias. The protected root still redirects to sign-in and `/sign-in` returns 200.
 
 ## Current validation checkpoint
 
-Phase 4 Slice 2 passes its full local gate: Drizzle migration-history validation, all 12 migrations against empty in-memory Postgres with pgvector enabled and `archive_chunks.embedding` verified as `vector(1024)`, ESLint, standalone TypeScript, 69 unit tests across 25 files, and the normal Turbopack production build. Tests use mocks/fake HTTP and make no paid API calls. Slice 1 is pushed; migration `0011`, chunk writes, and embeddings have not been run against Neon.
+Phase 4 Slice 2 passes locally, in GitHub Actions, and in Vercel: Drizzle migration-history validation, all 12 migrations against empty in-memory Postgres with pgvector enabled and `archive_chunks.embedding` verified as `vector(1024)`, ESLint, standalone TypeScript, 69 unit tests across 25 files, four credential-free browser checks, and the normal production build. Tests use mocks/fake HTTP and make no paid API calls. Migration `0011`, chunk writes, and embeddings have not been run against Neon.
 
 ## Known issues and setup state
 

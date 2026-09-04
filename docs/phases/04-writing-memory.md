@@ -42,4 +42,6 @@ Read-only validation over the 74 imported documents produces 156 chunks with no 
 
 The complete Slice 2 local gate passes Drizzle migration-history validation, the empty-database migration test, ESLint, standalone TypeScript, 69 unit tests across 25 files, and the normal Turbopack production build.
 
+Slice 2 commit `bcbc2bb` is pushed to `main`. GitHub Actions run `33882574863` passed the complete remote gate in 2m8s, and Vercel deployment `dpl_73cn8iqfvQspJy4BW4SqzabU76UP` reached Ready on the canonical Production alias. These deployed code paths do not query `archive_chunks` at runtime, so Production remains compatible while migration `0011` awaits approval.
+
 Next: after explicit approval, apply migration `0011`, write the 156 deterministic chunks, and populate their embedding cache. Then add literal, semantic, and observable hybrid retrieval as Slice 3.
