@@ -62,6 +62,27 @@ test.describe("authenticated writing core", () => {
     await expect(body).toHaveText(originalBody);
   });
 
+  test("captures selection-based AI actions without changing prose", async ({ page }) => {
+    await page.goto(`/articles/${articleId}`);
+    const body = page.locator('[aria-label="Article body"]');
+    const originalBody = await body.innerText();
+
+    await body.click();
+    await body.press("Control+Home");
+    await body.press("Shift+Control+ArrowRight");
+
+    const actions = page.getByRole("toolbar", { name: "AI writing actions" });
+    await expect(actions).toBeVisible();
+    await expect(actions.getByRole("button", { name: "Tighten", exact: true })).toBeVisible();
+    await expect(actions.getByRole("button", { name: "Ask AI…", exact: true })).toBeVisible();
+
+    await actions.getByRole("button", { name: "Tighten", exact: true }).click();
+    await expect(
+      page.getByText(/Tighten prepared for \d+ selected characters\. Your article has not changed\./),
+    ).toBeVisible();
+    await expect(body).toHaveText(originalBody);
+  });
+
   test("selects reusable tags and keeps account actions aligned", async ({ page }) => {
     await page.goto(`/articles/${articleId}`);
 

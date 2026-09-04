@@ -20,6 +20,7 @@ import {
   Quote,
   Redo2,
   Save,
+  Sparkles,
   Undo2,
 } from "lucide-react";
 import Link from "next/link";
@@ -45,6 +46,10 @@ import {
   updateArticleStatusAction,
 } from "@/app/actions/article-organization";
 import { saveArticleAction } from "@/app/actions/articles";
+import {
+  SelectionAiMenu,
+  type PreparedEditorAction,
+} from "@/components/editor/selection-ai-menu";
 import { ArticleTagPicker } from "@/components/tags/article-tag-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -161,6 +166,8 @@ export function ArticleEditor({
   const [checkpointSaving, setCheckpointSaving] = useState(false);
   const [organizationMessage, setOrganizationMessage] = useState("");
   const [organizationError, setOrganizationError] = useState(false);
+  const [preparedEditorAction, setPreparedEditorAction] =
+    useState<PreparedEditorAction | null>(null);
   const [metrics, setMetrics] = useState(() =>
     calculateWritingMetrics(articleDocumentToPlainText(initialDocument)),
   );
@@ -182,6 +189,7 @@ export function ArticleEditor({
     document: ArticleDocument;
   } | null>(null);
   const draftInProgressRef = useRef(false);
+  const getServerRevision = useCallback(() => serverRevisionRef.current, []);
 
   const updateMetrics = useCallback((rawDocument: unknown) => {
     const parsedDocument = normalizeArticleDocument(rawDocument);
@@ -809,6 +817,25 @@ export function ArticleEditor({
         </div>
       ) : null}
 
+      {preparedEditorAction ? (
+        <div
+          aria-live="polite"
+          className="flex shrink-0 items-center gap-2 border-b border-border bg-accent-soft px-4 py-2 text-xs text-foreground sm:px-6"
+        >
+          <Sparkles className="size-3.5 shrink-0 text-accent" />
+          <span className="min-w-0 truncate">
+            {preparedEditorAction.label} prepared for {preparedEditorAction.selection.originalText.length} selected characters. Your article has not changed.
+          </span>
+          <button
+            type="button"
+            onClick={() => setPreparedEditorAction(null)}
+            className="ml-auto shrink-0 font-medium text-muted-foreground hover:text-foreground"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+
       {saveState === "conflict" ? (
         <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 sm:px-6">
           <span className="mr-auto">A newer version was saved elsewhere. Your local copy is still safe.</span>
@@ -839,6 +866,13 @@ export function ArticleEditor({
           className="article-title block w-full resize-none overflow-hidden border-0 bg-transparent text-4xl leading-[1.08] font-medium tracking-[-0.035em] outline-none placeholder:text-muted-foreground/55 sm:text-[3.35rem]"
         />
         <div className="mt-10">
+          {editor ? (
+            <SelectionAiMenu
+              editor={editor}
+              sourceRevision={getServerRevision}
+              onPrepare={setPreparedEditorAction}
+            />
+          ) : null}
           <EditorContent editor={editor} />
         </div>
       </article>

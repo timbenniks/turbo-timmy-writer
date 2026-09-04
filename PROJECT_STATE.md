@@ -1,10 +1,10 @@
 # Project state
 
-Last updated: 2026-09-01
+Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, and 2 are complete and deployed. The premise → one-question interview → revisioned brief → explicit first draft milestone passes live-provider QA and deterministic desktop/mobile acceptance coverage.
+Phases 0, 1, and 2 are complete and deployed. Phase 3 precision AI is active; its first local slice captures bounded editor selections and exposes preset/free-form actions without changing canonical prose.
 
 ## Completed work
 
@@ -153,10 +153,14 @@ Phases 0, 1, and 2 are complete and deployed. The premise → one-question inter
 - Post-suite pooled counts confirmed exact cleanup: 82 articles and zero writing sessions, writing messages, article briefs, or article-skill AI runs.
 - Every Phase 2 acceptance criterion now passes. Tim can draft immediately after the first question, the brief is visible/evolving/manual, the resulting draft uses durable intent, and conversation remains available after completion.
 - Phase 2 final commit `858e70c` passed GitHub Actions run `33538457443` in 1m31s. Vercel deployment `dpl_cGGwm9JnXzu7W4RwSiinFkPYoFhZ` reached Ready on the canonical Production alias; protected `/start` still redirects unauthenticated requests to sign-in.
+- Began Phase 3 with a typed selection boundary that records exact original text, a direction-aware Tiptap bookmark, canonical document version, and current server revision. It rejects cursors, structural/whitespace-only selections, and payloads over 8,000 characters.
+- Added a responsive selection bubble menu with Tighten, Clarify, Make sharper, Fix rhythm, Alternative, and a 500-character free-form Ask AI input. Preparing an action does not call AI, autosave, or mutate article prose.
+- Added four focused selection tests and authenticated desktop/mobile Playwright coverage. Manual Chrome checks at the default desktop width and 390 × 844 confirmed preset/free-form preparation, internal menu scrolling without page overflow, and exact prose invariance.
+- Phase 3 Slice 1 validation passes Drizzle schema validation, ESLint, standalone TypeScript, 51 unit tests, a production Webpack build, and four credential-free desktop/mobile Playwright checks with ten authenticated checks intentionally skipped. The normal Turbopack build reached compilation but its CSS worker could not bind an internal port in this restricted environment; no application compile error was reported.
 
 ## Current validation checkpoint
 
-Begin Phase 3 precision AI from the clean, deployed Phase 2 checkpoint.
+Phase 3 Slice 1 is implemented and validated locally. Begin Slice 2 by implementing the editor skill and persisting pending suggestions without changing the document. Let CI run the normal Turbopack build because the local restricted environment prevented its CSS worker from binding an internal port; the production Webpack fallback passes.
 
 ## Known issues and setup state
 
@@ -200,5 +204,6 @@ Begin Phase 3 precision AI from the clean, deployed Phase 2 checkpoint.
 
 ## Next tasks
 
-1. Read and activate `docs/phases/03-precision-ai.md` before implementation.
-2. Begin with reviewable selection-based AI suggestions; never mutate canonical prose without explicit acceptance.
+1. Implement the versioned editor skill for preset and free-form transformations.
+2. Persist pending suggestions against the captured original text, bookmark, and source revision without mutating canonical prose.
+3. Render the pending result for review; accept/reject remains the guarded Slice 3 boundary.
