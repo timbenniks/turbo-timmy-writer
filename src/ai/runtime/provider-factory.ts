@@ -22,6 +22,41 @@ function guidedTestProvider(): AiProvider {
     async generateStructured<TOutput>(
       request: AiStructuredProviderRequest<TOutput>,
     ) {
+      if (request.outputName.startsWith("article-repurpose_")) {
+        const parsed = JSON.parse(request.input) as {
+          canonicalTitle?: string;
+          canonicalMarkdown?: string;
+          destinationProfile?: { destination?: string };
+        };
+        const title = parsed.canonicalTitle || "A useful title";
+        const bodyMarkdown = parsed.canonicalMarkdown || "A useful argument.";
+        const destination = parsed.destinationProfile?.destination;
+        const output = destination === "website"
+          ? {
+              content: { version: 1, destination, bodyMarkdown },
+              metadata: { version: 1, destination, title, slug: "a-useful-title", description: "A useful article.", canonicalUrl: null },
+            }
+          : destination === "linkedin-article"
+            ? {
+                content: { version: 1, destination, bodyMarkdown },
+                metadata: { version: 1, destination, title, publicationUrl: null },
+              }
+            : destination === "newsletter"
+              ? {
+                  content: { version: 1, destination, bodyMarkdown, intro: null, callToAction: null },
+                  metadata: { version: 1, destination, subject: title, previewText: "A useful argument." },
+                }
+              : {
+                  content: { version: 1, destination: "linkedin-post", bodyMarkdown: bodyMarkdown.slice(0, 3_000) },
+                  metadata: { version: 1, destination: "linkedin-post", publicationUrl: null },
+                };
+        return {
+          output: request.outputSchema.parse(output),
+          responseId: "guided-test-repurpose-response",
+          finishReason: "stop",
+          usage: { inputTokens: 10, outputTokens: 10 },
+        };
+      }
       if (request.outputName.startsWith("article-selection-editor_")) {
         const parsed = JSON.parse(request.input) as { selectedPassage?: string };
         return {

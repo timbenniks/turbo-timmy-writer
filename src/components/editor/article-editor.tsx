@@ -20,9 +20,11 @@ import {
   Quote,
   Redo2,
   Save,
+  Send,
   Undo2,
 } from "lucide-react";
 import Link from "next/link";
+import type { Route } from "next";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import {
@@ -885,6 +887,12 @@ export function ArticleEditor({
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/articles/${articleId}/variants` as Route}>
+              <Send />
+              <span className="hidden sm:inline">Variants</span>
+            </Link>
+          </Button>
           <WorkspaceAppearanceButtons />
           <Button size="sm" type="button" disabled={!editor || saveState === "saving"} onClick={() => void saveArticle()}>
             <Save />

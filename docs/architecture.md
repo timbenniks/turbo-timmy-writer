@@ -82,7 +82,7 @@ interface WritingSkill<TInput, TOutput> {
 
 The executor validates input, resolves only requested context, selects a centrally configured model, starts an `ai_runs` record, executes or streams, validates structured output where applicable, then completes the run with usage and outcome. Skills do not import UI or publisher code.
 
-The live OpenAI adapter uses the Responses API through the Vercel AI SDK, disables provider-side response storage, imposes a request timeout, and maps provider failures to bounded safe codes. `OPENAI_MODEL` is the shared generative default; interview, draft, edit, and review may override it independently, while embeddings require an embedding-capable model. CI never supplies a live credential and exercises provider-neutral mocks only.
+The live OpenAI adapter uses the Responses API through the Vercel AI SDK, disables provider-side response storage, imposes a request timeout, and maps provider failures to bounded safe codes. `OPENAI_MODEL` is the shared generative default; interview, draft, edit, review, and repurpose may override it independently, while embeddings require an embedding-capable model. CI never supplies a live credential and exercises provider-neutral mocks only.
 
 The article-start route authenticates and owner-scopes the session before accepting input. It stores each user turn first, streams newline-delimited safe UI events from the interview skill, and stores the complete assistant turn with its AI run ID. A visibly incomplete response is not committed as a conversation turn. The client can retry while the already-saved user text remains durable.
 
@@ -113,6 +113,14 @@ Archive chunking uses versioned `cl100k_base` token windows targeting 800 tokens
 ### Publishing
 
 `src/publishing/adapters` contains destination adapters behind a typed contract. Core article services know about a generic variant and publication record, not GitHub paths, LinkedIn limits, or newsletter fields.
+
+Phase 5 keeps destination profiles in independent modules under
+`src/variants/destinations`. `article-repurpose/v1` receives exactly one profile,
+the canonical Markdown snapshot, and bounded voice guidance, then validates an
+exact destination-specific structured output. Variant writes are owner-scoped and
+optimistically concurrent. Initial generation records an immutable canonical
+article version; regeneration locks the article and variant, snapshots the old
+variant, and replaces it only when both expected revisions still match.
 
 The website adapter performs deterministic transformation and validation before any external write. An explicit preview and confirmation precede GitHub API publication. Idempotent updates use the stored repository path and latest commit/blob information.
 

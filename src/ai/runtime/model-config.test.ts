@@ -10,6 +10,7 @@ const environment = {
   OPENAI_MODEL_DRAFT: "draft-model",
   OPENAI_MODEL_EDIT: "edit-model",
   OPENAI_MODEL_REVIEW: "review-model",
+  OPENAI_MODEL_REPURPOSE: "repurpose-model",
   OPENAI_MODEL_EMBEDDING: "embedding-model",
 };
 
@@ -21,6 +22,7 @@ describe("AI model configuration", () => {
     expect(resolveAiModel(configuration, "embedding")).toBe(
       "embedding-model",
     );
+    expect(resolveAiModel(configuration, "repurpose")).toBe("repurpose-model");
   });
 
   it("uses one shared model for generative work", () => {
@@ -30,6 +32,7 @@ describe("AI model configuration", () => {
 
     expect(resolveAiModel(configuration, "interview")).toBe("shared-model");
     expect(resolveAiModel(configuration, "draft")).toBe("shared-model");
+    expect(resolveAiModel(configuration, "repurpose")).toBe("shared-model");
     expect(configuration.embedding).toBeUndefined();
   });
 

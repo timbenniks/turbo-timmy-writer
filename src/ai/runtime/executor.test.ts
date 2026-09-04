@@ -16,6 +16,7 @@ const models: AiModelConfiguration = {
   draft: "draft-model",
   edit: "edit-model",
   review: "review-model",
+  repurpose: "repurpose-model",
   embedding: "embedding-model",
 };
 

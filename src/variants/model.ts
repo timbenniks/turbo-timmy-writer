@@ -8,6 +8,11 @@ export const variantDestinations = [
 ] as const;
 export const variantStatuses = ["draft", "ready", "published"] as const;
 
+const httpUrlSchema = z.url().refine((value) => {
+  const protocol = new URL(value).protocol;
+  return protocol === "http:" || protocol === "https:";
+}, "Use an HTTP or HTTPS URL.");
+
 const markdownSchema = z.string().max(150_000);
 
 export const websiteVariantContentSchema = z.object({
@@ -46,18 +51,18 @@ export const websiteVariantMetadataSchema = z.object({
   title: z.string().trim().min(1).max(200),
   slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(200),
   description: z.string().trim().max(320),
-  canonicalUrl: z.url().nullable(),
+  canonicalUrl: httpUrlSchema.nullable(),
 });
 export const linkedinPostVariantMetadataSchema = z.object({
   version: z.literal(1),
   destination: z.literal("linkedin-post"),
-  publicationUrl: z.url().nullable(),
+  publicationUrl: httpUrlSchema.nullable(),
 });
 export const linkedinArticleVariantMetadataSchema = z.object({
   version: z.literal(1),
   destination: z.literal("linkedin-article"),
   title: z.string().trim().min(1).max(200),
-  publicationUrl: z.url().nullable(),
+  publicationUrl: httpUrlSchema.nullable(),
 });
 export const newsletterVariantMetadataSchema = z.object({
   version: z.literal(1),
@@ -72,6 +77,19 @@ export const variantMetadataSchema = z.discriminatedUnion("destination", [
   linkedinArticleVariantMetadataSchema,
   newsletterVariantMetadataSchema,
 ]);
+
+export const variantPayloadSchema = z.object({
+  content: variantContentSchema,
+  metadata: variantMetadataSchema,
+}).superRefine((value, context) => {
+  if (value.content.destination !== value.metadata.destination) {
+    context.addIssue({
+      code: "custom",
+      message: "Variant content and metadata must use the same destination.",
+      path: ["metadata", "destination"],
+    });
+  }
+});
 
 export const variantIdSchema = z.uuid();
 
@@ -101,6 +119,24 @@ export function regenerationGuard(input: {
     return { allowed: false, snapshotRequired: true } as const;
   }
   return { allowed: true, snapshotRequired: true } as const;
+}
+
+export function regenerationDecision(input: {
+  expectedArticleRevision: number;
+  currentArticleRevision: number;
+  expectedVariantRevision: number;
+  currentVariantRevision: number;
+  hasManualEdits: boolean;
+  confirmed: boolean;
+}) {
+  if (input.expectedArticleRevision !== input.currentArticleRevision) {
+    return "article-conflict" as const;
+  }
+  if (input.expectedVariantRevision !== input.currentVariantRevision) {
+    return "variant-conflict" as const;
+  }
+  if (!regenerationGuard(input).allowed) return "confirmation-required" as const;
+  return "ready" as const;
 }
 
 export type VariantDestination = (typeof variantDestinations)[number];

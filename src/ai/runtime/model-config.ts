@@ -5,6 +5,7 @@ export const aiModelPurposes = [
   "draft",
   "edit",
   "review",
+  "repurpose",
   "embedding",
 ] as const;
 
@@ -17,6 +18,7 @@ export const aiModelConfigurationSchema = z.object({
   draft: modelNameSchema,
   edit: modelNameSchema,
   review: modelNameSchema,
+  repurpose: modelNameSchema,
   embedding: modelNameSchema.optional(),
 });
 
@@ -34,6 +36,7 @@ export function parseAiModelConfiguration(
     draft: environment.OPENAI_MODEL_DRAFT ?? sharedModel,
     edit: environment.OPENAI_MODEL_EDIT ?? sharedModel,
     review: environment.OPENAI_MODEL_REVIEW ?? sharedModel,
+    repurpose: environment.OPENAI_MODEL_REPURPOSE ?? sharedModel,
     embedding: environment.OPENAI_MODEL_EMBEDDING,
   });
 }

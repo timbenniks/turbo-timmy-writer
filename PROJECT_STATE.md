@@ -4,7 +4,7 @@ Last updated: 2026-09-04
 
 ## Current phase
 
-Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is complete locally. Phase 5 variants is in progress with Slice 1 implemented locally. Migrations `0012` and `0013` are intentionally unapplied pending Tim's approval.
+Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is complete locally. Phase 5 variants Slices 1–5 are implemented locally; final validation remains. Migrations `0012` and `0013` are intentionally unapplied pending Tim's approval.
 
 ## Completed work
 
@@ -198,6 +198,9 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 4 writing memory is compl
 - Added owner-scoped versioned `writing_profiles` in additive migration `0012_short_lethal_legion.sql`. All 13 migrations apply from empty state and produce 16 public tables with pgvector and `vector(1024)` intact; the new migration has not been applied to Neon.
 - Began Phase 5 with independently typed website, LinkedIn post, LinkedIn article, and newsletter content/metadata, stable canonical/variant content hashing, explicit stale reasons, and a regeneration guard that protects manual edits.
 - Added owner-scoped `publication_variants` with source article version/revision/hash and immutable pre-regeneration snapshots in additive migration `0013_calm_tarantula.sql`. All 14 migrations apply from empty state and produce 18 tables; `0013` is not applied to Neon.
+- Added independent versioned destination modules for website, LinkedIn post, LinkedIn article, and newsletter. `article-repurpose/v1` requests only the selected profile, canonical snapshot, and bounded voice guidance and validates destination-specific structured output.
+- Added the protected variants workspace with editable typed fields and Markdown, formatting preview, clipboard copy, manual publication URL/state tracking, explicit stale choices, and an article-workspace entry point.
+- Added owner-scoped create, manual save, and regeneration operations. Initial generation snapshots its canonical source; regeneration locks both revisions, snapshots the old variant, preserves manual edits unless explicitly confirmed, and never updates the canonical article.
 
 ## Current validation checkpoint
 
@@ -246,6 +249,6 @@ Phase 4 passes every local acceptance criterion. The final gate passes Drizzle h
 
 ## Next tasks
 
-1. Add independent versioned destination profiles and the structured repurpose skill.
-2. Add editable, protected destination variants plus safe regeneration snapshots and explicit stale choices.
-3. Keep migrations `0012` and `0013` local until Tim approves applying them to Neon; no current deployed runtime path queries them.
+1. Complete Phase 5 concurrency/validation coverage and the full local gate.
+2. Audit the completed Phase 4–5 code and the existing codebase for security, ownership, duplication, unused code, and unnecessary complexity; fix validated findings.
+3. Keep migrations `0012` and `0013` local until Tim approves applying them to Neon; do not push or deploy while he is away.

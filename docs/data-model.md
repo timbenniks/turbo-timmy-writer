@@ -214,6 +214,15 @@ GIN or vector index only after query-plan evidence justifies it.
 
 Contains `id`, `article_id`, destination, content JSON, metadata JSON, `generated_from_version_id`, status, has-manual-edits flag, content hash, timestamps, and optional publication time. A variant is stale when its source version is not the canonical article's current relevant version/hash; compute this through a tested domain function rather than an unreliable mutable flag alone.
 
+Phase 5 migration `0013_calm_tarantula.sql` implements one owner-scoped variant
+per article/destination with its exact canonical article version, source revision,
+source SHA-256 hash, variant SHA-256 hash, AI run, optimistic revision, manual-edit
+state, publication state, and dates. `publication_variant_versions` stores the
+complete prior content/metadata/hash before regeneration. Generation creates a
+canonical article checkpoint; regeneration atomically locks both current records,
+creates both required snapshots, and updates only matching revisions. Staleness is
+derived from the saved source revision/hash and current canonical document.
+
 ### `publications`
 
 Contains `id`, `article_id`, `variant_id`, publisher ID, status, external ID, external URL, external path, commit SHA, published article version ID, request metadata JSON, safe result metadata JSON, timestamps, and optional error code. Keep prior successful publication records when updates occur or model attempts explicitly so history is auditable.

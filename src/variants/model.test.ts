@@ -4,6 +4,7 @@ import { emptyArticleDocument } from "@/editor/document";
 import { hashCanonicalArticle, hashVariant } from "./hashing";
 import {
   regenerationGuard,
+  regenerationDecision,
   variantFreshness,
   variantMetadataSchema,
 } from "./model";
@@ -50,6 +51,26 @@ describe("publication variants", () => {
       version: 1,
       destination: "newsletter",
       publicationUrl: null,
+    }).success).toBe(false);
+  });
+
+  it("rejects a second regeneration decision after the first advances revision", () => {
+    const request = {
+      expectedArticleRevision: 7,
+      currentArticleRevision: 7,
+      expectedVariantRevision: 3,
+      hasManualEdits: false,
+      confirmed: false,
+    };
+    expect(regenerationDecision({ ...request, currentVariantRevision: 3 })).toBe("ready");
+    expect(regenerationDecision({ ...request, currentVariantRevision: 4 })).toBe("variant-conflict");
+  });
+
+  it("rejects non-web publication URLs", () => {
+    expect(variantMetadataSchema.safeParse({
+      version: 1,
+      destination: "linkedin-post",
+      publicationUrl: "javascript:alert(1)",
     }).success).toBe(false);
   });
 });

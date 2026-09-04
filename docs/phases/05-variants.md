@@ -36,4 +36,22 @@ revision, manual-edit state, and immutable variant snapshots. All 14 migrations
 pass against empty Postgres and produce 18 public tables. Migration `0013` remains
 local and unapplied.
 
-Next: add independent versioned destination profiles and the repurpose skill.
+Slices 2–5 add independent v1 profiles for website, LinkedIn post, LinkedIn
+article, and newsletter plus `article-repurpose/v1`. The structured skill receives
+only the selected destination profile, canonical Markdown snapshot, and bounded
+voice guidance; output must match the requested destination's exact schema.
+
+The protected variant workspace supports all four destinations, typed metadata,
+editable Markdown, calm formatting previews, clipboard copy, manual publication
+state/URL tracking, and optimistic manual saves. Canonical editing and variant
+editing use separate routes and tables.
+
+Stale variants show the exact saved/current relationship and offer Review,
+Regenerate, or Keep current without automatic replacement. Regeneration always
+creates a history snapshot. A variant with manual edits additionally requires an
+explicit browser confirmation, and the server independently enforces the same
+guard. Article or variant changes during generation yield a conflict without
+replacing either document.
+
+Next: complete concurrency/validation coverage, inspect the responsive workflow
+where the unapplied migration permits, and run the final Phase 5 gate.
