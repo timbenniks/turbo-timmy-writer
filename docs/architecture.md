@@ -100,6 +100,8 @@ Archive documents and voice observations remain separate. Retrieved passages car
 
 The Phase 4 repository importer is dry-run-first and owner-scoped. It treats a source filename as stable identity, stores exact Markdown alongside derived plain text, preserves normalized frontmatter, and excludes source-marked drafts. A deterministic content hash drives insert/update/no-op planning; source reconciliation occurs only during an explicit write. Archive imports never mutate canonical article rows.
 
+Archive chunking uses versioned `cl100k_base` token windows targeting 800 tokens with 100-token overlap and a 1,000-token ceiling; a whole short document remains one chunk. The chunk identity hashes its title and body so attribution changes invalidate the cached vector. A provider-neutral embedding boundary requests and validates exactly 1,024 dimensions from a separately configured `text-embedding-3` model. Chunk writes are idempotent, changed chunks clear stale vectors, and embedding retries select only missing or differently configured cache entries. No vector similarity index is created until Phase 4 retrieval validates the distance metric and query shape.
+
 ### Publishing
 
 `src/publishing/adapters` contains destination adapters behind a typed contract. Core article services know about a generic variant and publication record, not GitHub paths, LinkedIn limits, or newsletter fields.
