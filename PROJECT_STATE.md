@@ -168,6 +168,7 @@ Phases 0, 1, 2, and 3 are complete and deployed. Phase 3 precision AI is ready f
 - Phase 3 local gate passes Drizzle validation, ESLint, standalone TypeScript, 58 unit tests, the normal Turbopack production build, four credential-free browser checks, and deterministic guided/precision acceptance at both widths. All Phase 3 acceptance criteria pass locally.
 - Phase 3 completion commit `559e6cf` and the preceding selection commit `3d85812` are pushed to `main`. GitHub Actions run `33874955804` passed install, lint, typecheck, 58 unit tests, four browser checks, and the normal production build in 2m22s.
 - Vercel deployment `dpl_EYvVuNMnZNmMXJ675ovM7G3egpBw` reached Ready and owns the canonical Production alias. Production `/` redirects to sign-in, while `/sign-in` and the configured GitHub provider endpoint return 200.
+- The first authenticated Production inspection exposed a React hydration warning because the client-rendered `Saved at` time used the host's implicit timezone (UTC during Vercel rendering and Europe/Paris in Tim's browser). Formatting now names `Europe/Paris` explicitly so server and client output is deterministic.
 
 ## Current validation checkpoint
 
