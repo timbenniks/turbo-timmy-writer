@@ -5,7 +5,9 @@ import { calculateWritingMetrics } from "@/articles/metrics";
 import {
   websitePublicationMetadataSchema,
   websitePublicationSlugSchema,
+  websitePublicationTargets,
   type WebsitePublicationMetadata,
+  type WebsitePublicationTarget,
 } from "@/publishing/website-contract";
 
 export {
@@ -17,11 +19,6 @@ const TIMBENNIKS_DEV_REPOSITORY = "timbenniks/timbenniksdev-2024";
 const TIMBENNIKS_DEV_WRITING_DIRECTORY = "content/4.writing";
 const TIMBENNIKS_DEV_ORIGIN = "https://timbenniks.dev";
 
-const websitePublicationTargets = [
-  "timbenniksdev-2024",
-  "timbenniks-2026",
-] as const;
-
 const websitePublicationTargetProfiles = {
   "timbenniksdev-2024": {
     repository: TIMBENNIKS_DEV_REPOSITORY,
@@ -32,9 +29,6 @@ const websitePublicationTargetProfiles = {
     writingDirectory: "src/content/writing",
   },
 } as const;
-
-export type WebsitePublicationTarget =
-  (typeof websitePublicationTargets)[number];
 
 export type WebsitePublicationFrontmatter = z.output<
   typeof websitePublicationMetadataSchema

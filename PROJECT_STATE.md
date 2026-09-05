@@ -4,7 +4,7 @@ Last updated: 2026-09-05
 
 ## Current phase
 
-Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 Slices 1 through 3 are pushed through `1528ce3`; Slice 4 is complete locally with a server-only, repository-allowlisted GitHub Contents adapter and mocked integration coverage. No application publication flow invokes it yet, and no website article has been written or published.
+Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 Slices 1 through 4 are pushed through `aaa1756`. Slice 5 has begun locally with an additive publication-attempt schema and deterministic state contract; the new migration is not applied to Neon and no application publication flow invokes the GitHub adapter. No website article has been written or published.
 
 ## Completed work
 
@@ -209,10 +209,11 @@ Phases 0 through 5 are complete and pushed to `main`. The requested full code au
 - Inspected both local website repositories without modifying them. Deterministic Phase 6 output now targets `content/4.writing/<slug>.md` for the Nuxt 2024 site and `src/content/writing/<slug>.md` for the Astro 2026 site, using the latter's canonical 17-tag vocabulary and five-tag cap.
 - Added backward-compatible website variant fields for publication date, hero image URL, and canonical tags. Publication readiness validates the complete shared contract and renders the exact Markdown destined for both repositories side by side; previewing does not write to GitHub or change the canonical article.
 - Added a configurable server-only GitHub Contents adapter with explicit repository allowlisting, safe input/response validation, bounded requests, UTF-8 Base64 encoding, current-file inspection, optimistic update SHAs, and sanitized provider errors. Seven mocked tests cover create, update, missing files, forbidden targets, conflicts, invalid responses, and timeouts without network access.
+- Began Phase 6 Slice 5 with target-specific publication attempts. Additive migration `0014_dazzling_mandarin.sql` and database constraints retain the exact Markdown snapshot, variant revision/hash, canonical source version, operation, repository coordinates, expected blob SHA, terminal commit/blob/URL results, and bounded failure state without conflating the two repository writes.
 
 ## Current validation checkpoint
 
-Phase 6 GitHub adapter validation passes the complete local gate: `pnpm db:check`; all 14 migrations against empty Postgres with 18 public tables, pgvector, and `vector(1024)` intact; ESLint; standalone TypeScript; 103 tests across 34 files; the production build; Knip with no unused-code findings; `git diff --check`; and four credential-free Playwright checks at desktop/mobile widths.
+Phase 6 Slice 5 persistence validation passes the complete local gate: `pnpm db:check`; all 15 migrations against empty Postgres with 19 public tables, pgvector, and `vector(1024)` intact; ESLint; standalone TypeScript; 107 tests across 35 files; the production build; Knip with no unused-code findings; `git diff --check`; and four credential-free Playwright checks at desktop/mobile widths.
 
 ## Known issues and setup state
 

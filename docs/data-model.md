@@ -234,6 +234,16 @@ and one to five tags, in addition to title, slug, and description.
 
 Contains `id`, `article_id`, `variant_id`, publisher ID, status, external ID, external URL, external path, commit SHA, published article version ID, request metadata JSON, safe result metadata JSON, timestamps, and optional error code. Keep prior successful publication records when updates occur or model attempts explicitly so history is auditable.
 
+Phase 6 migration `0014_dazzling_mandarin.sql` implements target-specific,
+append-only attempts for the two website repositories. Each row snapshots the
+exact Markdown, variant revision and SHA-256 content hash, canonical source
+article version, operation, repository/path/branch, and expected existing blob
+SHA before an external request. Pending rows contain no result; succeeded rows
+require commit SHA, blob SHA, canonical external URL, and completion time; failed
+rows require only a bounded error code and completion time. Database checks
+enforce those states and the create/update SHA distinction. The migration is
+validated locally but has not been applied to Neon.
+
 ### `publisher_configs`
 
 Contains `id`, `user_id`, publisher ID, display name, non-secret configuration JSON, credential reference, enabled state, and timestamps. Secrets belong in environment/provider secret storage for V1, not plaintext JSONB. A future encrypted credential store can satisfy the reference.

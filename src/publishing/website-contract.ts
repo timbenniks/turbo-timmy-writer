@@ -2,6 +2,14 @@ import { z } from "zod";
 
 import { httpUrlSchema } from "@/lib/validation/http-url";
 
+export const websitePublicationTargets = [
+  "timbenniksdev-2024",
+  "timbenniks-2026",
+] as const;
+
+export type WebsitePublicationTarget =
+  (typeof websitePublicationTargets)[number];
+
 export const websitePublicationTags = [
   "composable-architecture",
   "cms",
