@@ -4,7 +4,7 @@ Last updated: 2026-09-05
 
 ## Current phase
 
-Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 Slices 1 and 2 are pushed in commits `3d8e405` and `4a0b5f7`; Slice 3 is complete locally with persisted publication metadata and exact side-by-side Nuxt 2024/Astro 2026 previews. No GitHub write adapter exists yet, and no website article has been written or published.
+Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 Slices 1 through 3 are pushed through `1528ce3`; Slice 4 is complete locally with a server-only, repository-allowlisted GitHub Contents adapter and mocked integration coverage. No application publication flow invokes it yet, and no website article has been written or published.
 
 ## Completed work
 
@@ -208,10 +208,11 @@ Phases 0 through 5 are complete and pushed to `main`. The requested full code au
 - Added the missing production `OPENAI_MODEL_EMBEDDING=text-embedding-3-small` configuration and redeployed the existing Phase 5 artifact. Authenticated hybrid search then returned 10 ranked passages; literal search, Archive, and the variant workspace also passed desktop and 390 x 844 checks without console errors or horizontal overflow.
 - Inspected both local website repositories without modifying them. Deterministic Phase 6 output now targets `content/4.writing/<slug>.md` for the Nuxt 2024 site and `src/content/writing/<slug>.md` for the Astro 2026 site, using the latter's canonical 17-tag vocabulary and five-tag cap.
 - Added backward-compatible website variant fields for publication date, hero image URL, and canonical tags. Publication readiness validates the complete shared contract and renders the exact Markdown destined for both repositories side by side; previewing does not write to GitHub or change the canonical article.
+- Added a configurable server-only GitHub Contents adapter with explicit repository allowlisting, safe input/response validation, bounded requests, UTF-8 Base64 encoding, current-file inspection, optimistic update SHAs, and sanitized provider errors. Seven mocked tests cover create, update, missing files, forbidden targets, conflicts, invalid responses, and timeouts without network access.
 
 ## Current validation checkpoint
 
-Phase 6 metadata editing and dual-target preview pass the complete local gate: `pnpm db:check`; all 14 migrations against empty Postgres with 18 public tables, pgvector, and `vector(1024)` intact; ESLint; standalone TypeScript; 96 tests across 33 files; the production build; Knip with no unused-code findings; and four credential-free Playwright checks at desktop/mobile widths.
+Phase 6 GitHub adapter validation passes the complete local gate: `pnpm db:check`; all 14 migrations against empty Postgres with 18 public tables, pgvector, and `vector(1024)` intact; ESLint; standalone TypeScript; 103 tests across 34 files; the production build; Knip with no unused-code findings; `git diff --check`; and four credential-free Playwright checks at desktop/mobile widths.
 
 ## Known issues and setup state
 
