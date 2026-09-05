@@ -4,7 +4,7 @@ Last updated: 2026-09-05
 
 ## Current phase
 
-Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 Slices 1 through 4 are pushed through `aaa1756`. Slice 5 has begun locally with an additive publication-attempt schema and deterministic state contract; the new migration is not applied to Neon and no application publication flow invokes the GitHub adapter. No website article has been written or published.
+Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 Slices 1 through 4 are pushed through `aaa1756`; the Slice 5 publication-attempt persistence foundation is pushed in `0514a1e`. GitHub Actions run `33992455125` passed and Vercel deployment `dpl_2J7sUu7iWogrDanpUDiP9RN7FMGj` is Ready on the Production aliases. Migration `0014_dazzling_mandarin.sql` is not applied to Neon and no application publication flow invokes the GitHub adapter. No website article has been written or published.
 
 ## Completed work
 
