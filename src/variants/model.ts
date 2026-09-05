@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { httpUrlSchema } from "@/lib/validation/http-url";
+import { storedWebsitePublicationDetailsSchema } from "@/publishing/website-contract";
 
 export const variantDestinations = [
   "website",
@@ -49,6 +50,7 @@ export const websiteVariantMetadataSchema = z.object({
   slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(200),
   description: z.string().trim().max(320),
   canonicalUrl: httpUrlSchema.nullable(),
+  ...storedWebsitePublicationDetailsSchema.shape,
 });
 export const linkedinPostVariantMetadataSchema = z.object({
   version: z.literal(1),

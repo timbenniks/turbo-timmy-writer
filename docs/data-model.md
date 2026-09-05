@@ -223,6 +223,13 @@ canonical article checkpoint; regeneration atomically locks both current records
 creates both required snapshots, and updates only matching revisions. Staleness is
 derived from the saved source revision/hash and current canonical document.
 
+Phase 6 extends the website variant's version-1 metadata JSON with optional
+`publicationDate`, `imageUrl`, and canonical `tags` (at most five unique values).
+No schema migration is needed because the metadata column is JSONB and the stored
+contract remains backward compatible. Publication readiness is stricter than
+storage: both repository outputs require a valid ISO timestamp, HTTP(S) image,
+and one to five tags, in addition to title, slug, and description.
+
 ### `publications`
 
 Contains `id`, `article_id`, `variant_id`, publisher ID, status, external ID, external URL, external path, commit SHA, published article version ID, request metadata JSON, safe result metadata JSON, timestamps, and optional error code. Keep prior successful publication records when updates occur or model attempts explicitly so history is auditable.

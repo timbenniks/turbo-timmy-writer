@@ -8,7 +8,7 @@ Publish and update timbenniks.dev articles through a validated GitHub API adapte
 
 1. Inspect the live and local website repositories and confirm their actual content schemas and deployment behaviour. Complete locally; verified findings are recorded in [`../website-publishing-research.md`](../website-publishing-research.md).
 2. Implement and unit-test slugging, reading time, canonical URLs, target paths, YAML serialization, metadata duplication, canonical 2026 tags, and field validation. Complete locally for deterministic Nuxt 2024 and Astro 2026 output; no GitHub write adapter exists yet.
-3. Add website metadata editing and exact frontmatter/Markdown preview.
+3. Add website metadata editing and exact frontmatter/Markdown preview. Complete locally: website variants persist the shared publication date, hero image URL, and up to five canonical tags; readiness validation gates side-by-side previews of the exact Nuxt 2024 and Astro 2026 files. Existing variants remain readable without a database migration because these JSON fields are optional until publication.
 4. Implement a configurable GitHub publisher adapter with mocked integration tests.
 5. Add explicit confirmation, create/update flows, commit tracking, canonical URL tracking, and publication snapshots.
 6. Validate a safe end-to-end publish/update against the configured repository.

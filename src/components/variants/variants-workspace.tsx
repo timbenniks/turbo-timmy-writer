@@ -10,6 +10,12 @@ import { savePublicationVariantAction } from "@/app/actions/publication-variants
 import { Button } from "@/components/ui/button";
 import { httpUrlSchema } from "@/lib/validation/http-url";
 import {
+  websitePublicationMetadataSchema,
+  websitePublicationTags,
+  type WebsitePublicationTag,
+} from "@/publishing/website-contract";
+import { websitePublicationOutputs } from "@/publishing/website";
+import {
   variantFormFromStored,
   variantPayloadFromForm,
   type VariantForm,
@@ -269,6 +275,17 @@ function VariantEditor({
     onRegenerate();
   }
 
+  function toggleWebsiteTag(tag: WebsitePublicationTag) {
+    update(
+      "tags",
+      form.tags.includes(tag)
+        ? form.tags.filter((current) => current !== tag)
+        : form.tags.length < 5
+          ? [...form.tags, tag]
+          : form.tags,
+    );
+  }
+
   const publishedUrl = safeHttpUrl(form.publicationUrl);
 
   return (
@@ -323,7 +340,43 @@ function VariantEditor({
             <Field label="Title" value={form.title} maxLength={200} onChange={(value) => update("title", value)} />
             <Field label="Slug" value={form.slug} maxLength={200} onChange={(value) => update("slug", value)} />
             <Field label="Description" value={form.description} maxLength={320} onChange={(value) => update("description", value)} />
-            <Field label="Canonical URL" value={form.canonicalUrl} inputMode="url" onChange={(value) => update("canonicalUrl", value)} />
+            <Field
+              label="Publication date (ISO 8601)"
+              value={form.publicationDate}
+              placeholder="2026-09-05T10:00:00Z"
+              onChange={(value) => update("publicationDate", value)}
+            />
+            <Field
+              label="Hero image URL"
+              value={form.imageUrl}
+              inputMode="url"
+              placeholder="https://…"
+              onChange={(value) => update("imageUrl", value)}
+            />
+            <fieldset className="grid gap-2 sm:col-span-2">
+              <legend className="text-sm font-medium">Site tags (choose up to five)</legend>
+              <div className="flex flex-wrap gap-2">
+                {websitePublicationTags.map((tag) => (
+                  <label key={tag} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={form.tags.includes(tag)}
+                      disabled={!form.tags.includes(tag) && form.tags.length >= 5}
+                      onChange={() => toggleWebsiteTag(tag)}
+                    />
+                    {tag}
+                  </label>
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {form.tags.length}/5 selected
+              </span>
+            </fieldset>
+            <p className="text-xs text-muted-foreground sm:col-span-2">
+              Canonical URL: {form.slug
+                ? `https://timbenniks.dev/writing/${form.slug}`
+                : "generated from the validated slug"}
+            </p>
           </>
         ) : null}
         {variant.destination === "linkedin-article" ? (
@@ -368,6 +421,9 @@ function VariantEditor({
         </span>
       </label>
 
+      {variant.destination === "website" ? (
+        <WebsitePublicationPreview form={form} />
+      ) : (
       <section className="rounded-xl border border-border bg-background p-5" aria-label="Formatting preview">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Formatting preview</p>
         {variant.destination === "newsletter" ? (
@@ -376,13 +432,66 @@ function VariantEditor({
             <p className="mt-1 text-xs text-muted-foreground">{form.previewText || "Preview text"}</p>
           </div>
         ) : null}
-        {(variant.destination === "website" || variant.destination === "linkedin-article") ? (
+        {variant.destination === "linkedin-article" ? (
           <h3 className="mt-4 font-serif text-2xl">{form.title || "Untitled variant"}</h3>
         ) : null}
         {form.intro ? <p className="mt-4 whitespace-pre-wrap text-sm italic leading-6">{form.intro}</p> : null}
         <div className="mt-4 whitespace-pre-wrap text-sm leading-7">{form.bodyMarkdown || "The variant body will appear here."}</div>
         {form.callToAction ? <p className="mt-5 font-medium">{form.callToAction}</p> : null}
       </section>
+      )}
+    </section>
+  );
+}
+
+function WebsitePublicationPreview({ form }: { form: VariantForm }) {
+  const metadata = websitePublicationMetadataSchema.safeParse({
+    title: form.title,
+    slug: form.slug,
+    description: form.description,
+    date: form.publicationDate,
+    image: form.imageUrl,
+    tags: form.tags,
+    draft: false,
+  });
+
+  if (!metadata.success) {
+    const issues = [...new Set(metadata.error.issues.map((issue) => {
+      const field = issue.path[0];
+      return `${typeof field === "string" ? field : "metadata"}: ${issue.message}`;
+    }))];
+    return (
+      <section className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-amber-950" aria-label="Website publication preview">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">Publication preview needs metadata</p>
+        <p className="mt-2 text-sm">Complete the website fields before either repository file can be published.</p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-xs">
+          {issues.map((issue) => <li key={issue}>{issue}</li>)}
+        </ul>
+      </section>
+    );
+  }
+
+  const outputs = websitePublicationOutputs({
+    metadata: metadata.data,
+    plainText: form.bodyMarkdown,
+    bodyMarkdown: form.bodyMarkdown,
+  });
+
+  return (
+    <section className="space-y-3" aria-label="Website publication preview">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Exact repository files</p>
+        <p className="mt-1 text-sm text-muted-foreground">Both previews come from this saved variant. Publishing remains a separate confirmed action.</p>
+      </div>
+      <div className="grid gap-4 xl:grid-cols-2">
+        {outputs.map((output) => (
+          <article key={output.target} className="min-w-0 rounded-xl border border-border bg-background p-4">
+            <p className="font-medium">{output.repository}</p>
+            <p className="mt-1 break-all font-mono text-[11px] text-muted-foreground">{output.path}</p>
+            <pre className="mt-4 max-h-[520px] overflow-auto whitespace-pre-wrap break-words rounded-lg bg-sidebar p-4 text-xs leading-5">{output.markdown}</pre>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -393,12 +502,14 @@ function Field({
   onChange,
   maxLength,
   inputMode,
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   maxLength?: number;
   inputMode?: "url";
+  placeholder?: string;
 }) {
   return (
     <label className="grid gap-1 text-sm">
@@ -407,6 +518,7 @@ function Field({
         value={value}
         maxLength={maxLength}
         inputMode={inputMode}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         className="h-10 rounded-lg border border-border bg-background px-3 outline-none focus:border-foreground"
       />

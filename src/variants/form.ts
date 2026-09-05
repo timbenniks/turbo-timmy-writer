@@ -1,3 +1,5 @@
+import type { WebsitePublicationTag } from "@/publishing/website-contract";
+
 import {
   variantPayloadSchema,
   type VariantContent,
@@ -12,6 +14,9 @@ export type VariantForm = {
   slug: string;
   description: string;
   canonicalUrl: string;
+  publicationDate: string;
+  imageUrl: string;
+  tags: WebsitePublicationTag[];
   publicationUrl: string;
   subject: string;
   previewText: string;
@@ -33,6 +38,11 @@ export function variantFormFromStored(input: {
     slug: "slug" in metadata ? metadata.slug : "",
     description: "description" in metadata ? metadata.description : "",
     canonicalUrl: "canonicalUrl" in metadata ? metadata.canonicalUrl ?? "" : "",
+    publicationDate: "publicationDate" in metadata
+      ? metadata.publicationDate ?? ""
+      : "",
+    imageUrl: "imageUrl" in metadata ? metadata.imageUrl ?? "" : "",
+    tags: "tags" in metadata ? metadata.tags ?? [] : [],
     publicationUrl: "publicationUrl" in metadata ? metadata.publicationUrl ?? "" : "",
     subject: "subject" in metadata ? metadata.subject : "",
     previewText: "previewText" in metadata ? metadata.previewText : "",
@@ -54,6 +64,9 @@ export function variantPayloadFromForm(destination: VariantDestination, form: Va
           slug: form.slug,
           description: form.description,
           canonicalUrl: form.canonicalUrl || null,
+          publicationDate: form.publicationDate || null,
+          imageUrl: form.imageUrl || null,
+          tags: form.tags,
         },
       }
     : destination === "linkedin-post"

@@ -2,7 +2,16 @@ import { stringify } from "yaml";
 import { z } from "zod";
 
 import { calculateWritingMetrics } from "@/articles/metrics";
-import { httpUrlSchema } from "@/lib/validation/http-url";
+import {
+  websitePublicationMetadataSchema,
+  websitePublicationSlugSchema,
+  type WebsitePublicationMetadata,
+} from "@/publishing/website-contract";
+
+export {
+  websitePublicationMetadataSchema,
+  type WebsitePublicationMetadata,
+} from "@/publishing/website-contract";
 
 const TIMBENNIKS_DEV_REPOSITORY = "timbenniks/timbenniksdev-2024";
 const TIMBENNIKS_DEV_WRITING_DIRECTORY = "content/4.writing";
@@ -24,55 +33,8 @@ const websitePublicationTargetProfiles = {
   },
 } as const;
 
-const timbenniks2026Tags = [
-  "composable-architecture",
-  "cms",
-  "api-design",
-  "frontend",
-  "performance",
-  "cloud-infra",
-  "developer-experience",
-  "ai-engineering",
-  "craft",
-  "personalization",
-  "devrel",
-  "product-strategy",
-  "content-ops",
-  "career",
-  "media-production",
-  "personal",
-  "opinion",
-] as const;
-
 export type WebsitePublicationTarget =
   (typeof websitePublicationTargets)[number];
-
-const websitePublicationSlugSchema = z
-  .string()
-  .trim()
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-  .max(200);
-
-const websitePublicationFaqSchema = z.object({
-  question: z.string().trim().min(1).max(300),
-  answer: z.string().trim().min(1).max(1_500),
-});
-
-export const websitePublicationMetadataSchema = z.object({
-  title: z.string().trim().min(1).max(200),
-  slug: websitePublicationSlugSchema,
-  description: z.string().trim().min(1).max(1_000),
-  date: z.iso.datetime({ offset: true }),
-  image: httpUrlSchema,
-  tags: z.array(z.enum(timbenniks2026Tags)).min(1).max(5)
-    .refine((tags) => new Set(tags).size === tags.length, "Use each tag once."),
-  faqs: z.array(websitePublicationFaqSchema).max(8).optional(),
-  draft: z.boolean().default(false),
-});
-
-export type WebsitePublicationMetadata = z.input<
-  typeof websitePublicationMetadataSchema
->;
 
 export type WebsitePublicationFrontmatter = z.output<
   typeof websitePublicationMetadataSchema
