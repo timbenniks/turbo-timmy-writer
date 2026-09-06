@@ -1,0 +1,231 @@
+# Getting started
+
+This is the operator guide for Turbo Timmy Writer. Use it when setting up a new
+machine, rotating credentials, or enabling a feature that is intentionally not
+configured yet.
+
+## What already works
+
+The application is deployed at <https://turbo-timmy-writer.vercel.app>.
+Production GitHub OAuth, Neon Postgres, generative OpenAI calls, and archive
+embeddings are configured. Database migrations `0000` through `0015` are
+applied.
+
+The remaining optional production setup is the GitHub publishing token. Until
+that token is added, articles and variants remain safe in Turbo Timmy Writer and
+the app cannot write to either website repository.
+
+## Use the deployed app
+
+1. Open <https://turbo-timmy-writer.vercel.app>.
+2. Sign in with the allowlisted `timbenniks` GitHub account.
+3. Create or reopen an article.
+4. Edit the canonical article, then create destination variants when ready.
+5. For a website variant, save it and inspect both exact Markdown previews
+   before confirming either repository independently.
+
+Publishing always requires an explicit confirmation. A variant never
+overwrites the canonical article.
+
+## Set up a development machine
+
+Requirements:
+
+- Node.js 22 or newer
+- pnpm 11.25.0
+- Git
+- Vercel CLI when pulling the managed development environment
+
+Clone and install:
+
+```bash
+git clone https://github.com/timbenniks/turbo-timmy-writer.git
+cd turbo-timmy-writer
+corepack enable
+pnpm install --frozen-lockfile
+```
+
+Link the existing Vercel project and pull its Development values into the
+ignored `.env.local` file:
+
+```bash
+vercel link
+vercel env pull .env.local --environment development --yes
+```
+
+If `.env.local` already exists, back it up before pulling because it contains
+local secrets. Never commit it.
+
+Start the application on its intentional local port:
+
+```bash
+pnpm dev
+```
+
+Then open <http://localhost:3001>. Port 3001 is used because port 3000 belongs
+to the local Hermes WhatsApp bridge.
+
+## Environment checklist
+
+`.env.example` is the source of truth for variable names. Secrets belong only
+in `.env.local` or Vercel's encrypted environment storage.
+
+| Variable | Needed for | Notes |
+| --- | --- | --- |
+| `DATABASE_URL` | Application database access | Use the pooled Neon URL. |
+| `DATABASE_URL_UNPOOLED` | Migrations and write-heavy maintenance scripts | Use the direct Neon URL. |
+| `AUTH_SECRET` | Signed login sessions | Use a long, random, environment-specific value. |
+| `AUTH_GITHUB_ID` | GitHub sign-in | Use the client ID for the environment's OAuth App. |
+| `AUTH_GITHUB_SECRET` | GitHub sign-in | Secret; local and Production use different OAuth Apps. |
+| `ALLOWED_GITHUB_LOGIN` | Access control and data ownership | Currently `timbenniks`. |
+| `NEXTAUTH_URL` | OAuth callback origin | Local is `http://localhost:3001`; Production is the canonical Vercel URL. |
+| `OPENAI_API_KEY` | Live interview, drafting, editing, reviews, repurposing, and embeddings | Secret and server-side only. |
+| `OPENAI_MODEL` | Default generative model | Used for every generative purpose unless overridden. |
+| `OPENAI_MODEL_INTERVIEW` | Optional model override | Leave unset to use `OPENAI_MODEL`. |
+| `OPENAI_MODEL_DRAFT` | Optional model override | Leave unset to use `OPENAI_MODEL`. |
+| `OPENAI_MODEL_EDIT` | Optional model override | Leave unset to use `OPENAI_MODEL`. |
+| `OPENAI_MODEL_REVIEW` | Optional model override | Leave unset to use `OPENAI_MODEL`. |
+| `OPENAI_MODEL_REPURPOSE` | Optional model override | Leave unset to use `OPENAI_MODEL`. |
+| `OPENAI_MODEL_EMBEDDING` | Archive semantic search | Must be a `text-embedding-3-*` model; vectors use 1,024 dimensions. |
+| `GITHUB_PUBLISH_TOKEN` | Live website publishing | Optional fine-grained token described below. |
+| `GITHUB_PUBLISH_BRANCH` | Website target branch | Defaults to `main`. |
+
+## GitHub OAuth
+
+Local and Production require separate GitHub OAuth Apps because an OAuth App
+accepts one callback URL. The exact application names, callback URLs, Vercel
+commands, and validation steps are in [docs/auth-setup.md](docs/auth-setup.md).
+
+Preview deployments deliberately have no GitHub OAuth credentials. They fail
+closed until a preview-login strategy is intentionally chosen.
+
+## Neon and database migrations
+
+The existing Neon database is connected through Vercel. Normal application
+traffic uses `DATABASE_URL`; migrations use `DATABASE_URL_UNPOOLED` when it is
+available.
+
+Check schema consistency and prove the complete migration chain against an
+empty local test database:
+
+```bash
+pnpm db:check
+pnpm db:test-migrations
+```
+
+Apply pending migrations only after reviewing the generated SQL and confirming
+the target database:
+
+```bash
+pnpm db:migrate
+```
+
+Do not run a migration or an import merely to test connectivity. Establish a
+disposable Neon branch before the first destructive or data-transforming
+migration.
+
+## OpenAI
+
+Set `OPENAI_API_KEY` and one shared `OPENAI_MODEL` to enable the writing tools.
+Only add purpose-specific model variables when a workflow genuinely needs a
+different model. Configure `OPENAI_MODEL_EMBEDDING` separately because it must
+be embedding-capable.
+
+The application keeps provider credentials server-side and disables provider
+response storage. CI supplies no OpenAI key and never performs paid calls.
+
+## Enable website publishing later
+
+Create a fine-grained GitHub personal access token owned by `timbenniks` with:
+
+- access limited to `timbenniks/timbenniksdev-2024` and
+  `timbenniks/timbenniks-2026`;
+- repository **Contents: Read and write** permission;
+- no additional repository or account permissions; and
+- a practical expiration date so the credential is rotated deliberately.
+
+Add it only to the Vercel Production environment:
+
+```bash
+vercel env add GITHUB_PUBLISH_TOKEN production --sensitive
+vercel env add GITHUB_PUBLISH_BRANCH production
+```
+
+Enter `main` for `GITHUB_PUBLISH_BRANCH`, then redeploy the application so the
+new environment values are present in the runtime. Do not copy the broader
+GitHub CLI credential into Vercel or `.env.local`.
+
+Before the first real publication:
+
+1. Save the website variant and make sure it is current and marked ready.
+2. Inspect the complete Nuxt 2024 and Astro 2026 Markdown previews.
+3. Confirm one target at a time.
+4. Check the recorded commit SHA and canonical URL in Turbo Timmy Writer.
+5. Confirm the corresponding website deployment succeeds before confirming the
+   second target.
+
+The application writes through the GitHub Contents API. It does not shell out
+to `gh`, invoke Vercel, or modify a local website checkout.
+
+## Validate before pushing
+
+Run the full baseline:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+For browser boundary checks:
+
+```bash
+pnpm test:e2e
+```
+
+Authenticated end-to-end tests require a deliberately recorded local auth
+state; see [tests/e2e/README.md](tests/e2e/README.md). Never commit that state.
+
+## Archive maintenance
+
+Archive scripts are intentionally dry-run-first. The source is the 2024 site's
+`content/4.writing` directory.
+
+```bash
+pnpm db:import-archive --source=/absolute/path/to/content/4.writing
+pnpm db:sync-archive-memory
+```
+
+Only add `--write` after inspecting the dry-run summary. Add `--embed` together
+with `--write` only when OpenAI usage is intended:
+
+```bash
+pnpm db:import-archive --source=/absolute/path/to/content/4.writing --write
+pnpm db:sync-archive-memory --write --embed
+```
+
+`db:import-writing` is a replacement import for canonical articles and is more
+destructive. Do not pass its `--replace` option without first backing up the
+database and confirming that replacing the owner's articles is intended.
+
+## Common problems
+
+- **The root redirects to sign-in:** expected when no authenticated session is
+  present.
+- **The sign-in page reports missing setup:** check the four auth variables and
+  the exact OAuth callback URL.
+- **AI actions are unavailable:** check `OPENAI_API_KEY`, `OPENAI_MODEL`, and the
+  relevant optional purpose override.
+- **Semantic search is unavailable:** check `OPENAI_MODEL_EMBEDDING` and confirm
+  archive chunks have embeddings.
+- **Publishing reports missing configuration:** add the scoped publisher token
+  and branch to Production, then redeploy.
+- **A Preview deployment cannot sign in:** expected with the current fail-closed
+  Preview OAuth policy.
+- **Local port 3001 is occupied:** stop the conflicting process or set an
+  intentional alternate port and update the Development OAuth callback to
+  match before signing in.
+
+For current deployment state, completed migrations, and known limitations, see
+[PROJECT_STATE.md](PROJECT_STATE.md).

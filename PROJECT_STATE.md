@@ -4,7 +4,7 @@ Last updated: 2026-09-06
 
 ## Current phase
 
-Phases 0 through 6 are complete: exact dual-repository previews, explicit per-target confirmation, create/update orchestration, immutable publication snapshots, commit/canonical tracking, safe retry state, and live disposable-branch GitHub validation all pass. Neon has all 16 migrations applied through `0015_workable_mysterio.sql`. No article was published during validation; production publishing remains disabled until a fine-grained server-side GitHub token is configured.
+Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness objective: make the proven writing-to-publishing workflow straightforward to configure and maintain before expanding product scope. Neon has all 16 migrations applied through `0015_workable_mysterio.sql`. No article was published during validation; production publishing remains disabled until a fine-grained server-side GitHub token is configured.
 
 ## Completed work
 
@@ -213,10 +213,11 @@ Phases 0 through 6 are complete: exact dual-repository previews, explicit per-ta
 - Completed Phase 6 publication orchestration with explicit per-repository confirmation, saved/ready/current guards, atomic revision revalidation, one-pending-attempt enforcement, optimistic blob-SHA updates, path-change protection, independent result history, and canonical URL tracking. The browser exposed and a focused regression test fixed an empty optional-URL crash in the shared validator.
 - Applied migrations `0014_dazzling_mandarin.sql` and `0015_workable_mysterio.sql` through the configured direct Neon connection. Pooled verification found 16 migration records, the `publications` table and pending-target unique index, 82 unchanged articles, and zero fixture variants/publications after cleanup.
 - Live GitHub validation created and updated the exact 2026 writing path on a disposable non-production branch, verified distinct commit/blob SHAs, and deleted the branch. Its reusable fixture now goes through the production website serializer so it cannot drift from the Astro content schema. Desktop and 390 × 844 authenticated inspection showed both exact previews, enabled confirmation actions only for saved/ready/current content, disabled both actions after an unsaved edit, and no horizontal overflow.
+- Began Phase 7 with a repository-root operator guide covering current versus optional setup, a fresh development machine, the complete environment contract, OAuth, database safety, AI configuration, least-privilege website publishing, validation, archive maintenance, and troubleshooting. README now routes maintainers to the guide.
 
 ## Current validation checkpoint
 
-Phase 6 completion passes the full gate: `pnpm db:check`; all 16 migrations against empty Postgres with 19 public tables, pgvector, `vector(1024)`, the publication table, and its pending-target guard intact; ESLint; standalone TypeScript; 114 tests across 37 files with the opt-in live GitHub test skipped in the normal suite; the production build; Knip with no unused-code findings; `git diff --check`; and four credential-free Playwright checks at desktop/mobile widths. The same opt-in GitHub test passed separately against a disposable branch.
+Phase 7 Slice 1 is documentation-only. Its validation checks every relative Markdown link, confirms every `.env.example` variable is documented, and runs the full Phase 0 baseline. The preceding Phase 6 checkpoint passed all 16 migrations against empty Postgres, ESLint, standalone TypeScript, 114 tests, the production build, and four credential-free Playwright checks.
 
 ## Known issues and setup state
 
@@ -268,4 +269,4 @@ Phase 6 completion passes the full gate: `pnpm db:check`; all 16 migrations agai
 ## Next tasks
 
 1. Configure a fine-grained production GitHub publisher token when Tim is ready to enable live publication.
-2. Begin Phase 7 only after reading and confirming its active phase plan.
+2. Use the core workflow in Production and select the next Phase 7 objective from observed friction rather than treating the candidate backlog as committed scope.

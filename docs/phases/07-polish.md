@@ -4,6 +4,33 @@
 
 Improve speed, confidence, and reach after the core writing-to-publishing workflow is proven.
 
+## Active objective
+
+Make the finished core workflow straightforward to operate before adding more
+product surface. This is documentation and operational hardening, not a new
+integration.
+
+### Slice 1: operator getting-started guide
+
+Complete locally on 2026-09-06. `GETTING_STARTED.md` now distinguishes existing
+Production setup from optional future configuration and covers a new machine,
+all validated environment variables, GitHub OAuth, Neon migrations, OpenAI,
+least-privilege website publishing, verification, archive maintenance, and
+common failure modes. The README links to it.
+
+Acceptance criteria:
+
+- Every application environment variable has a purpose and setup boundary.
+- Secret values are never included, and privileged credentials remain
+  server-side.
+- Destructive database operations are visibly separated from ordinary setup.
+- Publishing setup grants only the repository access the adapter needs.
+- Commands and local links match the current repository.
+
+Privacy and cost review: documentation introduces no runtime collection,
+external calls, or new dependency. Paid embedding commands remain explicit and
+the guide labels them before use.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
