@@ -10,7 +10,7 @@ import { listDeliveriesForArticleUser } from "@/db/queries/deliveries";
 import { listPublicationsForArticleUser } from "@/db/queries/publications";
 import { listPublicationVariantsForUser } from "@/db/queries/publication-variants";
 import { listThemesForUser } from "@/db/queries/themes";
-import { readButtondownEnvironment } from "@/lib/env/server";
+import { readButtondownEnvironment, readLinkedInEnvironment } from "@/lib/env/server";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +50,7 @@ export default async function ArticleVariantsPage({
           articleTitle={article.title}
           articleRevision={article.revision}
           buttondownConfigured={Boolean(readButtondownEnvironment())}
+          linkedInConfigured={Boolean(readLinkedInEnvironment())}
           publications={publications.map((publication) => ({
             ...publication,
             createdAt: publication.createdAt.toISOString(),

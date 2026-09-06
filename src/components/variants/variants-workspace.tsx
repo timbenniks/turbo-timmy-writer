@@ -10,7 +10,10 @@ import {
   publishWebsiteVariantAction,
   savePublicationVariantAction,
 } from "@/app/actions/publication-variants";
-import { createButtondownDraftAction } from "@/app/actions/deliveries";
+import {
+  createButtondownDraftAction,
+  publishLinkedInPostAction,
+} from "@/app/actions/deliveries";
 import { Button } from "@/components/ui/button";
 import { httpUrlSchema } from "@/lib/validation/http-url";
 import {
@@ -99,6 +102,7 @@ export function VariantsWorkspace({
   articleTitle,
   articleRevision,
   buttondownConfigured,
+  linkedInConfigured,
   variants,
   publications,
   deliveries,
@@ -107,6 +111,7 @@ export function VariantsWorkspace({
   articleTitle: string;
   articleRevision: number;
   buttondownConfigured: boolean;
+  linkedInConfigured: boolean;
   variants: VariantWorkspaceSnapshot[];
   publications: PublicationSnapshot[];
   deliveries: DeliverySnapshot[];
@@ -223,6 +228,7 @@ export function VariantsWorkspace({
             publications={publications.filter(({ variantId }) => variantId === current.id)}
             deliveries={deliveries.filter(({ variantId }) => variantId === current.id)}
             buttondownConfigured={buttondownConfigured}
+            linkedInConfigured={linkedInConfigured}
           />
         ) : (
           <section className="mx-auto max-w-2xl rounded-2xl border border-dashed border-border bg-surface px-6 py-16 text-center">
@@ -252,6 +258,7 @@ function VariantEditor({
   publications,
   deliveries,
   buttondownConfigured,
+  linkedInConfigured,
 }: {
   articleId: string;
   variant: VariantWorkspaceSnapshot;
@@ -262,6 +269,7 @@ function VariantEditor({
   publications: PublicationSnapshot[];
   deliveries: DeliverySnapshot[];
   buttondownConfigured: boolean;
+  linkedInConfigured: boolean;
 }) {
   const router = useRouter();
   const [form, setForm] = useState(() => variantFormFromStored(variant));
@@ -507,6 +515,16 @@ function VariantEditor({
           onMessage={onMessage}
         />
       ) : null}
+      {variant.destination === "linkedin-post" ? (
+        <LinkedInDelivery
+          articleId={articleId}
+          variant={variant}
+          dirty={dirty}
+          delivery={deliveries.find(({ provider }) => provider === "linkedin")}
+          configured={linkedInConfigured}
+          onMessage={onMessage}
+        />
+      ) : null}
     </section>
   );
 }
@@ -575,6 +593,71 @@ function ButtondownDelivery({
       {delivery?.status === "pending" ? <p className="mt-2 text-xs text-amber-700">A Buttondown request is pending.</p> : null}
       {delivery?.status === "failed" ? <p className="mt-2 text-xs text-red-700">Last draft attempt failed safely ({delivery.errorCode ?? "unknown"}).</p> : null}
       {delivery?.status === "succeeded" ? <p className="mt-2 text-xs text-emerald-700">Draft created · provider ID {delivery.externalId}</p> : null}
+    </section>
+  );
+}
+
+function LinkedInDelivery({
+  articleId,
+  variant,
+  dirty,
+  delivery,
+  configured,
+  onMessage,
+}: {
+  articleId: string;
+  variant: VariantWorkspaceSnapshot;
+  dirty: boolean;
+  delivery?: DeliverySnapshot;
+  configured: boolean;
+  onMessage: (message: string) => void;
+}) {
+  const router = useRouter();
+  const [publishing, setPublishing] = useState(false);
+
+  async function publish() {
+    if (!window.confirm(
+      "Publish this exact saved post publicly on LinkedIn now? This cannot be kept as a draft or automatically undone.",
+    )) return;
+    setPublishing(true);
+    try {
+      const result = await publishLinkedInPostAction({
+        articleId,
+        variantId: variant.id,
+        expectedRevision: variant.revision,
+        confirmed: true,
+      });
+      onMessage(result.message);
+      if (result.ok) router.refresh();
+    } catch {
+      onMessage("LinkedIn publication failed safely. Check its audit result before retrying.");
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  const disabled = !configured || dirty || variant.freshness.stale || variant.status === "draft" || publishing;
+  return (
+    <section className="rounded-xl border border-red-200 bg-background p-5" aria-label="LinkedIn public delivery">
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">LinkedIn public post</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            LinkedIn publishes immediately. There is no draft stage or automatic undo.
+          </p>
+        </div>
+        <Button size="sm" disabled={disabled} onClick={() => void publish()}>
+          {publishing ? <LoaderCircle className="animate-spin" /> : <Send />}
+          {publishing ? "Publishing…" : "Publish publicly"}
+        </Button>
+      </div>
+      {dirty ? <p className="mt-2 text-xs text-amber-700">Save these changes before publishing.</p> : null}
+      {!configured ? <p className="mt-2 text-xs text-amber-700">Configure the server-side LinkedIn identity, token, and API version to enable publishing.</p> : null}
+      {variant.status === "draft" ? <p className="mt-2 text-xs text-amber-700">Set and save the variant as Ready first.</p> : null}
+      {variant.freshness.stale ? <p className="mt-2 text-xs text-amber-700">Regenerate this stale variant first.</p> : null}
+      {delivery?.status === "pending" ? <p className="mt-2 text-xs text-amber-700">A LinkedIn publication is pending.</p> : null}
+      {delivery?.status === "failed" ? <p className="mt-2 text-xs text-red-700">Last publication failed safely ({delivery.errorCode ?? "unknown"}).</p> : null}
+      {delivery?.status === "succeeded" ? <p className="mt-2 text-xs text-emerald-700">Published publicly · provider ID {delivery.externalId}</p> : null}
     </section>
   );
 }

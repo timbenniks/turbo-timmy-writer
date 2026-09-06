@@ -46,13 +46,14 @@ test.describe("audited provider delivery", () => {
     }]);
   });
 
-  test("shows a guarded Buttondown draft action without making a provider request", async ({ page }) => {
+  test("shows guarded provider actions without making a provider request", async ({ page }) => {
     if (!databaseUrl || !allowedLogin) return;
     const sql = neon(databaseUrl);
     const [user] = await sql`select id from users where lower(github_login) = lower(${allowedLogin}) limit 1`;
     const articleId = randomUUID();
     const versionId = randomUUID();
     const variantId = randomUUID();
+    const linkedInVariantId = randomUUID();
     const title = "Disposable newsletter delivery";
     const documentJson = {
       type: "doc" as const,
@@ -73,6 +74,20 @@ test.describe("audited provider delivery", () => {
     };
     const sourceContentHash = hashCanonicalArticle({ title, documentJson });
     const contentHash = hashVariant({ content, metadata });
+    const linkedInContent = {
+      version: 1 as const,
+      destination: "linkedin-post" as const,
+      bodyMarkdown: "Disposable public post",
+    };
+    const linkedInMetadata = {
+      version: 1 as const,
+      destination: "linkedin-post" as const,
+      publicationUrl: null,
+    };
+    const linkedInContentHash = hashVariant({
+      content: linkedInContent,
+      metadata: linkedInMetadata,
+    });
 
     await sql`insert into articles (id,user_id,title,slug,status,document_json,plain_text,metadata,revision)
       values (${articleId},${user.id},${title},${`delivery-${articleId}`},'editing',${JSON.stringify(documentJson)}::jsonb,'Canonical body',${JSON.stringify({ version: 1 })}::jsonb,1)`;
@@ -87,8 +102,17 @@ test.describe("audited provider delivery", () => {
         ${variantId},${user.id},${articleId},'newsletter',${JSON.stringify(content)}::jsonb,
         ${JSON.stringify(metadata)}::jsonb,${versionId},1,${sourceContentHash},${contentHash},1,'ready'
       )`;
+      await sql`insert into publication_variants (
+        id,user_id,article_id,destination,content_json,metadata_json,
+        generated_from_version_id,source_article_revision,source_content_hash,
+        content_hash,revision,status
+      ) values (
+        ${linkedInVariantId},${user.id},${articleId},'linkedin-post',${JSON.stringify(linkedInContent)}::jsonb,
+        ${JSON.stringify(linkedInMetadata)}::jsonb,${versionId},1,${sourceContentHash},${linkedInContentHash},1,'ready'
+      )`;
 
       await page.goto(`/articles/${articleId}/variants`);
+      await page.getByRole("button", { name: /Newsletter/ }).click();
       await expect(page.getByRole("heading", { name: "Newsletter", exact: true })).toBeVisible();
       const delivery = page.getByRole("region", { name: "Buttondown draft delivery" });
       await expect(delivery.getByText("It never sends the newsletter.")).toBeVisible();
@@ -97,6 +121,19 @@ test.describe("audited provider delivery", () => {
       else {
         await expect(button).toBeDisabled();
         await expect(delivery.getByText(/Configure the server-side Buttondown API key/)).toBeVisible();
+      }
+
+      await page.getByRole("button", { name: /LinkedIn post/ }).click();
+      const linkedInDelivery = page.getByRole("region", { name: "LinkedIn public delivery" });
+      await expect(linkedInDelivery.getByText(/publishes immediately/)).toBeVisible();
+      const publishButton = linkedInDelivery.getByRole("button", { name: "Publish publicly" });
+      const linkedInConfigured = process.env.LINKEDIN_ACCESS_TOKEN
+        && process.env.LINKEDIN_AUTHOR_URN
+        && process.env.LINKEDIN_API_VERSION;
+      if (linkedInConfigured) await expect(publishButton).toBeEnabled();
+      else {
+        await expect(publishButton).toBeDisabled();
+        await expect(linkedInDelivery.getByText(/Configure the server-side LinkedIn identity/)).toBeVisible();
       }
     } finally {
       await sql`delete from articles where id = ${articleId}`;

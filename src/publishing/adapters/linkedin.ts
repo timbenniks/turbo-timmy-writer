@@ -1,8 +1,8 @@
 import "server-only";
 
 import { z } from "zod";
+import { linkedInTextPostSnapshot } from "@/delivery/linkedin";
 
-const commentarySchema = z.string().trim().min(1).max(3_000);
 const postIdSchema = z.string().trim().regex(/^urn:li:(?:share|ugcPost):[0-9]+$/).max(200);
 
 export class LinkedInPublishError extends Error {
@@ -38,8 +38,15 @@ export function createLinkedInPublisher(options: {
 
   return {
     async publishText(commentary: unknown) {
-      const parsed = commentarySchema.safeParse(commentary);
-      if (!parsed.success) throw new LinkedInPublishError("invalid_request");
+      let snapshot: ReturnType<typeof linkedInTextPostSnapshot>;
+      try {
+        snapshot = linkedInTextPostSnapshot({
+          authorUrn: config.authorUrn,
+          commentary: z.string().parse(commentary),
+        });
+      } catch {
+        throw new LinkedInPublishError("invalid_request");
+      }
       let response: Response;
       try {
         response = await request("https://api.linkedin.com/rest/posts", {
@@ -50,18 +57,7 @@ export function createLinkedInPublisher(options: {
             "Linkedin-Version": config.apiVersion,
             "X-Restli-Protocol-Version": "2.0.0",
           },
-          body: JSON.stringify({
-            author: config.authorUrn,
-            commentary: parsed.data,
-            visibility: "PUBLIC",
-            distribution: {
-              feedDistribution: "MAIN_FEED",
-              targetEntities: [],
-              thirdPartyDistributionChannels: [],
-            },
-            lifecycleState: "PUBLISHED",
-            isReshareDisabledByAuthor: false,
-          }),
+          body: JSON.stringify(snapshot),
           signal: AbortSignal.timeout(timeoutMs),
         });
       } catch (error) {

@@ -203,10 +203,20 @@ creation may affect plan usage; publishing remains a separate explicit action.
 Direct member posting is technically supported through LinkedIn's versioned
 Posts API when an app has the self-serve **Share on LinkedIn** product and an
 OAuth token with `w_member_social`. It also requires Tim's numeric Person URN
-and a currently supported `YYYYMM` API version. The API publishes immediately,
-so leave all three `LINKEDIN_*` values unset until explicit-confirmation UI and
-durable delivery auditing are enabled. Tokens expire and must stay server-side;
-never reuse the GitHub OAuth credential or place a LinkedIn token in the client.
+and a currently supported `YYYYMM` API version. Add all three values to the
+Production environment and redeploy only when direct public posting is wanted:
+
+```bash
+vercel env add LINKEDIN_ACCESS_TOKEN production --sensitive
+vercel env add LINKEDIN_AUTHOR_URN production
+vercel env add LINKEDIN_API_VERSION production
+```
+
+Save a current LinkedIn post variant as Ready, review the exact text, then use
+Publish publicly. The warning requires confirmation and the server records the
+exact public request before calling LinkedIn. The API publishes immediately;
+there is no draft stage or automatic undo. Tokens expire and must stay
+server-side; never reuse the GitHub OAuth credential or put a token in the client.
 
 ## Enable website publishing later
 

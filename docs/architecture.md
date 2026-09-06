@@ -155,10 +155,11 @@ and must be based on the actual content type rather than assumed field names.
 Creating and publishing an entry remain distinct operations.
 
 LinkedIn is different: its supported member Posts API writes public content in
-the create call. The transport therefore requires a configured Person URN,
-Bearer token with `w_member_social`, and explicit API version, and it stays
-disconnected until confirmation/audit orchestration exists. Generation and
-variant persistence must never invoke it.
+the create call. The transport requires a configured Person URN, Bearer token
+with `w_member_social`, and explicit API version. A saved, Ready, current
+LinkedIn-post variant must pass explicit immediate-publication confirmation;
+the exact shared request object is persisted in `deliveries` before the call.
+Generation and variant persistence never invoke it.
 
 Phase 5 keeps destination profiles in independent modules under
 `src/variants/destinations`. `article-repurpose/v1` receives exactly one profile,

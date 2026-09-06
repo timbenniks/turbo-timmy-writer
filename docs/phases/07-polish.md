@@ -351,7 +351,7 @@ member posting remains practical through the self-serve Share on LinkedIn
 product and `w_member_social`. A server-only adapter implements the versioned
 `POST /rest/posts` text-post contract for a configured Person URN. Because the
 API creates a public post immediately, the adapter is disconnected until an
-explicit confirmation and durable audit record are available.
+explicit confirmation and durable audit record are available in Slice 19.
 
 Acceptance criteria:
 
@@ -362,10 +362,9 @@ Acceptance criteria:
 - Success requires a validated LinkedIn share or UGC-post URN response header.
 - No UI path, OAuth token, live request, or automatic LinkedIn publication exists.
 
-Privacy and cost review: the disconnected adapter sends nothing today. Future
-use would transmit the confirmed post text to LinkedIn and publish it publicly
-in the same call, so explicit confirmation and an auditable immutable snapshot
-are mandatory; it must never run during generation or variant save.
+Privacy and cost review: the adapter alone sends nothing. Slice 19 invokes it
+only through explicit public-post confirmation and a prior immutable audit row;
+it never runs during generation or variant save.
 
 ### Slice 17: optional GitHub backup delivery
 
@@ -419,14 +418,34 @@ to Buttondown, which retains a remote draft and may count it toward plan usage.
 No recipient send, automatic retry, background job, AI call, or credential
 exposure occurs. GitHub/website publication history remains a separate table.
 
+### Slice 19: audited LinkedIn public-post delivery
+
+Complete locally on 2026-09-06. A LinkedIn post variant that is saved, Ready,
+and current exposes a deliberately alarming confirmed publication action. The
+same request builder supplies both the immutable preflight audit snapshot and
+the Posts API body, preventing audit/request drift. LinkedIn publishes in the
+create call; the UI never describes this operation as a draft or offers an undo.
+
+Acceptance criteria:
+
+- Authentication, exact variant revision, LinkedIn-post destination, Ready
+  state, current canonical source, valid commentary, configuration, and explicit
+  public-publication confirmation are required.
+- The exact Person URN, commentary, public distribution, and `PUBLISHED`
+  lifecycle request is hashed and persisted before the provider call.
+- The provider is never called after audit concurrency refusal.
+- Success records the validated LinkedIn post URN; failure records only a bounded error code.
+- The UI distinguishes all blocked/result states and says publication is immediate and not automatically reversible.
+- Desktop/mobile authenticated validation makes no live LinkedIn request.
+
+Privacy and cost review: confirmation sends the saved post text and configured
+Person identity to LinkedIn and immediately makes it public. LinkedIn retains
+the post under its platform policies. There is no background execution,
+automatic retry, token exposure, generation-time call, or silent canonical edit.
+
 ## Candidate work
 
-- Richer version comparison and AI annotations
-- Command palette and broader keyboard shortcuts
-- Improved theme builder
-- Hero image and optional Cloudinary integration
 - Contentstack Developers field mapping and audited publish orchestration
-- Explicitly confirmed and audited LinkedIn publication orchestration
 
 ## Planning rule
 

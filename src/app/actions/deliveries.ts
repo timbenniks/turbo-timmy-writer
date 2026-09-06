@@ -12,12 +12,17 @@ import {
 } from "@/db/queries/deliveries";
 import { getPublicationVariantForUser } from "@/db/queries/publication-variants";
 import { buttondownDraftSnapshot } from "@/delivery/newsletter";
+import { linkedInTextPostSnapshot } from "@/delivery/linkedin";
 import { deliverySnapshotHash } from "@/delivery/model";
-import { readButtondownEnvironment } from "@/lib/env/server";
+import { readButtondownEnvironment, readLinkedInEnvironment } from "@/lib/env/server";
 import {
   ButtondownError,
   createButtondownAdapter,
 } from "@/publishing/adapters/buttondown";
+import {
+  createLinkedInPublisher,
+  LinkedInPublishError,
+} from "@/publishing/adapters/linkedin";
 import { hashCanonicalArticle } from "@/variants/hashing";
 import { variantFreshness, variantIdSchema } from "@/variants/model";
 
@@ -105,6 +110,87 @@ export async function createButtondownDraftAction(input: unknown) {
       message: error instanceof ButtondownError
         ? error.message
         : "Buttondown could not create the newsletter draft.",
+    };
+  }
+}
+
+export async function publishLinkedInPostAction(input: unknown) {
+  const parsed = inputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false as const, message: "Confirm the public LinkedIn post first." };
+  }
+  const session = await getAllowedSession();
+  if (!session) return { ok: false as const, message: "Your session has expired." };
+  const [article, variant] = await Promise.all([
+    getArticleForUser(parsed.data.articleId, session.user.id),
+    getPublicationVariantForUser(parsed.data.variantId, session.user.id),
+  ]);
+  if (!article || !variant || variant.articleId !== article.id || variant.destination !== "linkedin-post") {
+    return { ok: false as const, message: "The LinkedIn post variant was not found." };
+  }
+  if (variant.revision !== parsed.data.expectedRevision || variant.status === "draft") {
+    return { ok: false as const, message: "Save the current LinkedIn post as Ready before publishing." };
+  }
+  const freshness = variantFreshness({
+    sourceArticleRevision: variant.sourceArticleRevision,
+    sourceContentHash: variant.sourceContentHash,
+  }, {
+    sourceArticleRevision: article.revision,
+    sourceContentHash: hashCanonicalArticle(article),
+  });
+  if (freshness.stale) {
+    return { ok: false as const, message: "Regenerate the stale LinkedIn post before publishing." };
+  }
+  const environment = readLinkedInEnvironment();
+  if (!environment) {
+    return { ok: false as const, message: "LinkedIn publishing is not configured." };
+  }
+
+  let snapshot: ReturnType<typeof linkedInTextPostSnapshot>;
+  try {
+    const commentary = variant.contentJson.destination === "linkedin-post"
+      ? variant.contentJson.bodyMarkdown
+      : "";
+    snapshot = linkedInTextPostSnapshot({ authorUrn: environment.authorUrn, commentary });
+  } catch {
+    return { ok: false as const, message: "The saved LinkedIn post is invalid." };
+  }
+  const attempt = await createPendingDeliveryForUser({
+    userId: session.user.id,
+    articleId: article.id,
+    variantId: variant.id,
+    expectedVariantRevision: variant.revision,
+    expectedArticleRevision: article.revision,
+    sourceContentHash: variant.sourceContentHash,
+    destination: "linkedin-post",
+    provider: "linkedin",
+    operation: "publish",
+    snapshot,
+    snapshotHash: deliverySnapshotHash(snapshot),
+  });
+  if (!attempt) {
+    return { ok: false as const, message: "The variant changed or another LinkedIn publication is pending. Reload before retrying." };
+  }
+
+  try {
+    const result = await createLinkedInPublisher(environment).publishText(snapshot.commentary);
+    const completed = await succeedDeliveryForUser({
+      deliveryId: attempt.id,
+      userId: session.user.id,
+      externalId: result.postId,
+      resultMetadata: { lifecycleState: "PUBLISHED" },
+    });
+    return completed
+      ? { ok: true as const, message: "LinkedIn post published publicly.", externalId: result.postId }
+      : { ok: false as const, message: "LinkedIn published the post, but its local audit result needs reconciliation." };
+  } catch (error) {
+    const code = error instanceof LinkedInPublishError ? error.code : "unavailable";
+    await failDeliveryForUser({ deliveryId: attempt.id, userId: session.user.id, errorCode: code });
+    return {
+      ok: false as const,
+      message: error instanceof LinkedInPublishError
+        ? error.message
+        : "LinkedIn could not publish the post.",
     };
   }
 }
