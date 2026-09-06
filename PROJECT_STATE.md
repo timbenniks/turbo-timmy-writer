@@ -224,10 +224,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Added a production-only installable PWA shell with a standalone manifest, uncached root-scoped service worker, and generic navigation fallback. It pre-caches only the public offline page and icon; protected pages, API responses, and article content never enter Cache Storage, while the already-open editor retains its existing local recovery/retry behavior.
 - Added protected private Insights derived from existing owner-scoped article, AI-run, variant, and publication records. It reports writing volume, recent activity, pipeline distribution, AI outcomes/tokens/timing, variant readiness, and publication outcomes without tracking scripts, third-party analytics, new cookies, or new behavioral rows.
 - Added an explicit portable writing backup from Insights. The owner-only, private/no-store JSON attachment includes canonical Tiptap documents plus Markdown projections, tags, immutable article versions, variants, and exact publication history in stable ID order, while excluding auth records, secrets, provider configuration, embeddings, and binary assets.
+- Added Quick Capture to the Ideas workspace for ideas, fragments, and research notes. Bounded server validation creates an owner-scoped canonical Tiptap article with `idea` status and explicit metadata kind; deterministic title fallback, derived plain text, and inbox labels preserve the distinction without a parallel notes format or AI call.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 11 passes ESLint, standalone TypeScript, 146 tests across 50 files, and the production build. Unit/route coverage proves the versioned filename, fail-closed access, owner ID propagation, private/no-store JSON attachment, and stable contract without touching a live database or external service. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
+Phase 7 Slice 12 passes ESLint, standalone TypeScript, 152 tests across 52 files, and the production build. Unit/action coverage proves canonical paragraph construction, bounded title fallback, explicit kind labels, validation, fail-closed access, owner propagation, and Ideas revalidation without a paid or external call. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
 
 ## Known issues and setup state
 

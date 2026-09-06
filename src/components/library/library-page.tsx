@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 
 import type { LibraryFilter } from "@/articles/model";
 import { getAllowedSession } from "@/auth/session";
@@ -12,9 +13,10 @@ import { listThemesForUser } from "@/db/queries/themes";
 
 type LibraryPageProps = {
   filter: LibraryFilter;
+  libraryToolbar?: ReactNode;
 };
 
-export async function LibraryPage({ filter }: LibraryPageProps) {
+export async function LibraryPage({ filter, libraryToolbar }: LibraryPageProps) {
   const session = await getAllowedSession();
   if (!session) {
     redirect("/sign-in");
@@ -35,6 +37,7 @@ export async function LibraryPage({ filter }: LibraryPageProps) {
       recentArticles={recentArticles}
       themes={themes}
       taxonomyTags={taxonomyTags}
+      libraryToolbar={libraryToolbar}
     />
   );
 }

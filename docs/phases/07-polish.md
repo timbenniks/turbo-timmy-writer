@@ -254,6 +254,27 @@ so it is returned only to Tim's authenticated browser and is never cached by
 the app shell. Download is explicit. No external write, model/provider call,
 dependency, or new database row is involved.
 
+### Slice 12: ideas, fragments, and research-note inbox
+
+Complete locally on 2026-09-06. The Ideas workspace now has a compact capture
+form for an idea, prose fragment, or research note. Every capture immediately
+becomes an owner-scoped canonical Tiptap article with `idea` lifecycle status
+and an explicit metadata kind, so it can use the normal editor, versioning,
+organization, AI tools, and later promotion without conversion.
+
+Acceptance criteria:
+
+- Capture kind, optional title, and body are bounded and server validated.
+- Untitled captures derive a deterministic bounded title from the first line.
+- Paragraph breaks become supported Tiptap paragraph nodes; plain text is derived.
+- The article is created with `idea` status and retains its explicit entry kind.
+- The Ideas list displays Idea, Fragment, or Research note instead of hiding the distinction.
+- Capture never invokes AI and cannot edit an existing article.
+
+Privacy and cost review: capture writes only the supplied text to Tim's existing
+article table. It makes no model or external call, adds no dependency/schema,
+and retains the same owner boundary as every canonical article.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -262,7 +283,6 @@ dependency, or new database row is involved.
 - Hero image and optional Cloudinary integration
 - Source and citation management UI and citation formatting
 - Archive relationships and graph exploration
-- Fragments, research notes, and ideas inbox
 - Optional GitHub delivery for the portable backup
 - Newsletter provider adapter
 - Contentstack Developers publisher

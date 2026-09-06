@@ -18,6 +18,7 @@ import {
   type LibraryFilter,
 } from "@/articles/model";
 import type { TagTaxonomyItem } from "@/articles/organization";
+import { entryKindLabels } from "@/captures/model";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { CommandPalette, CommandPaletteTrigger } from "@/components/navigation/command-palette";
 import { ArticleEditor } from "@/components/editor/article-editor";
@@ -41,6 +42,7 @@ type ArticleSummary = {
   title: string;
   status: ArticleStatus;
   plainText: string;
+  metadata: ArticleMetadata;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -85,6 +87,7 @@ type AppShellProps = {
   taxonomyTags: TagTaxonomyItem[];
   content?: ReactNode;
   activeUtility?: "insights";
+  libraryToolbar?: ReactNode;
 };
 
 const filterTitles: Record<LibraryFilter, string> = {
@@ -139,6 +142,7 @@ export function AppShell({
   taxonomyTags,
   content,
   activeUtility,
+  libraryToolbar,
 }: AppShellProps) {
   const activeCommandArticle = selectedArticle ?? commandArticle;
   const commands = [
@@ -268,7 +272,7 @@ export function AppShell({
               aiRuns={selectedArticleAiRuns}
             />
           ) : (
-            <Library articles={articles} filter={activeFilter} />
+            <Library articles={articles} filter={activeFilter} toolbar={libraryToolbar} />
           ))}
         </section>
 
@@ -287,9 +291,11 @@ export function AppShell({
 function Library({
   articles,
   filter,
+  toolbar,
 }: {
   articles: ArticleSummary[];
   filter: LibraryFilter;
+  toolbar?: ReactNode;
 }) {
   const title = filterTitles[filter];
 
@@ -322,6 +328,7 @@ function Library({
             <NewArticleButton compact />
           </div>
         </div>
+        {toolbar ? <div className="mt-8">{toolbar}</div> : null}
 
         {articles.length ? (
           <div className="mt-10 divide-y divide-border border-y border-border">
@@ -341,7 +348,9 @@ function Library({
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground sm:justify-end">
                   <span className="rounded-full border border-border bg-surface px-2.5 py-1">
-                    {articleStatusLabel(article.status)}
+                    {article.metadata.entryKind
+                      ? entryKindLabels[article.metadata.entryKind]
+                      : articleStatusLabel(article.status)}
                   </span>
                   <time dateTime={article.updatedAt.toISOString()}>
                     {formatUpdatedAt(article.updatedAt)}

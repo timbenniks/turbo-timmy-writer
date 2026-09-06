@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { ExternalHeroImage } from "@/assets/model";
+import type { EntryKind } from "@/captures/model";
 
 export const articleStatuses = [
   "idea",
@@ -21,6 +22,7 @@ export type LibraryFilter = "all" | "drafts" | "ideas" | "published" | "archive"
 export type ArticleMetadata = {
   version: 1;
   heroImage?: ExternalHeroImage;
+  entryKind?: EntryKind;
 };
 
 export const emptyArticleMetadata: ArticleMetadata = { version: 1 };

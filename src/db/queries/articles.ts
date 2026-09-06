@@ -11,15 +11,22 @@ import {
   type LibraryFilter,
 } from "@/articles/model";
 import type { ExternalHeroImage } from "@/assets/model";
+import {
+  quickCaptureDocument,
+  quickCaptureTitle,
+  type QuickCaptureInput,
+} from "@/captures/model";
 import { getDatabase } from "@/db/client";
 import { articles } from "@/db/schema";
 import { emptyArticleDocument } from "@/editor/document";
+import { articleDocumentToPlainText } from "@/editor/serialization/plain-text";
 
 const articleSummarySelection = {
   id: articles.id,
   title: articles.title,
   status: articles.status,
   plainText: articles.plainText,
+  metadata: articles.metadata,
   createdAt: articles.createdAt,
   updatedAt: articles.updatedAt,
 };
@@ -78,6 +85,26 @@ export async function createBlankArticleForUser(userId: string) {
     throw new Error("Blank article creation did not return an article ID.");
   }
 
+  return article;
+}
+
+export async function createQuickCaptureForUser(userId: string, input: QuickCaptureInput) {
+  const id = randomUUID();
+  const documentJson = quickCaptureDocument(input.body);
+  const [article] = await getDatabase()
+    .insert(articles)
+    .values({
+      id,
+      userId,
+      title: quickCaptureTitle(input),
+      slug: untitledArticleSlug(id),
+      status: "idea",
+      documentJson,
+      plainText: articleDocumentToPlainText(documentJson),
+      metadata: { version: 1, entryKind: input.kind },
+    })
+    .returning({ id: articles.id });
+  if (!article) throw new Error("Quick capture did not return an article ID.");
   return article;
 }
 

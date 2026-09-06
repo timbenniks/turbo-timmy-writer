@@ -111,6 +111,11 @@ configuration, rebuildable embeddings, and binary assets. Optional GitHub
 delivery must consume this same payload and remain separate from website
 publication.
 
+Ideas, fragments, and research notes use the canonical article aggregate from
+capture onward. `metadata.entryKind` supplies the inbox distinction while
+status `idea` supplies the shared lifecycle. There is no separate fragment
+document format to synchronize or migrate before a thought becomes an article.
+
 Phase 4 implements the first article profile as an immutable, validated seed in
 `src/ai/voice`. Runtime guidance strips source notes and passes only bounded,
 versioned observations to `article-first-draft/v2`; archive excerpts remain a
