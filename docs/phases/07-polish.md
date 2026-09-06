@@ -341,6 +341,29 @@ not orchestrated. Future explicit draft creation would send mapped article
 fields to Contentstack and may incur provider usage; publication must remain a
 separate confirmed operation with its own audit result.
 
+### Slice 16: LinkedIn Posts API feasibility and adapter
+
+Complete locally on 2026-09-06. Official LinkedIn documentation confirms that
+member posting remains practical through the self-serve Share on LinkedIn
+product and `w_member_social`. A server-only adapter implements the versioned
+`POST /rest/posts` text-post contract for a configured Person URN. Because the
+API creates a public post immediately, the adapter is disconnected until an
+explicit confirmation and durable audit record are available.
+
+Acceptance criteria:
+
+- Token, numeric Person URN, and explicit `YYYYMM` API version are validated server-side.
+- Commentary is trimmed, non-empty, and bounded at 3,000 characters.
+- The request uses Bearer auth, REST.li 2.0, version header, public visibility, and published lifecycle.
+- Authentication, permission, rate-limit, timeout, availability, and response failures are sanitized.
+- Success requires a validated LinkedIn share or UGC-post URN response header.
+- No UI path, OAuth token, live request, or automatic LinkedIn publication exists.
+
+Privacy and cost review: the disconnected adapter sends nothing today. Future
+use would transmit the confirmed post text to LinkedIn and publish it publicly
+in the same call, so explicit confirmation and an auditable immutable snapshot
+are mandatory; it must never run during generation or variant save.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -351,7 +374,7 @@ separate confirmed operation with its own audit result.
 - Optional GitHub delivery for the portable backup
 - Audited, explicitly confirmed newsletter draft orchestration
 - Contentstack Developers field mapping and audited publish orchestration
-- LinkedIn API publishing if a reliable supported API is practical
+- Explicitly confirmed and audited LinkedIn publication orchestration
 
 ## Planning rule
 

@@ -59,6 +59,12 @@ const contentstackEnvironmentSchema = z.object({
   CONTENTSTACK_BRANCH: z.string().trim().min(1).max(200).default("main"),
 });
 
+const linkedinEnvironmentSchema = z.object({
+  LINKEDIN_ACCESS_TOKEN: z.string().trim().min(1).max(2_000),
+  LINKEDIN_AUTHOR_URN: z.string().trim().regex(/^urn:li:person:[0-9]+$/).max(200),
+  LINKEDIN_API_VERSION: z.string().regex(/^20[0-9]{4}$/),
+});
+
 export type ArchiveEmbeddingEnvironment = {
   apiKey: string;
   model: string;
@@ -84,6 +90,7 @@ export type ContentstackEnvironment = {
   locale: string;
   branch: string;
 };
+export type LinkedInEnvironment = { accessToken: string; authorUrn: string; apiVersion: string };
 
 export function getDatabaseUrl() {
   return databaseEnvironmentSchema.parse({
@@ -174,6 +181,19 @@ export function readContentstackEnvironment(): ContentstackEnvironment | null {
     contentTypeUid: result.data.CONTENTSTACK_CONTENT_TYPE_UID,
     locale: result.data.CONTENTSTACK_LOCALE.toLowerCase(),
     branch: result.data.CONTENTSTACK_BRANCH,
+  } : null;
+}
+
+export function readLinkedInEnvironment(): LinkedInEnvironment | null {
+  const result = linkedinEnvironmentSchema.safeParse({
+    LINKEDIN_ACCESS_TOKEN: process.env.LINKEDIN_ACCESS_TOKEN,
+    LINKEDIN_AUTHOR_URN: process.env.LINKEDIN_AUTHOR_URN,
+    LINKEDIN_API_VERSION: process.env.LINKEDIN_API_VERSION,
+  });
+  return result.success ? {
+    accessToken: result.data.LINKEDIN_ACCESS_TOKEN,
+    authorUrn: result.data.LINKEDIN_AUTHOR_URN,
+    apiVersion: result.data.LINKEDIN_API_VERSION,
   } : null;
 }
 

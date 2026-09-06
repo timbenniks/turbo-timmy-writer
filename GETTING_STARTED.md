@@ -99,6 +99,9 @@ in `.env.local` or Vercel's encrypted environment storage.
 | `CONTENTSTACK_CONTENT_TYPE_UID` | Optional Contentstack draft delivery | Developers article content-type UID. |
 | `CONTENTSTACK_LOCALE` | Optional Contentstack draft delivery | Defaults to `en-us`. |
 | `CONTENTSTACK_BRANCH` | Optional Contentstack draft delivery | Defaults to `main`. |
+| `LINKEDIN_ACCESS_TOKEN` | Optional direct LinkedIn publishing | OAuth token with `w_member_social`; server-side only. |
+| `LINKEDIN_AUTHOR_URN` | Optional direct LinkedIn publishing | Tim's numeric `urn:li:person:…` author identity. |
+| `LINKEDIN_API_VERSION` | Optional direct LinkedIn publishing | Supported API version in `YYYYMM` form; configure deliberately. |
 
 ## GitHub OAuth
 
@@ -184,6 +187,16 @@ the six `CONTENTSTACK_*` values unset for now. Later, use the regional CMA host,
 stack API key, Developers content-type UID, locale, branch, and a dedicated
 least-privilege Management Token. These values remain server-side. Entry
 creation may affect plan usage; publishing remains a separate explicit action.
+
+## Enable direct LinkedIn publishing later
+
+Direct member posting is technically supported through LinkedIn's versioned
+Posts API when an app has the self-serve **Share on LinkedIn** product and an
+OAuth token with `w_member_social`. It also requires Tim's numeric Person URN
+and a currently supported `YYYYMM` API version. The API publishes immediately,
+so leave all three `LINKEDIN_*` values unset until explicit-confirmation UI and
+durable delivery auditing are enabled. Tokens expire and must stay server-side;
+never reuse the GitHub OAuth credential or place a LinkedIn token in the client.
 
 ## Enable website publishing later
 
