@@ -318,6 +318,29 @@ or orchestration invokes it. A future explicit action would send newsletter
 subject/body to Buttondown and may incur provider usage, so it must remain
 confirmed, draft-only, and auditable.
 
+### Slice 15: Contentstack draft adapter foundation
+
+Complete locally on 2026-09-06. A generic server-only Contentstack Management
+API adapter creates an unpublished entry for a configured regional host,
+content type, locale, and branch using stack API key plus Management Token.
+Field JSON and provider responses are bounded/validated under mocks. Developers
+field mapping and durable delivery orchestration remain pending until the real
+content-type contract is supplied; the adapter does not guess it.
+
+Acceptance criteria:
+
+- Host, stack key, Management Token, content-type UID, locale, and branch are validated server-side.
+- The create-entry request follows the official CMA v3 URL/header/body contract.
+- Entry JSON is recursive-safe and limited to 500 kB before the request.
+- Authentication/precondition, rate-limit, timeout, availability, and response failures are sanitized.
+- Only an entry identity validated from a successful response is returned.
+- No publish endpoint, UI call, credential, or live Contentstack request exists.
+
+Privacy and cost review: this foundation performs no runtime call because it is
+not orchestrated. Future explicit draft creation would send mapped article
+fields to Contentstack and may incur provider usage; publication must remain a
+separate confirmed operation with its own audit result.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -327,7 +350,7 @@ confirmed, draft-only, and auditable.
 - Source and citation management UI and citation formatting
 - Optional GitHub delivery for the portable backup
 - Audited, explicitly confirmed newsletter draft orchestration
-- Contentstack Developers publisher
+- Contentstack Developers field mapping and audited publish orchestration
 - LinkedIn API publishing if a reliable supported API is practical
 
 ## Planning rule

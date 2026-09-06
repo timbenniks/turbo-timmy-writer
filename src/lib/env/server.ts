@@ -50,6 +50,15 @@ const buttondownEnvironmentSchema = z.object({
   BUTTONDOWN_API_KEY: z.string().trim().min(1).max(500),
 });
 
+const contentstackEnvironmentSchema = z.object({
+  CONTENTSTACK_API_HOST: z.url().startsWith("https://").default("https://api.contentstack.io"),
+  CONTENTSTACK_API_KEY: z.string().trim().min(1).max(500),
+  CONTENTSTACK_MANAGEMENT_TOKEN: z.string().trim().min(1).max(1_000),
+  CONTENTSTACK_CONTENT_TYPE_UID: z.string().trim().regex(/^[a-z0-9_]+$/).max(200),
+  CONTENTSTACK_LOCALE: z.string().trim().regex(/^[a-z]{2}(?:-[a-z]{2})?$/i).default("en-us"),
+  CONTENTSTACK_BRANCH: z.string().trim().min(1).max(200).default("main"),
+});
+
 export type ArchiveEmbeddingEnvironment = {
   apiKey: string;
   model: string;
@@ -67,6 +76,14 @@ export type CloudinaryEnvironment = {
 };
 
 export type ButtondownEnvironment = { apiKey: string };
+export type ContentstackEnvironment = {
+  apiHost: string;
+  apiKey: string;
+  managementToken: string;
+  contentTypeUid: string;
+  locale: string;
+  branch: string;
+};
 
 export function getDatabaseUrl() {
   return databaseEnvironmentSchema.parse({
@@ -139,6 +156,25 @@ export function readButtondownEnvironment(): ButtondownEnvironment | null {
     BUTTONDOWN_API_KEY: process.env.BUTTONDOWN_API_KEY,
   });
   return result.success ? { apiKey: result.data.BUTTONDOWN_API_KEY } : null;
+}
+
+export function readContentstackEnvironment(): ContentstackEnvironment | null {
+  const result = contentstackEnvironmentSchema.safeParse({
+    CONTENTSTACK_API_HOST: process.env.CONTENTSTACK_API_HOST,
+    CONTENTSTACK_API_KEY: process.env.CONTENTSTACK_API_KEY,
+    CONTENTSTACK_MANAGEMENT_TOKEN: process.env.CONTENTSTACK_MANAGEMENT_TOKEN,
+    CONTENTSTACK_CONTENT_TYPE_UID: process.env.CONTENTSTACK_CONTENT_TYPE_UID,
+    CONTENTSTACK_LOCALE: process.env.CONTENTSTACK_LOCALE,
+    CONTENTSTACK_BRANCH: process.env.CONTENTSTACK_BRANCH,
+  });
+  return result.success ? {
+    apiHost: result.data.CONTENTSTACK_API_HOST.replace(/\/$/u, ""),
+    apiKey: result.data.CONTENTSTACK_API_KEY,
+    managementToken: result.data.CONTENTSTACK_MANAGEMENT_TOKEN,
+    contentTypeUid: result.data.CONTENTSTACK_CONTENT_TYPE_UID,
+    locale: result.data.CONTENTSTACK_LOCALE.toLowerCase(),
+    branch: result.data.CONTENTSTACK_BRANCH,
+  } : null;
 }
 
 export function isLocalGuidedAiTestMode() {

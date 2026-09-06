@@ -93,6 +93,12 @@ in `.env.local` or Vercel's encrypted environment storage.
 | `CLOUDINARY_API_KEY` | Optional managed hero-image uploads | Server-side credential from Cloudinary API Keys settings. |
 | `CLOUDINARY_API_SECRET` | Optional managed hero-image uploads | Secret; never expose it to the browser. |
 | `BUTTONDOWN_API_KEY` | Optional newsletter draft delivery | Secret; enables draft creation only after orchestration is explicitly configured. |
+| `CONTENTSTACK_API_HOST` | Optional Contentstack draft delivery | Regional CMA HTTPS host; defaults to `https://api.contentstack.io`. |
+| `CONTENTSTACK_API_KEY` | Optional Contentstack draft delivery | Stack API key; server-side only. |
+| `CONTENTSTACK_MANAGEMENT_TOKEN` | Optional Contentstack draft delivery | Least-privilege Management Token; secret and server-side only. |
+| `CONTENTSTACK_CONTENT_TYPE_UID` | Optional Contentstack draft delivery | Developers article content-type UID. |
+| `CONTENTSTACK_LOCALE` | Optional Contentstack draft delivery | Defaults to `en-us`. |
+| `CONTENTSTACK_BRANCH` | Optional Contentstack draft delivery | Defaults to `main`. |
 
 ## GitHub OAuth
 
@@ -168,6 +174,16 @@ enabled. When that slice is complete, use a dedicated Buttondown API key in the
 Vercel Production environment; never expose it to the browser or reuse a
 broader personal credential. Creating a draft may count toward provider usage,
 but Turbo Timmy Writer will not send or publish a newsletter automatically.
+
+## Enable Contentstack Developers drafts later
+
+The Contentstack adapter can create an unpublished entry through the Content
+Management API, but it is not connected to the UI until the actual Developers
+content-type field contract and durable delivery audit are configured. Leave
+the six `CONTENTSTACK_*` values unset for now. Later, use the regional CMA host,
+stack API key, Developers content-type UID, locale, branch, and a dedicated
+least-privilege Management Token. These values remain server-side. Entry
+creation may affect plan usage; publishing remains a separate explicit action.
 
 ## Enable website publishing later
 

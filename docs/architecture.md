@@ -143,6 +143,13 @@ and rejects a non-draft response. It is deliberately not callable from the UI
 until newsletter delivery attempts have their own durable audit state; website
 publication records must not be overloaded for that purpose.
 
+The Contentstack CMA adapter follows the same draft-first boundary. Regional
+host, stack, Management Token, content type, locale, and branch are server
+configuration; caller-supplied entry JSON is bounded and recursive-safe. The
+provider-specific Developers field mapper stays outside the transport adapter
+and must be based on the actual content type rather than assumed field names.
+Creating and publishing an entry remain distinct operations.
+
 Phase 5 keeps destination profiles in independent modules under
 `src/variants/destinations`. `article-repurpose/v1` receives exactly one profile,
 the canonical Markdown snapshot, and bounded voice guidance, then validates an

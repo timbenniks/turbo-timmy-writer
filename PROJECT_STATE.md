@@ -227,10 +227,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Added Quick Capture to the Ideas workspace for ideas, fragments, and research notes. Bounded server validation creates an owner-scoped canonical Tiptap article with `idea` status and explicit metadata kind; deterministic title fallback, derived plain text, and inbox labels preserve the distinction without a parallel notes format or AI call.
 - Added a bounded Archive relationship explorer that computes deterministic shared-tag Jaccard edges from the existing owner-scoped archive list. Focus selection exposes the shared tags, overlap percentage, visual connections, and attributed source link without storing inferred edges or claiming semantic/factual similarity.
 - Added a server-only Buttondown newsletter adapter foundation against the documented token-authenticated email endpoint. It bounds subject/body, requests `status: draft`, rejects non-draft responses, times out, and maps provider failures safely under mocks; no UI path, live request, credential, or automatic send exists yet.
+- Added a server-only Contentstack CMA draft adapter foundation with validated regional host, stack key, least-privilege Management Token, content type, locale, and branch. It bounds recursive entry JSON to 500 kB, validates returned identity, and sanitizes provider failures under mocks; actual Developers field mapping, UI orchestration, credentials, and publication remain deliberately absent.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 14 passes ESLint, standalone TypeScript, 160 tests across 54 files, and the production build. Mocked adapter coverage proves the exact endpoint/auth/body, draft-only response boundary, pre-request validation, and sanitized 401/429/5xx/invalid-response handling with no provider call. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
+Phase 7 Slice 15 passes ESLint, standalone TypeScript, 167 tests across 55 files, and the production build. Mocked adapter coverage proves the regional CMA v3 endpoint, required headers, entry envelope, byte bound, response validation, and sanitized 401/412/429/5xx handling with no provider call. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
 
 ## Known issues and setup state
 
