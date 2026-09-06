@@ -109,6 +109,24 @@ test.describe("version comparison", () => {
       const titleChange = page.getByRole("region", { name: "Title change" });
       await expect(titleChange.getByText("Earlier fixture title", { exact: true })).toBeVisible();
       await expect(titleChange.getByText("Playwright fixture version history", { exact: true })).toBeVisible();
+
+      page.once("dialog", (dialog) => dialog.accept());
+      await page.getByRole("button", { name: "Restore this version" }).click();
+      await expect(page).toHaveURL(`/articles/${articleId}`);
+      await expect(page.getByRole("textbox", { name: "Article title" })).toHaveValue(
+        "Earlier fixture title",
+      );
+      await expect(page.locator('[aria-label="Article body"]')).toContainText("Old evidence");
+
+      const [restoreEvidence] = await sql`
+        select
+          count(*) filter (where reason = 'pre-restore')::integer as before_count,
+          count(*) filter (where reason = 'restore')::integer as restore_count
+        from article_versions
+        where article_id = ${articleId}
+      `;
+      expect(restoreEvidence.before_count).toBe(1);
+      expect(restoreEvidence.restore_count).toBe(1);
     } finally {
       await sql`delete from ai_runs where id = ${aiRunId}`;
       await sql`delete from articles where id = ${articleId}`;

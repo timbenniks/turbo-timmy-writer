@@ -7,6 +7,7 @@ import { z } from "zod";
 import { articleDisplayTitle, articleIdSchema } from "@/articles/model";
 import { getAllowedSession } from "@/auth/session";
 import { AppShell } from "@/components/writing/app-shell";
+import { RestoreVersionButton } from "@/components/versions/restore-version-button";
 import { listTaxonomyTagsForUser } from "@/db/queries/article-organization";
 import { getArticleForUser, listRecentArticlesForUser } from "@/db/queries/articles";
 import { listArticleVersionsForUser } from "@/db/queries/article-versions";
@@ -178,6 +179,14 @@ export default async function ArticleHistoryPage({
                               </span>
                             </div>
                           ) : null}
+                          {snapshot.id === "current" ? null : (
+                            <RestoreVersionButton
+                              articleId={article.id}
+                              versionId={snapshot.id}
+                              expectedRevision={article.revision}
+                              versionName={snapshotName(snapshot)}
+                            />
+                          )}
                         </section>
                       ))}
                     </div>

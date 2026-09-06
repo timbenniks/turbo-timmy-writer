@@ -55,6 +55,27 @@ Privacy and cost review: comparison reads already stored article/version/run
 metadata, makes no model calls, and adds no third-party service or dependency.
 Restore remains a separate mutation slice with its own concurrency safeguards.
 
+### Slice 3: protected version restore
+
+Complete locally on 2026-09-06. An immutable checkpoint can be restored only
+after browser confirmation. The owner-scoped operation rejects stale article
+revisions, checkpoints the current canonical document before replacement,
+restores the selected Tiptap snapshot, and records the resulting restored
+version. It does not alter lifecycle status, variants, or publication history.
+
+Acceptance criteria:
+
+- Restore requires explicit confirmation and a non-current version ID.
+- Article and version ownership are checked server-side.
+- A concurrent article revision prevents the restore.
+- The current document is snapshotted before any replacement.
+- The restored state is itself an immutable version event.
+- Desktop and mobile browser tests prove the round trip and clean up their
+  temporary rows.
+
+Privacy and cost review: restore makes no external or model call. It creates two
+small database snapshots by design so the operation is reversible and auditable.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations

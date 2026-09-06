@@ -215,10 +215,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Live GitHub validation created and updated the exact 2026 writing path on a disposable non-production branch, verified distinct commit/blob SHAs, and deleted the branch. Its reusable fixture now goes through the production website serializer so it cannot drift from the Astro content schema. Desktop and 390 × 844 authenticated inspection showed both exact previews, enabled confirmation actions only for saved/ready/current content, disabled both actions after an unsaved edit, and no horizontal overflow.
 - Began Phase 7 with a repository-root operator guide covering current versus optional setup, a fresh development machine, the complete environment contract, OAuth, database safety, AI configuration, least-privilege website publishing, validation, archive maintenance, and troubleshooting. README now routes maintainers to the guide.
 - Added an owner-scoped article history workspace for comparing immutable checkpoints with each other or the current document. Deterministic bounded line diffs show title and body changes, while AI-linked checkpoints display safe skill/model/status/duration provenance without prompts or output.
+- Added explicitly confirmed version restore with optimistic revision protection. The atomic owner-scoped operation snapshots the current document, restores canonical Tiptap/title/text from the chosen checkpoint, and records the restored result without changing lifecycle status or derived variants.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 2 passes ESLint, standalone TypeScript, 117 tests across 38 files, the production build, and a disposable authenticated comparison flow at desktop and 390 × 844 widths. The browser fixture and its AI run/version rows are deleted after each test. Slice 1 separately validated every relative Markdown link and all 17 `.env.example` variables.
+Phase 7 Slice 3 passes ESLint, standalone TypeScript, 117 tests across 38 files, and a disposable authenticated comparison/restore flow at desktop and 390 × 844 widths. The test proves pre-restore and restored snapshots exist, then removes the article and all related rows. Slice 2's production build passed; the complete baseline is rerun before this milestone is committed.
 
 ## Known issues and setup state
 
