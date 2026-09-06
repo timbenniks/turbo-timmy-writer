@@ -8,6 +8,7 @@ export * from "./archive-documents";
 export * from "./editor-suggestions";
 export * from "./publication-variants";
 export * from "./publications";
+export * from "./sources";
 export * from "./tags";
 export * from "./themes";
 export * from "./users";

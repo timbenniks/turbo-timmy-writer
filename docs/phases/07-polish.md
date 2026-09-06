@@ -165,13 +165,35 @@ after Tim chooses it. Cloudinary may retain and bill for that asset even if the
 article form is not subsequently saved. The feature is disabled when its
 credentials are absent, makes no model call, and adds no dependency.
 
+### Slice 8: source and citation persistence
+
+Persistence foundation complete locally on 2026-09-06. Additive `sources` and
+`article_sources` tables keep Tim's research references separate from imported
+archive memory. Validated owner-scoped operations create a source plus article
+link, update its citation context, list it deterministically, or unlink it
+without touching canonical prose. The editor-facing management panel is the
+next sub-slice and will not ship until the migration can be applied safely.
+
+Acceptance criteria for this foundation:
+
+- A source has a bounded type, title, optional HTTP(S) URL, text, and notes.
+- Article links retain a bounded quote, context, and deterministic position.
+- Every list/update/unlink query proves both article and source ownership.
+- Creating a source and its link is one database batch after article ownership.
+- Unlinking never silently deletes a reusable source or edits the article.
+- The additive migration applies from an empty database with all prior migrations.
+
+Privacy and cost review: source contents remain in the application database and
+are not sent to AI, fetched from the supplied URL, or mixed into archive/voice
+memory. The slice adds no provider, dependency, or external request.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
 - Command palette and broader keyboard shortcuts
 - Improved theme builder
 - Hero image and optional Cloudinary integration
-- Source and citation management
+- Source and citation management UI and citation formatting
 - Archive relationships and graph exploration
 - Fragments, research notes, and ideas inbox
 - GitHub backup/export

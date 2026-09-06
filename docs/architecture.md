@@ -98,6 +98,11 @@ AI output can create a first draft when explicitly requested. After a canonical 
 
 Archive documents and voice observations remain separate. Retrieved passages carry source metadata and are selected for relevance. Voice observations carry evidence and confidence, not whole archive bodies.
 
+Article research sources are a third boundary. They are private, user-managed
+references linked to an article with optional quote and context. They are not
+archive recall, voice evidence, or AI input by default, and source operations
+never insert or change canonical prose.
+
 Phase 4 implements the first article profile as an immutable, validated seed in
 `src/ai/voice`. Runtime guidance strips source notes and passes only bounded,
 versioned observations to `article-first-draft/v2`; archive excerpts remain a
