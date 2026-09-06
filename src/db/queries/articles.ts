@@ -10,6 +10,7 @@ import {
   untitledArticleSlug,
   type LibraryFilter,
 } from "@/articles/model";
+import type { ExternalHeroImage } from "@/assets/model";
 import { getDatabase } from "@/db/client";
 import { articles } from "@/db/schema";
 import { emptyArticleDocument } from "@/editor/document";
@@ -98,7 +99,6 @@ export async function saveArticleForUser(input: SaveArticleForUserInput) {
       title: input.title,
       documentJson: input.documentJson,
       plainText: input.plainText,
-      metadata: { version: input.documentVersion },
       revision: input.expectedRevision + 1,
       updatedAt: savedAt,
     })
@@ -123,5 +123,52 @@ export async function saveArticleForUser(input: SaveArticleForUserInput) {
 
   return currentArticle
     ? { status: "conflict" as const, currentRevision: currentArticle.revision }
+    : null;
+}
+
+export async function updateArticleHeroImageForUser(input: {
+  articleId: string;
+  userId: string;
+  expectedRevision: number;
+  heroImage: ExternalHeroImage | null;
+}) {
+  const database = getDatabase();
+  const [current] = await database
+    .select({ metadata: articles.metadata })
+    .from(articles)
+    .where(and(
+      eq(articles.id, input.articleId),
+      eq(articles.userId, input.userId),
+      eq(articles.revision, input.expectedRevision),
+    ))
+    .limit(1);
+
+  if (current) {
+    const metadata = { ...current.metadata };
+    if (input.heroImage) metadata.heroImage = input.heroImage;
+    else delete metadata.heroImage;
+    const [updated] = await database
+      .update(articles)
+      .set({
+        metadata,
+        revision: input.expectedRevision + 1,
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(articles.id, input.articleId),
+        eq(articles.userId, input.userId),
+        eq(articles.revision, input.expectedRevision),
+      ))
+      .returning({ revision: articles.revision, updatedAt: articles.updatedAt });
+    if (updated) return { status: "updated" as const, article: updated };
+  }
+
+  const [article] = await database
+    .select({ revision: articles.revision })
+    .from(articles)
+    .where(and(eq(articles.id, input.articleId), eq(articles.userId, input.userId)))
+    .limit(1);
+  return article
+    ? { status: "conflict" as const, currentRevision: article.revision }
     : null;
 }

@@ -218,10 +218,12 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Added explicitly confirmed version restore with optimistic revision protection. The atomic owner-scoped operation snapshots the current document, restores canonical Tiptap/title/text from the chosen checkpoint, and records the restored result without changing lifecycle status or derived variants.
 - Added a dependency-free command palette available through `⌘K`, `Ctrl+K`, and visible desktop/mobile triggers. It deterministically filters navigation, memory search, current-article workflows, and recent writing; secondary article pages supply lightweight command context without mounting editor behavior.
 - Hardened the live-preview custom theme builder with shared client/server WCAG contrast checks. Exact ratios identify unreadable text, muted, accent, or selection colours, and invalid settings cannot be saved while starter themes and article content remain untouched.
+- Added canonical external hero images with validated HTTP(S) URL, required alt text, optional caption/credit, live preview, explicit removal, owner/revision-scoped persistence, and deterministic website-variant inheritance. No server image fetch, upload, or publication occurs.
+- Added optional authenticated Cloudinary hero uploads with server-only validated credentials, signed bounded raster uploads, response validation, a 30-second timeout, and sanitized failures. Upload only fills the unsaved hero form; alt text and explicit canonical save remain required, and prose autosave preserves hero metadata.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 5 passes ESLint, standalone TypeScript, 120 tests across 39 files, and the production build. Theme tests cover valid bounded settings, unsafe values, exact contrast calculation, accepted accessible colours, and rejected unreadable colours. The complete baseline is rerun before this milestone is committed.
+Phase 7 Slices 6 and 7 pass ESLint, standalone TypeScript, 134 tests across 44 files, the production build, and four desktop/mobile fail-closed browser checks. Unit/action/route/adapter coverage proves URL/alt validation, explicit removal, authentication, ownership-safe errors, stale-revision handling, revision advancement, destination-specific hero inheritance, Cloudinary signing, file bounds, validated responses, and sanitized provider failures without a live provider call. The authenticated desktop/mobile browser hero round trip is implemented, but its latest retry could not reach Neon during fixture setup while Tim's VPN testing was active; no product assertion ran, and the unchanged retry remains pending.
 
 ## Known issues and setup state
 

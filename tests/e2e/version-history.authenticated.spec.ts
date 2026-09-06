@@ -125,6 +125,18 @@ test.describe("version comparison", () => {
       );
       await expect(page.locator('[aria-label="Article body"]')).toContainText("Old evidence");
 
+      await page.locator("summary").filter({ hasText: "Hero image" }).click();
+      await page.getByRole("textbox", { name: "Image URL" }).fill("https://images.example.com/playwright-hero.jpg");
+      await page.getByRole("textbox", { name: "Alternative text" }).fill("A disposable test image");
+      await page.getByRole("button", { name: "Save hero image" }).click();
+      await expect(page.getByText("Hero image saved.", { exact: true }).last()).toBeVisible();
+      const [savedHero] = await sql`select metadata from articles where id = ${articleId}`;
+      expect(savedHero.metadata.heroImage).toMatchObject({ alt: "A disposable test image" });
+      await page.getByRole("button", { name: "Remove" }).click();
+      await expect(page.getByText("Hero image removed.", { exact: true }).last()).toBeVisible();
+      const [removedHero] = await sql`select metadata from articles where id = ${articleId}`;
+      expect(removedHero.metadata.heroImage).toBeUndefined();
+
       const [restoreEvidence] = await sql`
         select
           count(*) filter (where reason = 'pre-restore')::integer as before_count,

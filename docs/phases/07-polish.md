@@ -118,6 +118,53 @@ Acceptance criteria:
 Privacy and cost review: checks run locally and server-side using submitted
 colour values only. No telemetry, external call, or dependency is added.
 
+### Slice 6: canonical external hero images
+
+Complete locally on 2026-09-06. Articles can store one external HTTP(S) hero
+image with required alt text and optional caption/credit in versioned canonical
+metadata. The inline editor previews, saves, and explicitly removes it through
+an owner-scoped optimistic update. Saving advances the canonical revision, so
+existing variants become visibly stale; new website variants deterministically
+inherit the canonical hero URL without asking AI to invent one.
+
+Acceptance criteria:
+
+- URL, alt text, caption, credit, and removal inputs are bounded and validated.
+- The hero update checks ownership and the expected article revision.
+- Client bypass receives the same server validation.
+- Save/remove advances the editor's known server revision without changing prose.
+- Website metadata inherits only a supplied canonical hero URL; other
+  destinations remain unchanged.
+- No external image or article is uploaded, deleted, or published automatically.
+
+Privacy and cost review: the browser loads only a URL Tim explicitly enters.
+The server stores attribution metadata but fetches no image. No provider,
+credential, model call, or new dependency is introduced.
+
+### Slice 7: optional managed hero uploads
+
+Complete locally on 2026-09-06. When all three Cloudinary credentials are
+configured, Tim can explicitly select a bounded raster image for a signed,
+server-side upload. The returned HTTPS URL fills the unsaved hero form; it does
+not become canonical until required alt text is added and the existing save
+action is explicitly used. Pasting an external URL continues to work without
+Cloudinary.
+
+Acceptance criteria:
+
+- Cloudinary credentials are validated together and stay server-side.
+- Uploads require authentication and an explicitly selected supported file.
+- SVG, empty files, and files above 10 MB are rejected before their bytes are read.
+- Provider requests are signed, use HTTPS, time out, and expose only bounded errors.
+- Provider responses are validated before their URL reaches the editor.
+- Uploading neither auto-saves article metadata nor publishes an article.
+- Ordinary prose autosave preserves canonical hero metadata.
+
+Privacy and cost review: an upload sends the selected image to Cloudinary only
+after Tim chooses it. Cloudinary may retain and bill for that asset even if the
+article form is not subsequently saved. The feature is disabled when its
+credentials are absent, makes no model call, and adds no dependency.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations

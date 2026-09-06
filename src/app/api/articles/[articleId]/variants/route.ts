@@ -5,6 +5,7 @@ import { createWritingProvider } from "@/ai/runtime/provider-factory";
 import { repurposeSkillFor, validateRepurposeDestination } from "@/ai/skills/repurpose";
 import { selectArticleVoiceGuidance } from "@/ai/voice/article-profile";
 import { articleIdSchema } from "@/articles/model";
+import { applyCanonicalHeroToVariant } from "@/assets/variant";
 import { getAllowedSession } from "@/auth/session";
 import { databaseAiRunStore } from "@/db/queries/ai-runs";
 import { getArticleForUser } from "@/db/queries/articles";
@@ -110,7 +111,14 @@ export async function POST(request: Request, context: RouteContext) {
         signal: request.signal,
       },
     );
-    const output = validateRepurposeDestination(body.data.destination, generated.output);
+    const generatedOutput = validateRepurposeDestination(body.data.destination, generated.output);
+    const output = {
+      ...generatedOutput,
+      metadata: applyCanonicalHeroToVariant(
+        generatedOutput.metadata,
+        article.metadata.heroImage,
+      ),
+    };
     const result = existing
       ? await regeneratePublicationVariantForUser({
           variantId: existing.id,

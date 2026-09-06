@@ -59,6 +59,8 @@ import {
 } from "@/components/editor/precision-ai-panel";
 import type { ReviewKind } from "@/ai/review/model";
 import { ArticleTagPicker } from "@/components/tags/article-tag-picker";
+import { HeroImageEditor } from "@/components/assets/hero-image-editor";
+import type { ExternalHeroImage } from "@/assets/model";
 import { Button } from "@/components/ui/button";
 import {
   WorkspaceAppearanceButtons,
@@ -103,6 +105,7 @@ type ArticleEditorProps = {
   articleId: string;
   initialTitle: string;
   initialDocument: ArticleDocument;
+  initialHeroImage: ExternalHeroImage | null;
   status: ArticleStatus;
   initialTags: string[];
   availableTags: string[];
@@ -159,6 +162,7 @@ export function ArticleEditor({
   articleId,
   initialTitle,
   initialDocument,
+  initialHeroImage,
   status,
   initialTags,
   availableTags,
@@ -1019,6 +1023,18 @@ export function ArticleEditor({
           {organizationMessage}
         </div>
       ) : null}
+
+      <HeroImageEditor
+        articleId={articleId}
+        initialHeroImage={initialHeroImage}
+        canSave={saveState === "saved"}
+        expectedRevision={getServerRevision}
+        onSaved={(result) => {
+          serverRevisionRef.current = result.revision;
+          setSavedAt(result.savedAt);
+          setSaveMessage(result.heroImage ? "Hero image saved." : "Hero image removed.");
+        }}
+      />
 
       <PrecisionAiPanel
         suggestions={suggestions}

@@ -89,6 +89,9 @@ in `.env.local` or Vercel's encrypted environment storage.
 | `OPENAI_MODEL_EMBEDDING` | Archive semantic search | Must be a `text-embedding-3-*` model; vectors use 1,024 dimensions. |
 | `GITHUB_PUBLISH_TOKEN` | Live website publishing | Optional fine-grained token described below. |
 | `GITHUB_PUBLISH_BRANCH` | Website target branch | Defaults to `main`. |
+| `CLOUDINARY_CLOUD_NAME` | Optional managed hero-image uploads | Product-environment cloud name; all three Cloudinary values are required together. |
+| `CLOUDINARY_API_KEY` | Optional managed hero-image uploads | Server-side credential from Cloudinary API Keys settings. |
+| `CLOUDINARY_API_SECRET` | Optional managed hero-image uploads | Secret; never expose it to the browser. |
 
 ## GitHub OAuth
 
@@ -133,6 +136,27 @@ be embedding-capable.
 
 The application keeps provider credentials server-side and disables provider
 response storage. CI supplies no OpenAI key and never performs paid calls.
+
+## Enable managed hero-image uploads later
+
+Hero images work without an upload provider: paste an existing HTTP(S) image
+URL, add alternative text, and save. To upload a new image through Cloudinary,
+create or select a Cloudinary product environment and copy its cloud name, API
+key, and API secret from its API Keys settings. Add all three values to the
+same local or Vercel environment and restart or redeploy:
+
+```bash
+vercel env add CLOUDINARY_CLOUD_NAME production
+vercel env add CLOUDINARY_API_KEY production --sensitive
+vercel env add CLOUDINARY_API_SECRET production --sensitive
+```
+
+The API secret remains server-side. Turbo Timmy Writer accepts JPEG, PNG,
+WebP, AVIF, and GIF files up to 10 MB, uploads only after Tim selects a file,
+and still requires alternative text plus an explicit article save. Uploaded
+assets use the `turbo-timmy-writer/heroes` folder. Cloudinary storage and
+delivery can incur provider charges, so leave these values unset until managed
+uploads are wanted.
 
 ## Enable website publishing later
 

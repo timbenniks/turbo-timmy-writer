@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import type { Route } from "next";
 
 import { articleStartPremiseSchema } from "@/ai/conversation/model";
+import { updateArticleHeroImageInputSchema } from "@/assets/model";
 import {
   saveArticleInputSchema,
   type SaveArticleResult,
@@ -13,6 +14,7 @@ import { getAllowedSession } from "@/auth/session";
 import {
   createBlankArticleForUser,
   saveArticleForUser,
+  updateArticleHeroImageForUser,
 } from "@/db/queries/articles";
 import { createArticleStartForUser } from "@/db/queries/writing-sessions";
 import { articleDocumentToPlainText } from "@/editor/serialization/plain-text";
@@ -25,6 +27,21 @@ export async function createBlankArticleAction() {
 
   const article = await createBlankArticleForUser(session.user.id);
   redirect(`/articles/${article.id}` as Route);
+}
+
+export async function updateArticleHeroImageAction(input: unknown) {
+  const session = await getAllowedSession();
+  if (!session) return { ok: false as const, code: "unauthorized" as const, message: "Your session has expired." };
+  const parsed = updateArticleHeroImageInputSchema.safeParse(input);
+  if (!parsed.success) return { ok: false as const, code: "invalid" as const, message: "Enter a valid HTTP(S) image URL and useful alternative text." };
+
+  const result = await updateArticleHeroImageForUser({ ...parsed.data, userId: session.user.id });
+  if (!result) return { ok: false as const, code: "not-found" as const, message: "This article was not found." };
+  if (result.status === "conflict") {
+    return { ok: false as const, code: "conflict" as const, currentRevision: result.currentRevision, message: "The article changed before the hero image was saved." };
+  }
+  revalidatePath(`/articles/${parsed.data.articleId}`);
+  return { ok: true as const, revision: result.article.revision, savedAt: result.article.updatedAt.toISOString(), heroImage: parsed.data.heroImage };
 }
 
 export type CreateGuidedArticleState = {

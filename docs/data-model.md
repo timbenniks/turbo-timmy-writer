@@ -38,7 +38,7 @@ If the chosen Auth.js adapter requires standard account/session tables, add `acc
 | `status` | enum | Article lifecycle |
 | `document_json` | jsonb | Canonical Tiptap document |
 | `plain_text` | text | Derived projection |
-| `metadata` | jsonb | Versioned core metadata extension |
+| `metadata` | jsonb | Versioned core metadata extension; may include validated external hero URL, alt text, caption, and credit |
 | `revision` | integer | Monotonic optimistic-concurrency token, defaults to 1 |
 | `hero_asset_id` | uuid nullable | Added once assets exist |
 | `published_at` | timestamptz nullable | Canonical publication time |
@@ -57,6 +57,7 @@ Phase 1 Slice 1 implementation details:
 - Canonical editor JSON uses document version 1 and accepts only the deliberately supported semantic node/mark set. The application normalizes ProseMirror attribute maps to plain JSON before server transport, validates again on the server, and derives `plain_text` in the same owner-scoped save operation.
 - Markdown is deterministic but derived on demand; it is not duplicated on the mutable article row. Stable Markdown belongs on immutable versions or publication output when those features arrive.
 - Slice 3 saves require the caller's expected `revision` in the same owner-scoped update that increments it. A zero-row update is distinguished as missing ownership or a stale-write conflict; `updated_at` remains display metadata rather than the concurrency token.
+- Phase 7 stores the V1 external hero image in `metadata.heroImage` without a schema migration. Hero updates are owner/revision scoped, require HTTP(S) plus alt text, and advance the article revision. A future managed-asset adapter can add `hero_asset_id` without changing this canonical presentation contract.
 - The repository writing importer maps source Markdown into the supported canonical editor vocabulary and derives plain text. It preserves source-marked drafts as `drafting`, treats the other article files as `published`, keeps original slugs and dates, and records the exact original Markdown body in an immutable version with reason `import`. The section `index.md` is navigation rather than an article and is not imported.
 - Import replacement is deliberately dry-run-first, owner-scoped, transactional, and requires the direct database URL. It replaces articles, their versions, tags, and assignments for that owner only; it does not clear users, authentication data, themes, or preferences. These editable article rows do not replace the separate archive-document/chunk model planned for writing memory.
 

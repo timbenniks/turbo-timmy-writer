@@ -40,6 +40,12 @@ const githubPublisherEnvironmentSchema = z.object({
   GITHUB_PUBLISH_BRANCH: z.string().trim().min(1).max(255).default("main"),
 });
 
+const cloudinaryEnvironmentSchema = z.object({
+  CLOUDINARY_CLOUD_NAME: z.string().trim().regex(/^[a-z0-9_-]+$/i).max(100),
+  CLOUDINARY_API_KEY: z.string().trim().min(1).max(200),
+  CLOUDINARY_API_SECRET: z.string().trim().min(1).max(500),
+});
+
 export type ArchiveEmbeddingEnvironment = {
   apiKey: string;
   model: string;
@@ -48,6 +54,12 @@ export type ArchiveEmbeddingEnvironment = {
 export type GitHubPublisherEnvironment = {
   token: string;
   branch: string;
+};
+
+export type CloudinaryEnvironment = {
+  cloudName: string;
+  apiKey: string;
+  apiSecret: string;
 };
 
 export function getDatabaseUrl() {
@@ -98,6 +110,21 @@ export function readGitHubPublisherEnvironment(): GitHubPublisherEnvironment | n
   });
   return result.success
     ? { token: result.data.GITHUB_PUBLISH_TOKEN, branch: result.data.GITHUB_PUBLISH_BRANCH }
+    : null;
+}
+
+export function readCloudinaryEnvironment(): CloudinaryEnvironment | null {
+  const result = cloudinaryEnvironmentSchema.safeParse({
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+  });
+  return result.success
+    ? {
+        cloudName: result.data.CLOUDINARY_CLOUD_NAME,
+        apiKey: result.data.CLOUDINARY_API_KEY,
+        apiSecret: result.data.CLOUDINARY_API_SECRET,
+      }
     : null;
 }
 

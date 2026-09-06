@@ -379,6 +379,7 @@ function ArticleWorkspace({
       articleId={article.id}
       initialTitle={article.title}
       initialDocument={article.documentJson}
+      initialHeroImage={article.metadata.heroImage ?? null}
       status={article.status}
       initialTags={organization.tags}
       availableTags={taxonomyTags.map((tag) => tag.label)}
