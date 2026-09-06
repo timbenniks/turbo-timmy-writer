@@ -210,6 +210,28 @@ No authored content, authenticated response, telemetry, provider call, or new
 dependency is introduced. This does not claim cold-start offline editing; local
 recovery continues to protect edits in an editor that was already open.
 
+### Slice 10: private usage insights
+
+Complete locally on 2026-09-06. A protected Insights workspace derives writing
+volume, 30-day activity, article pipeline, AI run outcomes/tokens/duration,
+variant readiness/manual edits, and publication outcomes from owner-scoped
+records the product already requires. It adds no tracking event or analytics
+provider.
+
+Acceptance criteria:
+
+- Every query is restricted to the authenticated database user.
+- Metrics are deterministic, zero-safe, and unit tested with an explicit clock.
+- The page clearly identifies metrics as private and derived.
+- AI token and timing totals use existing operational metadata only.
+- The route fails closed before any metrics query for an unauthenticated user.
+- No client tracking script, identifier, cookie, or new database row is added.
+
+Privacy and cost review: calculations run server-side over Tim's existing rows
+and render only into his authenticated workspace. No data leaves the database,
+no new behavioral history is collected, and there is no provider or dependency
+cost.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -220,7 +242,6 @@ recovery continues to protect edits in an editor that was already open.
 - Archive relationships and graph exploration
 - Fragments, research notes, and ideas inbox
 - GitHub backup/export
-- Usage and product analytics
 - Newsletter provider adapter
 - Contentstack Developers publisher
 - LinkedIn API publishing if a reliable supported API is practical

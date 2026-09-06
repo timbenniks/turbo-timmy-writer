@@ -1,5 +1,6 @@
 import {
   ChevronDown,
+  ChartNoAxesCombined,
   FileText,
   MoreHorizontal,
   Plus,
@@ -83,6 +84,7 @@ type AppShellProps = {
   themes: WritingTheme[];
   taxonomyTags: TagTaxonomyItem[];
   content?: ReactNode;
+  activeUtility?: "insights";
 };
 
 const filterTitles: Record<LibraryFilter, string> = {
@@ -136,11 +138,13 @@ export function AppShell({
   themes,
   taxonomyTags,
   content,
+  activeUtility,
 }: AppShellProps) {
   const activeCommandArticle = selectedArticle ?? commandArticle;
   const commands = [
     { id: "new-article", label: "New article", group: "Navigate" as const, href: "/start" as Route, keywords: "premise blank" },
     { id: "search", label: "Search writing memory", group: "Navigate" as const, href: "/search" as Route, keywords: "archive memory" },
+    { id: "insights", label: "Writing insights", group: "Navigate" as const, href: "/insights" as Route, keywords: "analytics usage metrics" },
     ...libraryDestinations.map((destination) => ({
       id: `library-${destination.filter}`,
       label: destination.label,
@@ -192,7 +196,7 @@ export function AppShell({
                 key={label}
                 href={href}
                 className={`workspace-nav-link flex h-9 items-center gap-3 rounded-lg px-3 text-sm transition-colors ${
-                  !selectedArticle && activeFilter === filter
+                  !selectedArticle && !activeUtility && activeFilter === filter
                     ? "bg-muted font-medium text-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
@@ -236,6 +240,10 @@ export function AppShell({
             <Link href={"/search" as Route} aria-label="Search" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               <Search className="size-4" />
               <span className="workspace-footer-label">Search</span>
+            </Link>
+            <Link href={"/insights" as Route} aria-label="Insights" className={`workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm hover:bg-muted hover:text-foreground ${activeUtility === "insights" ? "bg-muted font-medium text-foreground" : "text-muted-foreground"}`}>
+              <ChartNoAxesCombined className="size-4" />
+              <span className="workspace-footer-label">Insights</span>
             </Link>
             <div className="workspace-account-row flex h-9 w-full items-center gap-1 rounded-lg px-1 text-sm text-muted-foreground">
               <TagManager initialTags={taxonomyTags} />

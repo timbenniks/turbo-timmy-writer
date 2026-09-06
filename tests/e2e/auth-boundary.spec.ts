@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test("protected writing routes fail closed", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/insights");
 
   await expect(page).toHaveURL(/\/sign-in$/);
   await expect(page.getByRole("heading", { name: "Your writing studio" })).toBeVisible();
