@@ -35,9 +35,19 @@ const archiveEmbeddingEnvironmentSchema = z.object({
     .max(200),
 });
 
+const githubPublisherEnvironmentSchema = z.object({
+  GITHUB_PUBLISH_TOKEN: z.string().trim().min(1),
+  GITHUB_PUBLISH_BRANCH: z.string().trim().min(1).max(255).default("main"),
+});
+
 export type ArchiveEmbeddingEnvironment = {
   apiKey: string;
   model: string;
+};
+
+export type GitHubPublisherEnvironment = {
+  token: string;
+  branch: string;
 };
 
 export function getDatabaseUrl() {
@@ -78,6 +88,16 @@ export function readArchiveEmbeddingEnvironment(): ArchiveEmbeddingEnvironment |
   });
   return result.success
     ? { apiKey: result.data.OPENAI_API_KEY, model: result.data.OPENAI_MODEL_EMBEDDING }
+    : null;
+}
+
+export function readGitHubPublisherEnvironment(): GitHubPublisherEnvironment | null {
+  const result = githubPublisherEnvironmentSchema.safeParse({
+    GITHUB_PUBLISH_TOKEN: process.env.GITHUB_PUBLISH_TOKEN,
+    GITHUB_PUBLISH_BRANCH: process.env.GITHUB_PUBLISH_BRANCH,
+  });
+  return result.success
+    ? { token: result.data.GITHUB_PUBLISH_TOKEN, branch: result.data.GITHUB_PUBLISH_BRANCH }
     : null;
 }
 

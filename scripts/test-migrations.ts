@@ -32,6 +32,8 @@ async function main() {
       count: number;
       vectorEnabled: boolean;
       embeddingType: string | null;
+      publicationTable: boolean;
+      pendingPublicationGuard: boolean;
     }>(`
       select
         (
@@ -46,12 +48,17 @@ async function main() {
           join pg_class as relation on relation.oid = attribute.attrelid
           where relation.relname = 'archive_chunks'
             and attribute.attname = 'embedding'
-        ) as "embeddingType"
+        ) as "embeddingType",
+        to_regclass('public.publications') is not null as "publicationTable",
+        to_regclass('public.publications_one_pending_target_unique') is not null
+          as "pendingPublicationGuard"
     `);
     const verification = result.rows[0];
     if (
       !verification?.vectorEnabled ||
-      verification.embeddingType !== "vector(1024)"
+      verification.embeddingType !== "vector(1024)" ||
+      !verification.publicationTable ||
+      !verification.pendingPublicationGuard
     ) {
       throw new Error("The pgvector archive migration was not applied correctly.");
     }
@@ -63,6 +70,8 @@ async function main() {
           publicTables: verification.count,
           vectorEnabled: verification.vectorEnabled,
           embeddingType: verification.embeddingType,
+          publicationTable: verification.publicationTable,
+          pendingPublicationGuard: verification.pendingPublicationGuard,
         },
         null,
         2,

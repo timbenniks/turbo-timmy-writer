@@ -1,10 +1,10 @@
 # Project state
 
-Last updated: 2026-09-05
+Last updated: 2026-09-06
 
 ## Current phase
 
-Phases 0 through 5 are complete and pushed to `main`. The requested full code audit and fixes are pushed in commit `22144e2`, with GitHub Actions run `33902882461` passing and Vercel reporting a successful Production deployment for the same commit. The configured Neon database has all 14 Drizzle migrations applied through `0013_calm_tarantula.sql`, including `writing_profiles`, `publication_variants`, and `publication_variant_versions`. Phase 6 Slices 1 through 4 are pushed through `aaa1756`; the Slice 5 publication-attempt persistence foundation is pushed in `0514a1e`. GitHub Actions run `33992455125` passed and Vercel deployment `dpl_2J7sUu7iWogrDanpUDiP9RN7FMGj` is Ready on the Production aliases. Migration `0014_dazzling_mandarin.sql` is not applied to Neon and no application publication flow invokes the GitHub adapter. No website article has been written or published.
+Phases 0 through 5 are complete and pushed to `main`. Phase 6 is complete locally: exact dual-repository previews, explicit per-target confirmation, create/update orchestration, immutable publication snapshots, commit/canonical tracking, safe retry state, and live disposable-branch GitHub validation all pass. Neon has all 16 migrations applied through `0015_workable_mysterio.sql`. No article was published during validation; production publishing remains disabled until a fine-grained server-side GitHub token is configured.
 
 ## Completed work
 
@@ -210,10 +210,13 @@ Phases 0 through 5 are complete and pushed to `main`. The requested full code au
 - Added backward-compatible website variant fields for publication date, hero image URL, and canonical tags. Publication readiness validates the complete shared contract and renders the exact Markdown destined for both repositories side by side; previewing does not write to GitHub or change the canonical article.
 - Added a configurable server-only GitHub Contents adapter with explicit repository allowlisting, safe input/response validation, bounded requests, UTF-8 Base64 encoding, current-file inspection, optimistic update SHAs, and sanitized provider errors. Seven mocked tests cover create, update, missing files, forbidden targets, conflicts, invalid responses, and timeouts without network access.
 - Began Phase 6 Slice 5 with target-specific publication attempts. Additive migration `0014_dazzling_mandarin.sql` and database constraints retain the exact Markdown snapshot, variant revision/hash, canonical source version, operation, repository coordinates, expected blob SHA, terminal commit/blob/URL results, and bounded failure state without conflating the two repository writes.
+- Completed Phase 6 publication orchestration with explicit per-repository confirmation, saved/ready/current guards, atomic revision revalidation, one-pending-attempt enforcement, optimistic blob-SHA updates, path-change protection, independent result history, and canonical URL tracking. The browser exposed and a focused regression test fixed an empty optional-URL crash in the shared validator.
+- Applied migrations `0014_dazzling_mandarin.sql` and `0015_workable_mysterio.sql` through the configured direct Neon connection. Pooled verification found 16 migration records, the `publications` table and pending-target unique index, 82 unchanged articles, and zero fixture variants/publications after cleanup.
+- Live GitHub validation created and updated the exact 2026 writing path on a disposable non-production branch, verified distinct commit/blob SHAs, and deleted the branch. Desktop and 390 × 844 authenticated inspection showed both exact previews, enabled confirmation actions only for saved/ready/current content, disabled both actions after an unsaved edit, and no horizontal overflow.
 
 ## Current validation checkpoint
 
-Phase 6 Slice 5 persistence validation passes the complete local gate: `pnpm db:check`; all 15 migrations against empty Postgres with 19 public tables, pgvector, and `vector(1024)` intact; ESLint; standalone TypeScript; 107 tests across 35 files; the production build; Knip with no unused-code findings; `git diff --check`; and four credential-free Playwright checks at desktop/mobile widths.
+Phase 6 completion passes the full gate: `pnpm db:check`; all 16 migrations against empty Postgres with 19 public tables, pgvector, `vector(1024)`, the publication table, and its pending-target guard intact; ESLint; standalone TypeScript; 114 tests across 37 files with the opt-in live GitHub test skipped in the normal suite; the production build; Knip with no unused-code findings; `git diff --check`; and four credential-free Playwright checks at desktop/mobile widths. The same opt-in GitHub test passed separately against a disposable branch.
 
 ## Known issues and setup state
 
@@ -232,12 +235,12 @@ Phase 6 Slice 5 persistence validation passes the complete local gate: `pnpm db:
 - The Neon database was provisioned through Vercel and this workspace has no authenticated Neon CLI or `.neon` branch link. Migrations `0001` through `0005` were therefore reviewed as additive and applied explicitly through the configured direct URL; establish disposable database branches before the first destructive or data-transforming migration.
 - Production includes the completed Phase 3 precision-AI workflow through commit `559e6cf`.
 - Phase 4 migrations `0010_damp_colonel_america.sql` and `0011_fat_masque.sql` are applied to the configured Neon database. Its 74 archive documents produce 156 cached 1,024-dimension vectors; the imported canonical articles remain outside the archive import/chunk path.
-- Phase 4/5 migrations `0012_short_lethal_legion.sql` and `0013_calm_tarantula.sql` are also applied to the configured Neon database. Pooled verification on 2026-09-04 found 14 migration records, 18 public tables, `writing_profiles`, `publication_variants`, and `publication_variant_versions`.
+- Phase 4/5 migrations `0012_short_lethal_legion.sql` and `0013_calm_tarantula.sql` plus Phase 6 migrations `0014_dazzling_mandarin.sql` and `0015_workable_mysterio.sql` are applied to Neon. Pooled verification on 2026-09-06 found 16 migration records, 19 public tables, the pending-publication guard, 82 canonical articles, and zero remaining test variants/publications.
 - The live timbenniks.dev website source is `https://github.com/timbenniks/timbenniksdev-2024`, not a repository named `timbenniks/timbenniks.dev`.
 - The current timbenniks.dev writing source has 83 non-index Markdown files in `content/4.writing`; the prior 82-article number refers to the previously imported canonical corpus in Turbo Timmy Writer, not the current live source count.
 - The local `timbenniksdev-2024` worktree contains unrelated uncommitted `writing/` workspace files and a `package-lock.json` change. They were inspected read-only and preserved.
 - `timbenniks-2026` derives slugs from Markdown filenames and derives SEO, Twitter, JSON-LD, feed, search, and public Markdown surfaces; Phase 6 must not duplicate those outputs into source frontmatter.
-- The in-app browser had no attached Chrome runtime on 2026-09-05, so authenticated visual inspection of the new website metadata editor and dual preview remains pending. Deterministic component/domain checks and the credential-free Playwright suite pass.
+- Production needs a fine-grained `GITHUB_PUBLISH_TOKEN` with Contents write access to `timbenniks/timbenniksdev-2024` and `timbenniks/timbenniks-2026`. The broader GitHub CLI credential was used only for disposable-branch validation and was deliberately not copied to Vercel or `.env.local`.
 
 ## Important architecture decisions
 
@@ -264,6 +267,5 @@ Phase 6 Slice 5 persistence validation passes the complete local gate: `pnpm db:
 
 ## Next tasks
 
-1. Add website metadata editing and side-by-side exact Nuxt 2024/Astro 2026 Markdown previews.
-2. Add the configurable GitHub publisher adapter only after preview validation is in place; keep all external writes confirmation-gated and track each repository result separately.
-3. Add create/update flows, commit/canonical tracking, and safe partial-failure retries before an end-to-end publication test.
+1. Configure a fine-grained production GitHub publisher token when Tim is ready to enable live publication.
+2. Begin Phase 7 only after reading and confirming its active phase plan.

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "publications_one_pending_target_unique" ON "publications" USING btree ("variant_id","target") WHERE "publications"."status" = 'pending';

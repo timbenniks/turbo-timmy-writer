@@ -127,12 +127,12 @@ The website adapter performs deterministic transformation and validation before 
 Phase 6 repository inspection verified that timbenniks.dev is sourced from the
 public `timbenniks/timbenniksdev-2024` repository. Website articles live under
 `content/4.writing/<slug>.md` and are consumed by a Nuxt 3 + Nuxt Content site.
-New local publication formatting therefore derives
+Publication formatting therefore derives
 `https://timbenniks.dev/writing/<slug>`, emits integer `"<minutes> min read"`
 values, duplicates social/keyword metadata into `head.meta`, and leaves legacy
 Dev.to `id`/`collection_id` fields out of new output. GitHub write operations
-remain future work and must not trigger a separate deployment because the
-repository already reports Vercel deployment statuses for `main`.
+commit only through the repository Contents API and do not invoke Vercel
+because the repositories' existing Git integrations own deployment.
 
 Local verification of the replacement Astro site adds a second explicit
 website publication target: `timbenniks/timbenniks-2026` consumes
@@ -158,8 +158,9 @@ update carries the previously observed blob SHA as an optimistic concurrency
 guard. Repository, path, branch, commit message, content size, response shape,
 and returned SHAs are validated. Provider errors expose only bounded application
 messages plus the GitHub request ID; upstream bodies and credentials are never
-returned or logged. The adapter does not decide publication confirmation or
-write database records—those remain orchestration responsibilities in Slice 5.
+returned or logged. Owner-scoped orchestration separately owns explicit
+confirmation, freshness and optimistic-revision checks, exact pre-request
+snapshots, terminal attempt records, canonical URLs, and variant status.
 
 ## Writing-voice source audit
 

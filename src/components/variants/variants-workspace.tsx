@@ -1,17 +1,21 @@
 "use client";
 
-import { Check, Clipboard, ExternalLink, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
+import { Check, Clipboard, ExternalLink, LoaderCircle, RefreshCw, Send, Sparkles } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { savePublicationVariantAction } from "@/app/actions/publication-variants";
+import {
+  publishWebsiteVariantAction,
+  savePublicationVariantAction,
+} from "@/app/actions/publication-variants";
 import { Button } from "@/components/ui/button";
 import { httpUrlSchema } from "@/lib/validation/http-url";
 import {
   websitePublicationMetadataSchema,
   websitePublicationTags,
+  type WebsitePublicationTarget,
   type WebsitePublicationTag,
 } from "@/publishing/website-contract";
 import { websitePublicationOutputs } from "@/publishing/website";
@@ -59,16 +63,34 @@ export type VariantWorkspaceSnapshot = {
   };
 };
 
+type PublicationSnapshot = {
+  id: string;
+  variantId: string;
+  target: WebsitePublicationTarget;
+  operation: "create" | "update";
+  status: "pending" | "succeeded" | "failed";
+  repository: string;
+  path: string;
+  branch: string;
+  commitSha: string | null;
+  externalUrl: string | null;
+  errorCode: string | null;
+  createdAt: string;
+  completedAt: string | null;
+};
+
 export function VariantsWorkspace({
   articleId,
   articleTitle,
   articleRevision,
   variants,
+  publications,
 }: {
   articleId: string;
   articleTitle: string;
   articleRevision: number;
   variants: VariantWorkspaceSnapshot[];
+  publications: PublicationSnapshot[];
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<VariantDestination>(variants[0]?.destination ?? "website");
@@ -179,6 +201,7 @@ export function VariantsWorkspace({
             onRegenerate={() => void generate(current)}
             onMessage={setMessage}
             onDirtyChange={(dirty) => setDirtyDestination(dirty ? current.destination : null)}
+            publications={publications.filter(({ variantId }) => variantId === current.id)}
           />
         ) : (
           <section className="mx-auto max-w-2xl rounded-2xl border border-dashed border-border bg-surface px-6 py-16 text-center">
@@ -205,6 +228,7 @@ function VariantEditor({
   onRegenerate,
   onMessage,
   onDirtyChange,
+  publications,
 }: {
   articleId: string;
   variant: VariantWorkspaceSnapshot;
@@ -212,6 +236,7 @@ function VariantEditor({
   onRegenerate: () => void;
   onMessage: (message: string) => void;
   onDirtyChange: (dirty: boolean) => void;
+  publications: PublicationSnapshot[];
 }) {
   const router = useRouter();
   const [form, setForm] = useState(() => variantFormFromStored(variant));
@@ -422,7 +447,14 @@ function VariantEditor({
       </label>
 
       {variant.destination === "website" ? (
-        <WebsitePublicationPreview form={form} />
+        <WebsitePublicationPreview
+          articleId={articleId}
+          form={form}
+          variant={variant}
+          dirty={dirty}
+          publications={publications}
+          onMessage={onMessage}
+        />
       ) : (
       <section className="rounded-xl border border-border bg-background p-5" aria-label="Formatting preview">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Formatting preview</p>
@@ -444,7 +476,23 @@ function VariantEditor({
   );
 }
 
-function WebsitePublicationPreview({ form }: { form: VariantForm }) {
+function WebsitePublicationPreview({
+  articleId,
+  form,
+  variant,
+  dirty,
+  publications,
+  onMessage,
+}: {
+  articleId: string;
+  form: VariantForm;
+  variant: VariantWorkspaceSnapshot;
+  dirty: boolean;
+  publications: PublicationSnapshot[];
+  onMessage: (message: string) => void;
+}) {
+  const router = useRouter();
+  const [publishing, setPublishing] = useState<WebsitePublicationTarget | null>(null);
   const metadata = websitePublicationMetadataSchema.safeParse({
     title: form.title,
     slug: form.slug,
@@ -477,6 +525,34 @@ function WebsitePublicationPreview({ form }: { form: VariantForm }) {
     bodyMarkdown: form.bodyMarkdown,
   });
 
+  async function publish(target: WebsitePublicationTarget, repository: string, path: string) {
+    const confirmed = window.confirm(
+      `Publish the saved variant to ${repository}/${path}? This creates a GitHub commit and may trigger the website deployment.`,
+    );
+    if (!confirmed) return;
+    setPublishing(target);
+    onMessage(`Publishing ${target}…`);
+    try {
+      const result = await publishWebsiteVariantAction({
+        articleId,
+        variantId: variant.id,
+        expectedRevision: variant.revision,
+        target,
+        confirmed: true,
+      });
+      if (!result.ok) {
+        onMessage(result.message);
+        return;
+      }
+      onMessage(`${result.operation === "create" ? "Published" : "Updated"} ${target} at commit ${result.commitSha.slice(0, 7)}.`);
+      router.refresh();
+    } catch {
+      onMessage("The publication request failed safely. Check its recorded result before retrying.");
+    } finally {
+      setPublishing(null);
+    }
+  }
+
   return (
     <section className="space-y-3" aria-label="Website publication preview">
       <div>
@@ -486,13 +562,47 @@ function WebsitePublicationPreview({ form }: { form: VariantForm }) {
       <div className="grid gap-4 xl:grid-cols-2">
         {outputs.map((output) => (
           <article key={output.target} className="min-w-0 rounded-xl border border-border bg-background p-4">
-            <p className="font-medium">{output.repository}</p>
-            <p className="mt-1 break-all font-mono text-[11px] text-muted-foreground">{output.path}</p>
+            <div className="flex flex-wrap items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{output.repository}</p>
+                <p className="mt-1 break-all font-mono text-[11px] text-muted-foreground">{output.path}</p>
+              </div>
+              <Button
+                size="sm"
+                disabled={dirty || variant.freshness.stale || form.status === "draft" || publishing !== null}
+                onClick={() => void publish(output.target, output.repository, output.path)}
+              >
+                {publishing === output.target ? <LoaderCircle className="animate-spin" /> : <Send />}
+                {publishing === output.target ? "Publishing…" : "Publish"}
+              </Button>
+            </div>
+            {dirty ? <p className="mt-2 text-xs text-amber-700">Save these changes before publishing.</p> : null}
+            {form.status === "draft" ? <p className="mt-2 text-xs text-amber-700">Set the saved variant to Ready before publishing.</p> : null}
+            {variant.freshness.stale ? <p className="mt-2 text-xs text-amber-700">Regenerate this stale variant before publishing.</p> : null}
+            <PublicationResult publication={publications.find(({ target }) => target === output.target)} />
             <pre className="mt-4 max-h-[520px] overflow-auto whitespace-pre-wrap break-words rounded-lg bg-sidebar p-4 text-xs leading-5">{output.markdown}</pre>
           </article>
         ))}
       </div>
     </section>
+  );
+}
+
+function PublicationResult({ publication }: { publication?: PublicationSnapshot }) {
+  if (!publication) return null;
+  if (publication.status === "pending") {
+    return <p className="mt-2 text-xs text-amber-700">A publication attempt is pending.</p>;
+  }
+  if (publication.status === "failed") {
+    return <p className="mt-2 text-xs text-red-700">Last attempt failed safely ({publication.errorCode ?? "unknown"}). You can retry.</p>;
+  }
+  return (
+    <p className="mt-2 text-xs text-emerald-700">
+      {publication.operation === "create" ? "Published" : "Updated"} on {publication.branch} · commit {publication.commitSha?.slice(0, 7)}
+      {publication.externalUrl ? (
+        <> · <a className="underline" href={publication.externalUrl} target="_blank" rel="noreferrer">open article</a></>
+      ) : null}
+    </p>
   );
 }
 

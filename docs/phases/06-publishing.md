@@ -10,8 +10,8 @@ Publish and update timbenniks.dev articles through a validated GitHub API adapte
 2. Implement and unit-test slugging, reading time, canonical URLs, target paths, YAML serialization, metadata duplication, canonical 2026 tags, and field validation. Complete locally for deterministic Nuxt 2024 and Astro 2026 output; no GitHub write adapter exists yet.
 3. Add website metadata editing and exact frontmatter/Markdown preview. Complete locally: website variants persist the shared publication date, hero image URL, and up to five canonical tags; readiness validation gates side-by-side previews of the exact Nuxt 2024 and Astro 2026 files. Existing variants remain readable without a database migration because these JSON fields are optional until publication.
 4. Implement a configurable GitHub publisher adapter with mocked integration tests. Complete locally: the server-only adapter restricts writes to an explicit repository allowlist, validates branch/path/SHA input, inspects create-versus-update state, uses expected blob SHAs for optimistic updates, safely encodes UTF-8 Markdown, bounds requests with timeouts, and validates GitHub responses. Mocked tests make no network calls.
-5. Add explicit confirmation, create/update flows, commit tracking, canonical URL tracking, and publication snapshots. In progress: the additive local `publications` schema and deterministic state contract retain the exact Markdown, variant revision/hash, canonical source version, target/repository/path/branch, expected blob SHA, terminal commit/blob/URL result, and safe failure metadata independently per target. No production migration or runtime publication orchestration has been activated.
-6. Validate a safe end-to-end publish/update against the configured repository.
+5. Add explicit confirmation, create/update flows, commit tracking, canonical URL tracking, and publication snapshots. Complete: saved, ready, current website variants expose a separate confirmation-gated action for each repository. Owner-scoped orchestration revalidates article and variant revisions at insertion time, records the exact snapshot before GitHub, uses the inspected blob SHA for updates, stores bounded failures for retry, and surfaces independent target history. A changed post-publication path is blocked rather than silently orphaning the old file.
+6. Validate a safe end-to-end publish/update against the configured repository. Complete on 2026-09-06: the real adapter created, inspected, and updated `src/content/writing/phase6-publisher-validation.md` on a disposable `phase6-validation-*` branch in `timbenniks/timbenniks-2026`; both commits returned valid distinct commit/blob SHAs, and the branch was deleted afterward. No article reached either production branch and the app never invoked Vercel directly.
 
 ## Known source-data warning
 
@@ -39,3 +39,8 @@ independently tracked because two GitHub writes cannot be atomic.
 - Secrets remain server-side.
 - Publication records retain the canonical article version, GitHub commit SHA, and URL.
 - Existing repository/Vercel integration handles deployment without a redundant trigger.
+
+All Phase 6 acceptance criteria pass. Production use additionally requires a
+server-side fine-grained `GITHUB_PUBLISH_TOKEN` with Contents write access to
+the two configured repositories; the broad local GitHub CLI credential is not
+copied into application hosting.

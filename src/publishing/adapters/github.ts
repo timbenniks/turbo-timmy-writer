@@ -24,7 +24,7 @@ const githubWriteResponseSchema = z.object({
     path: githubPathSchema,
     sha: githubShaSchema,
     html_url: z.url().nullable(),
-  }).nullable(),
+  }),
   commit: z.object({
     sha: githubShaSchema,
     html_url: z.url(),
@@ -51,7 +51,7 @@ type GitHubWriteInput = GitHubFileInput & {
   expectedSha?: string;
 };
 
-class GitHubPublisherError extends Error {
+export class GitHubPublisherError extends Error {
   constructor(
     readonly code:
       | "forbidden_repository"

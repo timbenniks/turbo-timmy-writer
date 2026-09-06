@@ -241,8 +241,9 @@ article version, operation, repository/path/branch, and expected existing blob
 SHA before an external request. Pending rows contain no result; succeeded rows
 require commit SHA, blob SHA, canonical external URL, and completion time; failed
 rows require only a bounded error code and completion time. Database checks
-enforce those states and the create/update SHA distinction. The migration is
-validated locally but has not been applied to Neon.
+enforce those states and the create/update SHA distinction. Migration
+`0015_workable_mysterio.sql` adds a partial unique index allowing at most one
+pending attempt per variant and target. Both migrations are applied to Neon.
 
 ### `publisher_configs`
 

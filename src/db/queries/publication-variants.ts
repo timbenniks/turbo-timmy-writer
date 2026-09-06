@@ -220,6 +220,23 @@ export async function savePublicationVariantForUser(input: {
     : null;
 }
 
+export async function markPublicationVariantPublishedForUser(input: {
+  variantId: string;
+  userId: string;
+  expectedRevision: number;
+}) {
+  const [row] = await getDatabase().update(publicationVariants).set({
+    status: "published",
+    publishedAt: new Date(),
+    updatedAt: new Date(),
+  }).where(and(
+    eq(publicationVariants.id, input.variantId),
+    eq(publicationVariants.userId, input.userId),
+    eq(publicationVariants.revision, input.expectedRevision),
+  )).returning({ id: publicationVariants.id });
+  return row ?? null;
+}
+
 export async function regeneratePublicationVariantForUser(input: {
   variantId: string;
   articleId: string;

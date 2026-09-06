@@ -8,6 +8,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -56,6 +57,9 @@ export const publications = pgTable(
   (table) => [
     index("publications_variant_target_created_idx").on(table.variantId, table.target, table.createdAt),
     index("publications_user_created_idx").on(table.userId, table.createdAt),
+    uniqueIndex("publications_one_pending_target_unique")
+      .on(table.variantId, table.target)
+      .where(sql`${table.status} = 'pending'`),
     check("publications_positive_variant_revision", sql`${table.variantRevision} > 0`),
     check("publications_content_hash_shape", sql`${table.contentHash} ~ '^[a-f0-9]{64}$'`),
     check("publications_expected_blob_sha_shape", sql`${table.expectedBlobSha} is null or ${table.expectedBlobSha} ~ '^[a-f0-9]{40}$'`),

@@ -6,6 +6,7 @@ import { VariantsWorkspace } from "@/components/variants/variants-workspace";
 import { AppShell } from "@/components/writing/app-shell";
 import { listTaxonomyTagsForUser } from "@/db/queries/article-organization";
 import { getArticleForUser, listRecentArticlesForUser } from "@/db/queries/articles";
+import { listPublicationsForArticleUser } from "@/db/queries/publications";
 import { listPublicationVariantsForUser } from "@/db/queries/publication-variants";
 import { listThemesForUser } from "@/db/queries/themes";
 
@@ -21,9 +22,10 @@ export default async function ArticleVariantsPage({
   const articleId = articleIdSchema.safeParse((await params).articleId);
   if (!articleId.success) notFound();
 
-  const [article, variants, recentArticles, themes, taxonomyTags] = await Promise.all([
+  const [article, variants, publications, recentArticles, themes, taxonomyTags] = await Promise.all([
     getArticleForUser(articleId.data, session.user.id),
     listPublicationVariantsForUser(articleId.data, session.user.id),
+    listPublicationsForArticleUser(articleId.data, session.user.id),
     listRecentArticlesForUser(session.user.id),
     listThemesForUser(session.user.id),
     listTaxonomyTagsForUser(session.user.id),
@@ -43,6 +45,11 @@ export default async function ArticleVariantsPage({
           articleId={article.id}
           articleTitle={article.title}
           articleRevision={article.revision}
+          publications={publications.map((publication) => ({
+            ...publication,
+            createdAt: publication.createdAt.toISOString(),
+            completedAt: publication.completedAt?.toISOString() ?? null,
+          }))}
           variants={variants.map((variant) => ({
             id: variant.id,
             destination: variant.destination,
