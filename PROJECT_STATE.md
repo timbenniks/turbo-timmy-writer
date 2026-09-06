@@ -4,7 +4,7 @@ Last updated: 2026-09-06
 
 ## Current phase
 
-Phases 0 through 5 are complete and pushed to `main`. Phase 6 is complete locally: exact dual-repository previews, explicit per-target confirmation, create/update orchestration, immutable publication snapshots, commit/canonical tracking, safe retry state, and live disposable-branch GitHub validation all pass. Neon has all 16 migrations applied through `0015_workable_mysterio.sql`. No article was published during validation; production publishing remains disabled until a fine-grained server-side GitHub token is configured.
+Phases 0 through 6 are complete: exact dual-repository previews, explicit per-target confirmation, create/update orchestration, immutable publication snapshots, commit/canonical tracking, safe retry state, and live disposable-branch GitHub validation all pass. Neon has all 16 migrations applied through `0015_workable_mysterio.sql`. No article was published during validation; production publishing remains disabled until a fine-grained server-side GitHub token is configured.
 
 ## Completed work
 
@@ -212,7 +212,7 @@ Phases 0 through 5 are complete and pushed to `main`. Phase 6 is complete locall
 - Began Phase 6 Slice 5 with target-specific publication attempts. Additive migration `0014_dazzling_mandarin.sql` and database constraints retain the exact Markdown snapshot, variant revision/hash, canonical source version, operation, repository coordinates, expected blob SHA, terminal commit/blob/URL results, and bounded failure state without conflating the two repository writes.
 - Completed Phase 6 publication orchestration with explicit per-repository confirmation, saved/ready/current guards, atomic revision revalidation, one-pending-attempt enforcement, optimistic blob-SHA updates, path-change protection, independent result history, and canonical URL tracking. The browser exposed and a focused regression test fixed an empty optional-URL crash in the shared validator.
 - Applied migrations `0014_dazzling_mandarin.sql` and `0015_workable_mysterio.sql` through the configured direct Neon connection. Pooled verification found 16 migration records, the `publications` table and pending-target unique index, 82 unchanged articles, and zero fixture variants/publications after cleanup.
-- Live GitHub validation created and updated the exact 2026 writing path on a disposable non-production branch, verified distinct commit/blob SHAs, and deleted the branch. Desktop and 390 × 844 authenticated inspection showed both exact previews, enabled confirmation actions only for saved/ready/current content, disabled both actions after an unsaved edit, and no horizontal overflow.
+- Live GitHub validation created and updated the exact 2026 writing path on a disposable non-production branch, verified distinct commit/blob SHAs, and deleted the branch. Its reusable fixture now goes through the production website serializer so it cannot drift from the Astro content schema. Desktop and 390 × 844 authenticated inspection showed both exact previews, enabled confirmation actions only for saved/ready/current content, disabled both actions after an unsaved edit, and no horizontal overflow.
 
 ## Current validation checkpoint
 
