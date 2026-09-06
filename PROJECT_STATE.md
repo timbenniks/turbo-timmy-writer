@@ -217,10 +217,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Added an owner-scoped article history workspace for comparing immutable checkpoints with each other or the current document. Deterministic bounded line diffs show title and body changes, while AI-linked checkpoints display safe skill/model/status/duration provenance without prompts or output.
 - Added explicitly confirmed version restore with optimistic revision protection. The atomic owner-scoped operation snapshots the current document, restores canonical Tiptap/title/text from the chosen checkpoint, and records the restored result without changing lifecycle status or derived variants.
 - Added a dependency-free command palette available through `⌘K`, `Ctrl+K`, and visible desktop/mobile triggers. It deterministically filters navigation, memory search, current-article workflows, and recent writing; secondary article pages supply lightweight command context without mounting editor behavior.
+- Hardened the live-preview custom theme builder with shared client/server WCAG contrast checks. Exact ratios identify unreadable text, muted, accent, or selection colours, and invalid settings cannot be saved while starter themes and article content remain untouched.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 4 passes ESLint, standalone TypeScript, 119 tests across 39 files, the production build, and the disposable authenticated history flow at desktop and 390 × 844 widths. Browser coverage opens the palette by keyboard, filters to the current article's publication variants, closes with Escape, completes restore, and removes all fixture rows. The complete baseline is rerun before this milestone is committed.
+Phase 7 Slice 5 passes ESLint, standalone TypeScript, 120 tests across 39 files, and the production build. Theme tests cover valid bounded settings, unsafe values, exact contrast calculation, accepted accessible colours, and rejected unreadable colours. The complete baseline is rerun before this milestone is committed.
 
 ## Known issues and setup state
 

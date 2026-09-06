@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   duplicateThemeName,
+  themeContrastIssues,
   themeNameSchema,
   themeSettingsSchema,
   type ThemeSettings,
@@ -90,7 +91,13 @@ export function WritingWorkspaceProvider({
     () => themeSettingsSchema.safeParse(draftSettings),
     [draftSettings],
   );
-  const draftIsValid = themeNameSchema.safeParse(draftName).success && draftSettingsResult.success;
+  const contrastIssues = useMemo(
+    () => draftSettingsResult.success ? themeContrastIssues(draftSettingsResult.data) : [],
+    [draftSettingsResult],
+  );
+  const draftIsValid = themeNameSchema.safeParse(draftName).success
+    && draftSettingsResult.success
+    && contrastIssues.length === 0;
   const previewTheme = useMemo<WritingTheme>(
     () => panelOpen && !activeTheme.isBuiltin && draftSettingsResult.success
       ? {
@@ -291,6 +298,13 @@ export function WritingWorkspaceProvider({
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {([['background', 'Canvas'], ['foreground', 'Text'], ['muted', 'Muted text'], ['accent', 'Accent'], ['selection', 'Selection']] as const).map(([key, label]) => <label key={key} className="text-xs font-medium">{label}<input type="color" value={draftSettings.appearance[key]} onChange={(event) => patchAppearance({ [key]: event.target.value })} className="mt-1 h-9 w-full rounded-md border bg-editor p-1" /></label>)}
                 </div>
+                {contrastIssues.length ? (
+                  <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-950">
+                    Improve contrast before saving: {contrastIssues.map((issue) => `${issue.field} ${issue.ratio}:1 (needs ${issue.minimum}:1)`).join("; ")}.
+                  </div>
+                ) : (
+                  <p className="text-xs text-emerald-800">Text and controls meet the minimum contrast checks.</p>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <label className="text-xs font-medium">Density<select value={draftSettings.chrome.density} onChange={(event) => patchChrome({ density: event.target.value as ThemeSettings["chrome"]["density"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
                   <label className="text-xs font-medium">Sidebar<select value={draftSettings.chrome.sidebar} onChange={(event) => patchChrome({ sidebar: event.target.value as ThemeSettings["chrome"]["sidebar"] })} className="mt-1 h-9 w-full rounded-md border bg-editor px-2"><option value="visible">Visible</option><option value="minimal">Minimal</option><option value="hidden">Hidden</option></select></label>

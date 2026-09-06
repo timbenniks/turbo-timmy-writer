@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { duplicateThemeName, themeSettingsSchema } from "./model";
+import {
+  accessibleThemeSettingsSchema,
+  colourContrastRatio,
+  duplicateThemeName,
+  themeContrastIssues,
+  themeSettingsSchema,
+} from "./model";
 
 const validSettings = {
   version: 1 as const,
@@ -31,5 +37,19 @@ describe("writing themes", () => {
   it("creates a bounded duplicate name", () => {
     expect(duplicateThemeName("Quiet")).toBe("Quiet copy");
     expect(duplicateThemeName("x".repeat(80))).toHaveLength(60);
+  });
+
+  it("calculates WCAG contrast and protects custom theme updates", () => {
+    expect(colourContrastRatio("#000000", "#ffffff")).toBe(21);
+    expect(themeContrastIssues(validSettings)).toEqual([]);
+
+    const unreadable = {
+      ...validSettings,
+      appearance: { ...validSettings.appearance, foreground: "#fffefd" },
+    };
+    expect(accessibleThemeSettingsSchema.safeParse(unreadable).success).toBe(false);
+    expect(themeContrastIssues(unreadable)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ field: "foreground", minimum: 4.5 }),
+    ]));
   });
 });

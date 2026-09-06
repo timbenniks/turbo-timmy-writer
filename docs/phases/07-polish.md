@@ -98,6 +98,26 @@ Acceptance criteria:
 Privacy and cost review: command filtering is entirely local, stores no query,
 and introduces no service, dependency, or model call.
 
+### Slice 5: accessible theme builder
+
+Complete locally on 2026-09-06. The existing live-preview theme editor now
+calculates WCAG contrast deterministically for primary text, muted text, accent
+controls, and selected text. Custom themes show exact failing ratios and cannot
+be saved below the defined thresholds. The server action applies the same
+validated boundary, so client bypass cannot persist an unreadable theme.
+
+Acceptance criteria:
+
+- Contrast calculation is deterministic and unit tested against the 21:1
+  black/white reference.
+- Existing valid starter settings remain accepted.
+- Invalid custom colours preview locally but cannot be saved.
+- Client and server use the same accessible-settings schema.
+- Theme edits continue to affect appearance only, never article content.
+
+Privacy and cost review: checks run locally and server-side using submitted
+colour values only. No telemetry, external call, or dependency is added.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations

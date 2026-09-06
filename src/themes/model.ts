@@ -25,6 +25,50 @@ export const themeSettingsSchema = z.object({
 
 export type ThemeSettings = z.infer<typeof themeSettingsSchema>;
 
+export type ThemeContrastIssue = {
+  field: "foreground" | "muted" | "accent" | "selection";
+  ratio: number;
+  minimum: number;
+};
+
+function relativeLuminance(hex: string) {
+  const channels = [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255);
+  const [red, green, blue] = channels.map((channel) =>
+    channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+  );
+  return 0.2126 * red! + 0.7152 * green! + 0.0722 * blue!;
+}
+
+export function colourContrastRatio(first: string, second: string) {
+  const lighter = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const darker = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return Math.round(((lighter + 0.05) / (darker + 0.05)) * 100) / 100;
+}
+
+export function themeContrastIssues(settings: ThemeSettings): ThemeContrastIssue[] {
+  const { background, foreground, muted, accent, selection } = settings.appearance;
+  const checks: Array<[ThemeContrastIssue["field"], string, string, number]> = [
+    ["foreground", foreground, background, 4.5],
+    ["muted", muted, background, 3],
+    ["accent", accent, background, 3],
+    ["selection", foreground, selection, 4.5],
+  ];
+  return checks.flatMap(([field, first, second, minimum]) => {
+    const ratio = colourContrastRatio(first, second);
+    return ratio < minimum ? [{ field, ratio, minimum }] : [];
+  });
+}
+
+export const accessibleThemeSettingsSchema = themeSettingsSchema.superRefine((settings, context) => {
+  for (const issue of themeContrastIssues(settings)) {
+    context.addIssue({
+      code: "custom",
+      path: ["appearance", issue.field],
+      message: `Contrast ${issue.ratio}:1 is below ${issue.minimum}:1.`,
+    });
+  }
+});
+
 export type WritingTheme = {
   id: string;
   name: string;
@@ -41,7 +85,7 @@ export const duplicateThemeInputSchema = z.object({ themeId: themeIdSchema });
 export const updateThemeInputSchema = z.object({
   themeId: themeIdSchema,
   name: themeNameSchema,
-  settings: themeSettingsSchema,
+  settings: accessibleThemeSettingsSchema,
 });
 export const themePreferenceInputSchema = z.object({ themeId: themeIdSchema });
 
