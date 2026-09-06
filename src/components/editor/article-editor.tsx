@@ -61,6 +61,10 @@ import type { ReviewKind } from "@/ai/review/model";
 import { ArticleTagPicker } from "@/components/tags/article-tag-picker";
 import { HeroImageEditor } from "@/components/assets/hero-image-editor";
 import type { ExternalHeroImage } from "@/assets/model";
+import {
+  ArticleSourcesPanel,
+  type ArticleSourceSnapshot,
+} from "@/components/sources/article-sources-panel";
 import { Button } from "@/components/ui/button";
 import {
   WorkspaceAppearanceButtons,
@@ -106,6 +110,7 @@ type ArticleEditorProps = {
   initialTitle: string;
   initialDocument: ArticleDocument;
   initialHeroImage: ExternalHeroImage | null;
+  initialSources: ArticleSourceSnapshot[];
   status: ArticleStatus;
   initialTags: string[];
   availableTags: string[];
@@ -163,6 +168,7 @@ export function ArticleEditor({
   initialTitle,
   initialDocument,
   initialHeroImage,
+  initialSources,
   status,
   initialTags,
   availableTags,
@@ -1035,6 +1041,8 @@ export function ArticleEditor({
           setSaveMessage(result.heroImage ? "Hero image saved." : "Hero image removed.");
         }}
       />
+
+      <ArticleSourcesPanel articleId={articleId} initialSources={initialSources} />
 
       <PrecisionAiPanel
         suggestions={suggestions}

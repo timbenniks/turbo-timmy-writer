@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import type { ArticleDocument } from "@/editor/document";
 import { libraryDestinations } from "@/lib/navigation";
 import type { WritingTheme } from "@/themes/model";
+import type { ArticleSourceSnapshot } from "@/components/sources/article-sources-panel";
 
 type ArticleSummary = {
   id: string;
@@ -83,6 +84,7 @@ type AppShellProps = {
     passage: string;
   }[];
   selectedArticleMemoryQuery?: string;
+  selectedArticleSources?: ArticleSourceSnapshot[];
   themes: WritingTheme[];
   taxonomyTags: TagTaxonomyItem[];
   content?: ReactNode;
@@ -138,6 +140,7 @@ export function AppShell({
   selectedArticleAiRuns = [],
   selectedArticleRelatedWriting = [],
   selectedArticleMemoryQuery = "",
+  selectedArticleSources = [],
   themes,
   taxonomyTags,
   content,
@@ -270,6 +273,7 @@ export function AppShell({
               suggestions={selectedArticleSuggestions}
               reviews={selectedArticleReviews}
               aiRuns={selectedArticleAiRuns}
+              sources={selectedArticleSources}
             />
           ) : (
             <Library articles={articles} filter={activeFilter} toolbar={libraryToolbar} />
@@ -383,6 +387,7 @@ function ArticleWorkspace({
   suggestions,
   reviews,
   aiRuns,
+  sources,
 }: {
   article: SelectedArticle;
   organization: NonNullable<AppShellProps["selectedArticleOrganization"]>;
@@ -390,6 +395,7 @@ function ArticleWorkspace({
   suggestions: EditorSuggestionSnapshot[];
   reviews: ArticleReviewSnapshot[];
   aiRuns: AiRunSnapshot[];
+  sources: ArticleSourceSnapshot[];
 }) {
   return (
     <ArticleEditor
@@ -397,6 +403,7 @@ function ArticleWorkspace({
       initialTitle={article.title}
       initialDocument={article.documentJson}
       initialHeroImage={article.metadata.heroImage ?? null}
+      initialSources={sources}
       status={article.status}
       initialTags={organization.tags}
       availableTags={taxonomyTags.map((tag) => tag.label)}

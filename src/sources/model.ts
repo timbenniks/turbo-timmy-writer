@@ -51,3 +51,12 @@ export const removeArticleSourceInputSchema = z.object({
 export type SourceType = z.infer<typeof sourceTypeSchema>;
 export type SourceInput = z.infer<typeof sourceInputSchema>;
 export type ArticleSourceDetails = z.infer<typeof articleSourceDetailsSchema>;
+
+export function formatSourceCitation(source: {
+  title: string;
+  url: string | null;
+  quote: string | null;
+}) {
+  const attribution = source.url ? `${source.title} — ${source.url}` : source.title;
+  return source.quote ? `“${source.quote}”\n— ${attribution}` : attribution;
+}

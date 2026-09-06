@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   articleSourceDetailsSchema,
   createArticleSourceInputSchema,
+  formatSourceCitation,
   sourceInputSchema,
 } from "./model";
 
@@ -41,5 +42,13 @@ describe("source input", () => {
   it("allows a title-only offline source", () => {
     expect(sourceInputSchema.parse({ type: "book", title: "The Design of Everyday Things" }))
       .toEqual({ type: "book", title: "The Design of Everyday Things" });
+  });
+
+  it("formats an explicit copyable citation without editing prose", () => {
+    expect(formatSourceCitation({
+      title: "Primary documentation",
+      url: "https://example.com/docs",
+      quote: "Exact evidence.",
+    })).toBe("“Exact evidence.”\n— Primary documentation — https://example.com/docs");
   });
 });

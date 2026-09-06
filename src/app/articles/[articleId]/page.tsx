@@ -19,6 +19,7 @@ import { listArticleReviewsForUser } from "@/db/queries/article-reviews";
 import { listAiRunsForArticleForUser } from "@/db/queries/ai-runs";
 import { relatedArchiveQuery } from "@/search/retrieval/model";
 import { retrieveArchiveForUser } from "@/search/retrieval/service";
+import { listArticleSourcesForUser } from "@/db/queries/sources";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const articleId = parsedArticleId.data;
-  const [article, recentArticles, organization, themes, taxonomyTags, articleStart, articleBrief, suggestions, reviews, aiRuns] = await Promise.all([
+  const [article, recentArticles, organization, themes, taxonomyTags, articleStart, articleBrief, suggestions, reviews, aiRuns, sources] = await Promise.all([
     getArticleForUser(articleId, session.user.id),
     listRecentArticlesForUser(session.user.id),
     getArticleOrganizationForUser(articleId, session.user.id),
@@ -49,6 +50,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     listEditorSuggestionsForUser(articleId, session.user.id),
     listArticleReviewsForUser(articleId, session.user.id),
     listAiRunsForArticleForUser(articleId, session.user.id),
+    listArticleSourcesForUser(articleId, session.user.id),
   ]);
 
   if (!article) {
@@ -142,6 +144,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         passage: result.passage,
       }))}
       selectedArticleMemoryQuery={memoryQuery}
+      selectedArticleSources={sources.map((source) => ({
+        id: source.id,
+        type: source.type,
+        title: source.title,
+        url: source.url,
+        text: source.text,
+        notes: source.notes,
+        quote: source.quote,
+        context: source.context,
+        position: source.position,
+      }))}
       themes={themes}
       taxonomyTags={taxonomyTags}
     />

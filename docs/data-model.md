@@ -216,6 +216,9 @@ quote, context, deterministic position, and timestamps. Its composite primary
 key prevents a source being linked to the same article twice. Owner-scoped
 queries verify both sides of every link; unlinking does not delete a reusable
 source and neither operation changes canonical article prose.
+Migration `0016_nasty_nico_minoru.sql` is applied to Neon. The editor projects
+these records through an explicit management panel; citation formatting and
+clipboard copy are deterministic client operations and do not mutate Tiptap.
 
 ## Variant and publishing tables
 

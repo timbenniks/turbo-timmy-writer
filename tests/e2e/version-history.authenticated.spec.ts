@@ -54,6 +54,7 @@ test.describe("version comparison", () => {
       select id from users where lower(github_login) = lower(${allowedLogin}) limit 1
     `;
     const articleId = randomUUID();
+    const sourceTitle = `Playwright fixture source ${articleId}`;
     const versionId = randomUUID();
     const aiRunId = randomUUID();
     const oldText = "Shared opening\nOld evidence\nShared ending";
@@ -137,6 +138,40 @@ test.describe("version comparison", () => {
       const [removedHero] = await sql`select metadata from articles where id = ${articleId}`;
       expect(removedHero.metadata.heroImage).toBeUndefined();
 
+      await page.locator("summary").filter({ hasText: "Sources" }).click();
+      await page.locator("summary").filter({ hasText: "Add source" }).click();
+      await page.getByLabel("Title", { exact: true }).fill(sourceTitle);
+      await page.getByLabel("URL (optional)").fill("https://example.com/primary-source");
+      await page.getByRole("textbox", { name: "Quote", exact: true }).fill("Exact disposable evidence.");
+      await page.getByLabel("Why it matters").fill("Initial context");
+      await page.getByRole("button", { name: "Add source" }).click();
+      await expect(page.getByText("Source added. Article prose was not changed.")).toBeVisible();
+      const [sourceEvidence] = await sql`
+        select s.id, s.title, article_sources.context
+        from sources s
+        join article_sources on article_sources.source_id = s.id
+        where article_sources.article_id = ${articleId}
+      `;
+      expect(sourceEvidence).toMatchObject({ title: sourceTitle, context: "Initial context" });
+
+      await page.getByRole("button", { name: `Edit ${sourceTitle}` }).click();
+      const sourceCard = page.getByRole("article", { name: `Source: ${sourceTitle}` });
+      await sourceCard.getByLabel("Why it matters").fill("Updated context");
+      await page.getByRole("button", { name: "Save source" }).click();
+      await expect(page.getByText("Source updated. Article prose was not changed.")).toBeVisible();
+      const [updatedSource] = await sql`select context from article_sources where article_id = ${articleId} and source_id = ${sourceEvidence.id}`;
+      expect(updatedSource.context).toBe("Updated context");
+
+      page.once("dialog", (dialog) => dialog.accept());
+      await page.getByRole("button", { name: `Unlink ${sourceTitle}` }).click();
+      await expect(page.getByText("Source unlinked. The reusable source was not deleted.")).toBeVisible();
+      const [unlinkedSource] = await sql`
+        select
+          exists(select 1 from sources where id = ${sourceEvidence.id}) as source_exists,
+          (select count(*)::integer from article_sources where source_id = ${sourceEvidence.id}) as link_count
+      `;
+      expect(unlinkedSource).toEqual({ source_exists: true, link_count: 0 });
+
       const [restoreEvidence] = await sql`
         select
           count(*) filter (where reason = 'pre-restore')::integer as before_count,
@@ -149,6 +184,7 @@ test.describe("version comparison", () => {
     } finally {
       await sql`delete from ai_runs where id = ${aiRunId}`;
       await sql`delete from articles where id = ${articleId}`;
+      await sql`delete from sources where user_id = ${user.id} and title = ${sourceTitle}`;
     }
   });
 });

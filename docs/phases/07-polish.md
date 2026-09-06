@@ -167,14 +167,16 @@ credentials are absent, makes no model call, and adds no dependency.
 
 ### Slice 8: source and citation persistence
 
-Persistence foundation complete locally on 2026-09-06. Additive `sources` and
+Complete on 2026-09-06. Additive `sources` and
 `article_sources` tables keep Tim's research references separate from imported
 archive memory. Validated owner-scoped operations create a source plus article
 link, update its citation context, list it deterministically, or unlink it
-without touching canonical prose. The editor-facing management panel is the
-next sub-slice and will not ship until the migration can be applied safely.
+without touching canonical prose. The editor panel creates, edits, and unlinks
+references, shows quotes and context, opens external URLs, and copies a
+deterministically formatted citation for Tim to paste explicitly. Migration
+`0016_nasty_nico_minoru.sql` is applied to Neon.
 
-Acceptance criteria for this foundation:
+Acceptance criteria:
 
 - A source has a bounded type, title, optional HTTP(S) URL, text, and notes.
 - Article links retain a bounded quote, context, and deterministic position.
@@ -182,6 +184,9 @@ Acceptance criteria for this foundation:
 - Creating a source and its link is one database batch after article ownership.
 - Unlinking never silently deletes a reusable source or edits the article.
 - The additive migration applies from an empty database with all prior migrations.
+- Source management remains separate from the Tiptap editor and never inserts
+  copied citations automatically.
+- Clipboard failure is reported without losing or changing source data.
 
 Privacy and cost review: source contents remain in the application database and
 are not sent to AI, fetched from the supplied URL, or mixed into archive/voice
@@ -370,7 +375,6 @@ are mandatory; it must never run during generation or variant save.
 - Command palette and broader keyboard shortcuts
 - Improved theme builder
 - Hero image and optional Cloudinary integration
-- Source and citation management UI and citation formatting
 - Optional GitHub delivery for the portable backup
 - Audited, explicitly confirmed newsletter draft orchestration
 - Contentstack Developers field mapping and audited publish orchestration
