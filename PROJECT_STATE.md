@@ -226,10 +226,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Added an explicit portable writing backup from Insights. The owner-only, private/no-store JSON attachment includes canonical Tiptap documents plus Markdown projections, tags, immutable article versions, variants, and exact publication history in stable ID order, while excluding auth records, secrets, provider configuration, embeddings, and binary assets.
 - Added Quick Capture to the Ideas workspace for ideas, fragments, and research notes. Bounded server validation creates an owner-scoped canonical Tiptap article with `idea` status and explicit metadata kind; deterministic title fallback, derived plain text, and inbox labels preserve the distinction without a parallel notes format or AI call.
 - Added a bounded Archive relationship explorer that computes deterministic shared-tag Jaccard edges from the existing owner-scoped archive list. Focus selection exposes the shared tags, overlap percentage, visual connections, and attributed source link without storing inferred edges or claiming semantic/factual similarity.
+- Added a server-only Buttondown newsletter adapter foundation against the documented token-authenticated email endpoint. It bounds subject/body, requests `status: draft`, rejects non-draft responses, times out, and maps provider failures safely under mocks; no UI path, live request, credential, or automatic send exists yet.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 13 passes ESLint, standalone TypeScript, 154 tests across 53 files, and the production build. Unit coverage proves normalized stable edges, exact overlap scores, and explicit node/edge limits; the graph consumes the established owner-scoped archive query and performs no write or external call. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
+Phase 7 Slice 14 passes ESLint, standalone TypeScript, 160 tests across 54 files, and the production build. Mocked adapter coverage proves the exact endpoint/auth/body, draft-only response boundary, pre-request validation, and sanitized 401/429/5xx/invalid-response handling with no provider call. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
 
 ## Known issues and setup state
 

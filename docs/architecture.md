@@ -137,6 +137,12 @@ Archive chunking uses versioned `cl100k_base` token windows targeting 800 tokens
 
 `src/publishing/adapters` contains destination adapters behind a typed contract. Core article services know about a generic variant and publication record, not GitHub paths, LinkedIn limits, or newsletter fields.
 
+The Phase 7 Buttondown adapter is a draft-only provider boundary. It validates
+newsletter content, authenticates only on the server, requests `status: draft`,
+and rejects a non-draft response. It is deliberately not callable from the UI
+until newsletter delivery attempts have their own durable audit state; website
+publication records must not be overloaded for that purpose.
+
 Phase 5 keeps destination profiles in independent modules under
 `src/variants/destinations`. `article-repurpose/v1` receives exactly one profile,
 the canonical Markdown snapshot, and bounded voice guidance, then validates an

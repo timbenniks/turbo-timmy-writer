@@ -46,6 +46,10 @@ const cloudinaryEnvironmentSchema = z.object({
   CLOUDINARY_API_SECRET: z.string().trim().min(1).max(500),
 });
 
+const buttondownEnvironmentSchema = z.object({
+  BUTTONDOWN_API_KEY: z.string().trim().min(1).max(500),
+});
+
 export type ArchiveEmbeddingEnvironment = {
   apiKey: string;
   model: string;
@@ -61,6 +65,8 @@ export type CloudinaryEnvironment = {
   apiKey: string;
   apiSecret: string;
 };
+
+export type ButtondownEnvironment = { apiKey: string };
 
 export function getDatabaseUrl() {
   return databaseEnvironmentSchema.parse({
@@ -126,6 +132,13 @@ export function readCloudinaryEnvironment(): CloudinaryEnvironment | null {
         apiSecret: result.data.CLOUDINARY_API_SECRET,
       }
     : null;
+}
+
+export function readButtondownEnvironment(): ButtondownEnvironment | null {
+  const result = buttondownEnvironmentSchema.safeParse({
+    BUTTONDOWN_API_KEY: process.env.BUTTONDOWN_API_KEY,
+  });
+  return result.success ? { apiKey: result.data.BUTTONDOWN_API_KEY } : null;
 }
 
 export function isLocalGuidedAiTestMode() {

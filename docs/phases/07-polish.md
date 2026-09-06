@@ -296,6 +296,28 @@ Privacy and cost review: graph calculation runs in-process over already stored
 archive titles, URLs, and tags. It makes no embedding/model/provider request,
 stores no interaction, and adds no dependency or database row.
 
+### Slice 14: Buttondown draft adapter foundation
+
+Complete locally on 2026-09-06. A server-only adapter follows Buttondown's
+documented `POST /v1/emails` token-authenticated contract and always requests
+`status: draft`. Bounded input, timeout, provider-error mapping, and response
+validation are covered with mocked requests. It is not connected to the UI or
+publication state until an auditable delivery record can be migrated.
+
+Acceptance criteria:
+
+- The API key is validated from server-only configuration.
+- Subject/body inputs are bounded before an external request.
+- Requests use Buttondown token authentication, HTTPS, JSON, and a short timeout.
+- The adapter requests a draft and rejects any response not validated as a draft.
+- Authentication, rate-limit, availability, timeout, and response errors are sanitized.
+- Tests make no live provider request and CI needs no Buttondown credential.
+
+Privacy and cost review: this foundation performs no runtime call because no UI
+or orchestration invokes it. A future explicit action would send newsletter
+subject/body to Buttondown and may incur provider usage, so it must remain
+confirmed, draft-only, and auditable.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -304,7 +326,7 @@ stores no interaction, and adds no dependency or database row.
 - Hero image and optional Cloudinary integration
 - Source and citation management UI and citation formatting
 - Optional GitHub delivery for the portable backup
-- Newsletter provider adapter
+- Audited, explicitly confirmed newsletter draft orchestration
 - Contentstack Developers publisher
 - LinkedIn API publishing if a reliable supported API is practical
 

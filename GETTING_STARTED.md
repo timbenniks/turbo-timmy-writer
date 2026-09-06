@@ -92,6 +92,7 @@ in `.env.local` or Vercel's encrypted environment storage.
 | `CLOUDINARY_CLOUD_NAME` | Optional managed hero-image uploads | Product-environment cloud name; all three Cloudinary values are required together. |
 | `CLOUDINARY_API_KEY` | Optional managed hero-image uploads | Server-side credential from Cloudinary API Keys settings. |
 | `CLOUDINARY_API_SECRET` | Optional managed hero-image uploads | Secret; never expose it to the browser. |
+| `BUTTONDOWN_API_KEY` | Optional newsletter draft delivery | Secret; enables draft creation only after orchestration is explicitly configured. |
 
 ## GitHub OAuth
 
@@ -157,6 +158,16 @@ and still requires alternative text plus an explicit article save. Uploaded
 assets use the `turbo-timmy-writer/heroes` folder. Cloudinary storage and
 delivery can incur provider charges, so leave these values unset until managed
 uploads are wanted.
+
+## Enable newsletter draft delivery later
+
+`BUTTONDOWN_API_KEY` is reserved for the optional Buttondown adapter. The
+current adapter is draft-only and is not yet connected to the publication UI,
+so leave the value unset until delivery orchestration and its audit record are
+enabled. When that slice is complete, use a dedicated Buttondown API key in the
+Vercel Production environment; never expose it to the browser or reuse a
+broader personal credential. Creating a draft may count toward provider usage,
+but Turbo Timmy Writer will not send or publish a newsletter automatically.
 
 ## Enable website publishing later
 
