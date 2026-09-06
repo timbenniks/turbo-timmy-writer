@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Lora } from "next/font/google";
 import type { ReactNode } from "react";
+
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 
 import "./globals.css";
 
@@ -22,7 +24,11 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Turbo Timmy Writer",
   description: "A focused, AI-assisted writing studio for Tim Benniks.",
+  applicationName: "Turbo Timmy Writer",
+  manifest: "/manifest.webmanifest",
 };
+
+export const viewport: Viewport = { themeColor: "#171717" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -30,7 +36,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${lora.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <ServiceWorkerRegistration />
+      </body>
     </html>
   );
 }

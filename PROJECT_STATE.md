@@ -221,10 +221,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Added canonical external hero images with validated HTTP(S) URL, required alt text, optional caption/credit, live preview, explicit removal, owner/revision-scoped persistence, and deterministic website-variant inheritance. No server image fetch, upload, or publication occurs.
 - Added optional authenticated Cloudinary hero uploads with server-only validated credentials, signed bounded raster uploads, response validation, a 30-second timeout, and sanitized failures. Upload only fills the unsaved hero form; alt text and explicit canonical save remain required, and prose autosave preserves hero metadata.
 - Began source/citation management with validated source and link models, additive `sources`/`article_sources` migration `0016_nasty_nico_minoru.sql`, and deterministic owner-scoped create/list/update/unlink operations. Sources remain distinct from archive and voice memory, and none of these operations touches canonical prose.
+- Added a production-only installable PWA shell with a standalone manifest, uncached root-scoped service worker, and generic navigation fallback. It pre-caches only the public offline page and icon; protected pages, API responses, and article content never enter Cache Storage, while the already-open editor retains its existing local recovery/retry behavior.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 8's persistence foundation passes ESLint, standalone TypeScript, 140 tests across 46 files, the production build, Drizzle consistency checks, and all 17 migrations against an empty PGlite database, producing 21 public tables with pgvector and publication guards intact. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
+Phase 7 Slice 9 passes ESLint, standalone TypeScript, 141 tests across 47 files, the production build, production-server header/content probes, and desktop/mobile Playwright checks that install the worker, disconnect the browser, and receive the generic offline shell. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
 
 ## Known issues and setup state
 

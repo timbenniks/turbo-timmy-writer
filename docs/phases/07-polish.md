@@ -187,6 +187,29 @@ Privacy and cost review: source contents remain in the application database and
 are not sent to AI, fetched from the supplied URL, or mixed into archive/voice
 memory. The slice adds no provider, dependency, or external request.
 
+### Slice 9: installable private offline shell
+
+Complete locally on 2026-09-06. Production builds expose a scoped standalone
+web-app manifest and register a tiny dependency-free service worker. When a
+navigation loses its connection, the installed app renders an honest offline
+fallback; an already open editor continues to use the existing local recovery
+envelope and reconnection retry. The worker never caches authenticated pages,
+API responses, or article content.
+
+Acceptance criteria:
+
+- The manifest provides local identity, scope, colours, and icon metadata.
+- Service-worker registration runs only in production-capable browsers.
+- The worker is served uncached with root scope and replaces old shell caches.
+- Only the generic offline page and public icon are pre-cached.
+- Failed navigations receive the offline page without exposing prior article data.
+- Browser coverage proves installation and offline navigation on the production server.
+
+Privacy and cost review: Cache Storage contains only two public shell assets.
+No authored content, authenticated response, telemetry, provider call, or new
+dependency is introduced. This does not claim cold-start offline editing; local
+recovery continues to protect edits in an editor that was already open.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -197,7 +220,6 @@ memory. The slice adds no provider, dependency, or external request.
 - Archive relationships and graph exploration
 - Fragments, research notes, and ideas inbox
 - GitHub backup/export
-- Progressive web app and deeper offline support
 - Usage and product analytics
 - Newsletter provider adapter
 - Contentstack Developers publisher
