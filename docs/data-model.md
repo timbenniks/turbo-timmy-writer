@@ -202,7 +202,7 @@ Phase 4 migration `0010_damp_colonel_america.sql` introduces this table without 
 Phase 4 migration `0011_fat_masque.sql` enables pgvector and adds `archive_chunks`; it is applied to the configured Neon database. Each row contains `id`, `archive_document_id`, ordinal, body text, token count, a nullable 1,024-dimension embedding vector, embedding model and dimensions, content hash, chunk metadata JSON, optional embedding timestamp, and row timestamps. Unique `(archive_document_id, ordinal)` makes deterministic replacement safe. The database requires vector, model, dimensions, and embedding timestamp to be either all present or all absent. Create a pgvector index only after testing the dataset and selected distance metric; premature index tuning adds risk without benefit.
 
 Phase 4 literal search computes a weighted title/body `tsvector` in its owner-scoped
-query. With 156 chunks this avoids a premature maintained column and index. Semantic
+query. With the current 169 chunks this avoids a premature maintained column and index. Semantic
 and literal results retain document and chunk identifiers for attribution; add a
 GIN or vector index only after query-plan evidence justifies it.
 

@@ -48,6 +48,16 @@ Tim approved activation on 2026-09-04. Migration `0011` applied through the dire
 
 Final pooled verification found 156 vectors with complete current cache metadata, 156 unique document/ordinal positions across all 74 archive documents, zero invalid token counts or hashes, and all 82 canonical articles intact.
 
+Maintenance refresh on 2026-09-06 inspected the updated local source read-only.
+The idempotent archive plan contained six inserts, 74 no-ops, zero updates, and
+zero removals. Applying it and syncing memory added 13 chunks and embedded only
+those new chunks (9,415 input tokens), producing 80 published documents and 169
+complete 1,024-dimension vectors. Canonical reconciliation added the one new
+published article without using the destructive replacement path and preserved
+an independently edited existing article at revision 4. Exact post-write checks
+matched the new article's source Markdown, Tiptap projection, plain text, tags,
+status, and immutable import checkpoint.
+
 Slices 3–5 add one owner-scoped retrieval boundary with literal, semantic, and
 hybrid modes. Literal ranking uses PostgreSQL full-text search; semantic ranking
 uses the cached pgvector embeddings; hybrid ranking normalizes and combines both
