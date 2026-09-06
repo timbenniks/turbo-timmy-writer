@@ -34,6 +34,8 @@ async function main() {
       embeddingType: string | null;
       publicationTable: boolean;
       pendingPublicationGuard: boolean;
+      deliveryTable: boolean;
+      pendingDeliveryGuard: boolean;
     }>(`
       select
         (
@@ -51,16 +53,21 @@ async function main() {
         ) as "embeddingType",
         to_regclass('public.publications') is not null as "publicationTable",
         to_regclass('public.publications_one_pending_target_unique') is not null
-          as "pendingPublicationGuard"
+          as "pendingPublicationGuard",
+        to_regclass('public.deliveries') is not null as "deliveryTable",
+        to_regclass('public.deliveries_one_pending_provider_unique') is not null
+          as "pendingDeliveryGuard"
     `);
     const verification = result.rows[0];
     if (
       !verification?.vectorEnabled ||
       verification.embeddingType !== "vector(1024)" ||
       !verification.publicationTable ||
-      !verification.pendingPublicationGuard
+      !verification.pendingPublicationGuard ||
+      !verification.deliveryTable ||
+      !verification.pendingDeliveryGuard
     ) {
-      throw new Error("The pgvector archive migration was not applied correctly.");
+      throw new Error("The migration chain was not applied correctly.");
     }
     console.log(
       JSON.stringify(
@@ -72,6 +79,8 @@ async function main() {
           embeddingType: verification.embeddingType,
           publicationTable: verification.publicationTable,
           pendingPublicationGuard: verification.pendingPublicationGuard,
+          deliveryTable: verification.deliveryTable,
+          pendingDeliveryGuard: verification.pendingDeliveryGuard,
         },
         null,
         2,

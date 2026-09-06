@@ -220,6 +220,18 @@ Migration `0016_nasty_nico_minoru.sql` is applied to Neon. The editor projects
 these records through an explicit management panel; citation formatting and
 clipboard copy are deterministic client operations and do not mutate Tiptap.
 
+### `deliveries`
+
+Phase 7 migration `0017_dashing_psylocke.sql` adds provider-neutral outbound
+delivery audits without overloading repository `publications`. Each row stores
+owner, article, variant, canonical source version, provider, operation, exact
+variant revision, immutable outbound snapshot JSON and SHA-256 hash, bounded
+request/result metadata, terminal external identity or error code, and timing.
+An owner/current/revision/state guard creates the pending row before any provider
+request, and a partial unique index allows only one pending provider attempt per
+variant. Buttondown uses `create-draft`; later Contentstack and LinkedIn slices
+reuse this audit boundary while retaining their distinct provider semantics.
+
 ## Variant and publishing tables
 
 ### `publication_variants`

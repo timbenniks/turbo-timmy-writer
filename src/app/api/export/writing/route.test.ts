@@ -24,7 +24,7 @@ describe("portable writing backup route", () => {
   it("returns an owner-only uncached JSON attachment", async () => {
     mocks.getAllowedSession.mockResolvedValue({ user: { id: "user-id" } });
     mocks.getPortableWritingBackupForUser.mockImplementation(async (_userId: string, exportedAt: Date) => ({
-      schemaVersion: 1,
+      schemaVersion: 2,
       exportedAt: exportedAt.toISOString(),
       scope: "writing",
       articles: [],
@@ -37,6 +37,6 @@ describe("portable writing backup route", () => {
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     expect(response.headers.get("content-disposition")).toMatch(/^attachment; filename="turbo-timmy-writer-\d{4}-\d{2}-\d{2}\.json"$/);
     expect(mocks.getPortableWritingBackupForUser).toHaveBeenCalledWith("user-id", expect.any(Date));
-    await expect(response.json()).resolves.toMatchObject({ schemaVersion: 1, scope: "writing" });
+    await expect(response.json()).resolves.toMatchObject({ schemaVersion: 2, scope: "writing" });
   });
 });

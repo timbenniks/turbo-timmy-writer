@@ -120,6 +120,13 @@
       "when": 1788685130527,
       "tag": "0016_nasty_nico_minoru",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788688771678,
+      "tag": "0017_dashing_psylocke",
+      "breakpoints": true
     }
   ]
 }

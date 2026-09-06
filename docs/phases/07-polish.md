@@ -307,7 +307,7 @@ Complete locally on 2026-09-06. A server-only adapter follows Buttondown's
 documented `POST /v1/emails` token-authenticated contract and always requests
 `status: draft`. Bounded input, timeout, provider-error mapping, and response
 validation are covered with mocked requests. It is not connected to the UI or
-publication state until an auditable delivery record can be migrated.
+publication state in this foundation; Slice 18 adds that audited orchestration.
 
 Acceptance criteria:
 
@@ -318,10 +318,8 @@ Acceptance criteria:
 - Authentication, rate-limit, availability, timeout, and response errors are sanitized.
 - Tests make no live provider request and CI needs no Buttondown credential.
 
-Privacy and cost review: this foundation performs no runtime call because no UI
-or orchestration invokes it. A future explicit action would send newsletter
-subject/body to Buttondown and may incur provider usage, so it must remain
-confirmed, draft-only, and auditable.
+Privacy and cost review: the adapter alone performs no call. Slice 18 invokes it
+only after explicit confirmation and retains the draft-only boundary.
 
 ### Slice 15: Contentstack draft adapter foundation
 
@@ -394,13 +392,39 @@ the configured repository should be private. GitHub retains the backup in
 commit history; normal repository storage and API limits apply. No AI call,
 new database record, or automatic schedule is added.
 
+### Slice 18: audited Buttondown draft delivery
+
+Complete locally on 2026-09-06. A newsletter variant that is saved, Ready, and
+current exposes an explicitly confirmed Buttondown action. Additive migration
+`0017_dashing_psylocke.sql` introduces reusable owner/article/variant-scoped
+delivery audit records. The exact provider request and deterministic hash are
+persisted before the request; success retains the provider draft ID and failure
+retains only a bounded error code. The action can create a draft but cannot send it.
+
+Acceptance criteria:
+
+- The action requires authentication, a newsletter variant, exact revision,
+  Ready state, current canonical source, valid saved fields, and confirmation.
+- An atomic database guard persists the immutable outbound snapshot before any provider call.
+- At most one pending Buttondown attempt exists per variant.
+- Success and failure both reach terminal audited states; provider detail and credentials are excluded.
+- The UI distinguishes unsaved, draft-state, stale, unconfigured, pending,
+  failed, and successful states and never claims the newsletter was sent.
+- Portable backup schema v2 includes delivery audit history in stable ID order.
+- The migration applies after the complete existing chain; automated provider tests use mocks only.
+- Authenticated desktop and mobile checks render the guarded action without a provider request.
+
+Privacy and cost review: confirmation sends the saved subject and composed body
+to Buttondown, which retains a remote draft and may count it toward plan usage.
+No recipient send, automatic retry, background job, AI call, or credential
+exposure occurs. GitHub/website publication history remains a separate table.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
 - Command palette and broader keyboard shortcuts
 - Improved theme builder
 - Hero image and optional Cloudinary integration
-- Audited, explicitly confirmed newsletter draft orchestration
 - Contentstack Developers field mapping and audited publish orchestration
 - Explicitly confirmed and audited LinkedIn publication orchestration
 

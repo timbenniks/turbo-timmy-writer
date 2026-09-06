@@ -174,12 +174,19 @@ uploads are wanted.
 ## Enable newsletter draft delivery later
 
 `BUTTONDOWN_API_KEY` is reserved for the optional Buttondown adapter. The
-current adapter is draft-only and is not yet connected to the publication UI,
-so leave the value unset until delivery orchestration and its audit record are
-enabled. When that slice is complete, use a dedicated Buttondown API key in the
-Vercel Production environment; never expose it to the browser or reuse a
-broader personal credential. Creating a draft may count toward provider usage,
-but Turbo Timmy Writer will not send or publish a newsletter automatically.
+integration is draft-only. Use a dedicated Buttondown API key in the Vercel
+Production environment; never expose it to the browser or reuse a broader
+personal credential:
+
+```bash
+vercel env add BUTTONDOWN_API_KEY production --sensitive
+```
+
+After redeploying, save a current newsletter variant as Ready and inspect its
+exact preview. The Create draft button requires confirmation, records the exact
+outbound snapshot before the provider call, and reports the returned draft ID.
+Creating a draft may count toward provider usage, but Turbo Timmy Writer has no
+Buttondown send action and cannot publish the newsletter automatically.
 
 ## Enable Contentstack Developers drafts later
 

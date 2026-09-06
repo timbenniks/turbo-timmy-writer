@@ -10,6 +10,7 @@ import {
   publishWebsiteVariantAction,
   savePublicationVariantAction,
 } from "@/app/actions/publication-variants";
+import { createButtondownDraftAction } from "@/app/actions/deliveries";
 import { Button } from "@/components/ui/button";
 import { httpUrlSchema } from "@/lib/validation/http-url";
 import {
@@ -79,18 +80,36 @@ type PublicationSnapshot = {
   completedAt: string | null;
 };
 
+type DeliverySnapshot = {
+  id: string;
+  variantId: string;
+  provider: "buttondown" | "contentstack" | "linkedin";
+  operation: "create-draft" | "publish";
+  status: "pending" | "succeeded" | "failed";
+  variantRevision: number;
+  externalId: string | null;
+  externalUrl: string | null;
+  errorCode: string | null;
+  createdAt: string;
+  completedAt: string | null;
+};
+
 export function VariantsWorkspace({
   articleId,
   articleTitle,
   articleRevision,
+  buttondownConfigured,
   variants,
   publications,
+  deliveries,
 }: {
   articleId: string;
   articleTitle: string;
   articleRevision: number;
+  buttondownConfigured: boolean;
   variants: VariantWorkspaceSnapshot[];
   publications: PublicationSnapshot[];
+  deliveries: DeliverySnapshot[];
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<VariantDestination>(variants[0]?.destination ?? "website");
@@ -202,6 +221,8 @@ export function VariantsWorkspace({
             onMessage={setMessage}
             onDirtyChange={(dirty) => setDirtyDestination(dirty ? current.destination : null)}
             publications={publications.filter(({ variantId }) => variantId === current.id)}
+            deliveries={deliveries.filter(({ variantId }) => variantId === current.id)}
+            buttondownConfigured={buttondownConfigured}
           />
         ) : (
           <section className="mx-auto max-w-2xl rounded-2xl border border-dashed border-border bg-surface px-6 py-16 text-center">
@@ -229,6 +250,8 @@ function VariantEditor({
   onMessage,
   onDirtyChange,
   publications,
+  deliveries,
+  buttondownConfigured,
 }: {
   articleId: string;
   variant: VariantWorkspaceSnapshot;
@@ -237,6 +260,8 @@ function VariantEditor({
   onMessage: (message: string) => void;
   onDirtyChange: (dirty: boolean) => void;
   publications: PublicationSnapshot[];
+  deliveries: DeliverySnapshot[];
+  buttondownConfigured: boolean;
 }) {
   const router = useRouter();
   const [form, setForm] = useState(() => variantFormFromStored(variant));
@@ -472,6 +497,84 @@ function VariantEditor({
         {form.callToAction ? <p className="mt-5 font-medium">{form.callToAction}</p> : null}
       </section>
       )}
+      {variant.destination === "newsletter" ? (
+        <ButtondownDelivery
+          articleId={articleId}
+          variant={variant}
+          dirty={dirty}
+          delivery={deliveries.find(({ provider }) => provider === "buttondown")}
+          configured={buttondownConfigured}
+          onMessage={onMessage}
+        />
+      ) : null}
+    </section>
+  );
+}
+
+function ButtondownDelivery({
+  articleId,
+  variant,
+  dirty,
+  delivery,
+  configured,
+  onMessage,
+}: {
+  articleId: string;
+  variant: VariantWorkspaceSnapshot;
+  dirty: boolean;
+  delivery?: DeliverySnapshot;
+  configured: boolean;
+  onMessage: (message: string) => void;
+}) {
+  const router = useRouter();
+  const [delivering, setDelivering] = useState(false);
+
+  async function deliver() {
+    const subject = variant.metadataJson.destination === "newsletter"
+      ? variant.metadataJson.subject
+      : "newsletter";
+    if (!window.confirm(
+      `Create a Buttondown draft for “${subject}”? This uploads the saved snapshot but does not send it.`,
+    )) return;
+    setDelivering(true);
+    try {
+      const result = await createButtondownDraftAction({
+        articleId,
+        variantId: variant.id,
+        expectedRevision: variant.revision,
+        confirmed: true,
+      });
+      onMessage(result.message);
+      if (result.ok) router.refresh();
+    } catch {
+      onMessage("Buttondown draft delivery failed safely. Check its audit result before retrying.");
+    } finally {
+      setDelivering(false);
+    }
+  }
+
+  const disabled = !configured || dirty || variant.freshness.stale || variant.status === "draft" || delivering;
+  return (
+    <section className="rounded-xl border border-border bg-background p-5" aria-label="Buttondown draft delivery">
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">Buttondown draft</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            Uploads this exact saved variant as a draft. It never sends the newsletter.
+          </p>
+        </div>
+        <Button size="sm" disabled={disabled} onClick={() => void deliver()}>
+          {delivering ? <LoaderCircle className="animate-spin" /> : <Send />}
+          {delivering ? "Creating draft…" : "Create draft"}
+        </Button>
+      </div>
+      {dirty ? <p className="mt-2 text-xs text-amber-700">Save these changes before delivery.</p> : null}
+      {!configured ? <p className="mt-2 text-xs text-amber-700">Configure the server-side Buttondown API key to enable draft delivery.</p> : null}
+      {variant.status === "draft" ? <p className="mt-2 text-xs text-amber-700">Set and save the variant as Ready first.</p> : null}
+      {variant.freshness.stale ? <p className="mt-2 text-xs text-amber-700">Regenerate this stale variant first.</p> : null}
+      {delivery?.status === "pending" ? <p className="mt-2 text-xs text-amber-700">A Buttondown request is pending.</p> : null}
+      {delivery?.status === "failed" ? <p className="mt-2 text-xs text-red-700">Last draft attempt failed safely ({delivery.errorCode ?? "unknown"}).</p> : null}
+      {delivery?.status === "succeeded" ? <p className="mt-2 text-xs text-emerald-700">Draft created · provider ID {delivery.externalId}</p> : null}
     </section>
   );
 }

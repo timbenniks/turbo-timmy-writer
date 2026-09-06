@@ -142,9 +142,10 @@ Archive chunking uses versioned `cl100k_base` token windows targeting 800 tokens
 
 The Phase 7 Buttondown adapter is a draft-only provider boundary. It validates
 newsletter content, authenticates only on the server, requests `status: draft`,
-and rejects a non-draft response. It is deliberately not callable from the UI
-until newsletter delivery attempts have their own durable audit state; website
-publication records must not be overloaded for that purpose.
+and rejects a non-draft response. An explicitly confirmed action is available
+only for a saved, Ready, current newsletter variant. The generic `deliveries`
+boundary stores the exact provider request/hash before calling Buttondown, then
+records a bounded terminal result. Website publication records are not overloaded.
 
 The Contentstack CMA adapter follows the same draft-first boundary. Regional
 host, stack, Management Token, content type, locale, and branch are server

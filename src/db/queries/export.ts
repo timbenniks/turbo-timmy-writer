@@ -7,6 +7,7 @@ import {
   articles,
   articleTags,
   articleVersions,
+  deliveries,
   publications,
   publicationVariants,
   tags,
@@ -16,7 +17,7 @@ import { portableBackupVersion } from "@/export/model";
 
 export async function getPortableWritingBackupForUser(userId: string, exportedAt = new Date()) {
   const database = getDatabase();
-  const [articleRows, tagRows, versionRows, variantRows, publicationRows] = await Promise.all([
+  const [articleRows, tagRows, versionRows, variantRows, publicationRows, deliveryRows] = await Promise.all([
     database
       .select({
         id: articles.id,
@@ -107,6 +108,29 @@ export async function getPortableWritingBackupForUser(userId: string, exportedAt
       .from(publications)
       .where(eq(publications.userId, userId))
       .orderBy(asc(publications.id)),
+    database
+      .select({
+        id: deliveries.id,
+        articleId: deliveries.articleId,
+        variantId: deliveries.variantId,
+        sourceArticleVersionId: deliveries.sourceArticleVersionId,
+        provider: deliveries.provider,
+        operation: deliveries.operation,
+        status: deliveries.status,
+        variantRevision: deliveries.variantRevision,
+        snapshotJson: deliveries.snapshotJson,
+        snapshotHash: deliveries.snapshotHash,
+        externalId: deliveries.externalId,
+        externalUrl: deliveries.externalUrl,
+        requestMetadataJson: deliveries.requestMetadataJson,
+        resultMetadataJson: deliveries.resultMetadataJson,
+        errorCode: deliveries.errorCode,
+        createdAt: deliveries.createdAt,
+        completedAt: deliveries.completedAt,
+      })
+      .from(deliveries)
+      .where(eq(deliveries.userId, userId))
+      .orderBy(asc(deliveries.id)),
   ]);
   const tagsByArticle = new Map<string, string[]>();
   for (const tag of tagRows) {
@@ -126,5 +150,6 @@ export async function getPortableWritingBackupForUser(userId: string, exportedAt
     articleVersions: versionRows,
     publicationVariants: variantRows,
     publications: publicationRows,
+    deliveries: deliveryRows,
   };
 }
