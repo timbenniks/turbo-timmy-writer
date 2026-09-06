@@ -999,6 +999,12 @@ export function ArticleEditor({
         <span className="shrink-0 tabular-nums" title={latestVersionAt ? `Last checkpoint at ${formatSavedAt(latestVersionAt)}` : undefined}>
           {versionCount} {versionCount === 1 ? "version" : "versions"}
         </span>
+        <Link
+          href={`/articles/${articleId}/history` as Route}
+          className="shrink-0 font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Compare
+        </Link>
       </div>
 
       {organizationMessage ? (

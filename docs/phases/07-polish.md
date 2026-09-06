@@ -31,6 +31,30 @@ Privacy and cost review: documentation introduces no runtime collection,
 external calls, or new dependency. Paid embedding commands remain explicit and
 the guide labels them before use.
 
+### Slice 2: version comparison and AI provenance
+
+Complete locally on 2026-09-06. Every article now links to a protected history
+workspace that compares any immutable checkpoint with another checkpoint or
+the current document. The owner-scoped query exposes snapshot metadata and
+safe AI provenance—skill, version, model, status, and duration—without prompts
+or generated output. A deterministic line diff highlights additions, removals,
+unchanged text, and title changes; unusually large inputs use a bounded
+fallback instead of unbounded comparison work.
+
+Acceptance criteria:
+
+- Version rows are returned only through article ownership.
+- The current article is comparison input, not a silently created snapshot.
+- Comparison is deterministic and bounded for large documents.
+- AI annotations expose operational provenance without prompt or output data.
+- Empty history has a useful state and introduces no document mutation.
+- A disposable browser fixture passes at desktop and mobile widths and is
+  removed after the test.
+
+Privacy and cost review: comparison reads already stored article/version/run
+metadata, makes no model calls, and adds no third-party service or dependency.
+Restore remains a separate mutation slice with its own concurrency safeguards.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations

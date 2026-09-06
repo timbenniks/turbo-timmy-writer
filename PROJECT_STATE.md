@@ -214,10 +214,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Applied migrations `0014_dazzling_mandarin.sql` and `0015_workable_mysterio.sql` through the configured direct Neon connection. Pooled verification found 16 migration records, the `publications` table and pending-target unique index, 82 unchanged articles, and zero fixture variants/publications after cleanup.
 - Live GitHub validation created and updated the exact 2026 writing path on a disposable non-production branch, verified distinct commit/blob SHAs, and deleted the branch. Its reusable fixture now goes through the production website serializer so it cannot drift from the Astro content schema. Desktop and 390 × 844 authenticated inspection showed both exact previews, enabled confirmation actions only for saved/ready/current content, disabled both actions after an unsaved edit, and no horizontal overflow.
 - Began Phase 7 with a repository-root operator guide covering current versus optional setup, a fresh development machine, the complete environment contract, OAuth, database safety, AI configuration, least-privilege website publishing, validation, archive maintenance, and troubleshooting. README now routes maintainers to the guide.
+- Added an owner-scoped article history workspace for comparing immutable checkpoints with each other or the current document. Deterministic bounded line diffs show title and body changes, while AI-linked checkpoints display safe skill/model/status/duration provenance without prompts or output.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 1 is documentation-only. Its validation checks every relative Markdown link, confirms every `.env.example` variable is documented, and runs the full Phase 0 baseline. The preceding Phase 6 checkpoint passed all 16 migrations against empty Postgres, ESLint, standalone TypeScript, 114 tests, the production build, and four credential-free Playwright checks.
+Phase 7 Slice 2 passes ESLint, standalone TypeScript, 117 tests across 38 files, the production build, and a disposable authenticated comparison flow at desktop and 390 × 844 widths. The browser fixture and its AI run/version rows are deleted after each test. Slice 1 separately validated every relative Markdown link and all 17 `.env.example` variables.
 
 ## Known issues and setup state
 
