@@ -1,4 +1,6 @@
 import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+import type { Route } from "next";
 
 type ArchiveDocumentSummary = {
   id: string;
@@ -40,6 +42,7 @@ export function ArchiveLibrary({ documents }: { documents: ArchiveDocumentSummar
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
             Imported source writing used for attributed retrieval. It remains separate from editable articles and voice guidance.
           </p>
+          <Link href={"/archive/graph" as Route} className="mt-5 inline-flex h-9 items-center rounded-md border border-border bg-background px-3 text-sm font-medium hover:bg-muted">Explore relationships</Link>
           <div className="mt-10 divide-y divide-border border-y border-border">
             {documents.map((document) => (
               <article key={document.id} className="py-5 sm:px-4">

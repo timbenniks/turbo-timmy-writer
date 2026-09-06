@@ -275,6 +275,27 @@ Privacy and cost review: capture writes only the supplied text to Tim's existing
 article table. It makes no model or external call, adds no dependency/schema,
 and retains the same owner boundary as every canonical article.
 
+### Slice 13: archive relationship explorer
+
+Complete locally on 2026-09-06. The protected Archive workspace links to a
+bounded visual explorer that focuses one published source and shows its
+strongest shared-tag neighbours. Edges use deterministic Jaccard tag overlap;
+the UI exposes the shared tags and percentage and links back to the attributed
+source.
+
+Acceptance criteria:
+
+- Nodes come only from the existing owner-scoped archive query.
+- Tag comparison normalizes case/whitespace and deduplicates each tag set.
+- Node and edge limits explicitly bound quadratic comparison and rendering.
+- Edge ordering and four-decimal scores are deterministic and unit tested.
+- The graph distinguishes tag overlap from AI similarity or factual dependence.
+- Exploring relationships never mutates archive or canonical articles.
+
+Privacy and cost review: graph calculation runs in-process over already stored
+archive titles, URLs, and tags. It makes no embedding/model/provider request,
+stores no interaction, and adds no dependency or database row.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -282,7 +303,6 @@ and retains the same owner boundary as every canonical article.
 - Improved theme builder
 - Hero image and optional Cloudinary integration
 - Source and citation management UI and citation formatting
-- Archive relationships and graph exploration
 - Optional GitHub delivery for the portable backup
 - Newsletter provider adapter
 - Contentstack Developers publisher

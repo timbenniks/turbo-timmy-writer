@@ -225,10 +225,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Added protected private Insights derived from existing owner-scoped article, AI-run, variant, and publication records. It reports writing volume, recent activity, pipeline distribution, AI outcomes/tokens/timing, variant readiness, and publication outcomes without tracking scripts, third-party analytics, new cookies, or new behavioral rows.
 - Added an explicit portable writing backup from Insights. The owner-only, private/no-store JSON attachment includes canonical Tiptap documents plus Markdown projections, tags, immutable article versions, variants, and exact publication history in stable ID order, while excluding auth records, secrets, provider configuration, embeddings, and binary assets.
 - Added Quick Capture to the Ideas workspace for ideas, fragments, and research notes. Bounded server validation creates an owner-scoped canonical Tiptap article with `idea` status and explicit metadata kind; deterministic title fallback, derived plain text, and inbox labels preserve the distinction without a parallel notes format or AI call.
+- Added a bounded Archive relationship explorer that computes deterministic shared-tag Jaccard edges from the existing owner-scoped archive list. Focus selection exposes the shared tags, overlap percentage, visual connections, and attributed source link without storing inferred edges or claiming semantic/factual similarity.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 12 passes ESLint, standalone TypeScript, 152 tests across 52 files, and the production build. Unit/action coverage proves canonical paragraph construction, bounded title fallback, explicit kind labels, validation, fail-closed access, owner propagation, and Ideas revalidation without a paid or external call. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
+Phase 7 Slice 13 passes ESLint, standalone TypeScript, 154 tests across 53 files, and the production build. Unit coverage proves normalized stable edges, exact overlap scores, and explicit node/edge limits; the graph consumes the established owner-scoped archive query and performs no write or external call. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
 
 ## Known issues and setup state
 

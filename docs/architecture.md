@@ -116,6 +116,11 @@ capture onward. `metadata.entryKind` supplies the inbox distinction while
 status `idea` supplies the shared lifecycle. There is no separate fragment
 document format to synchronize or migrate before a thought becomes an article.
 
+Archive graph exploration is a bounded, deterministic projection of imported
+document tags. It computes normalized shared-tag Jaccard edges in-process and
+never writes inferred relationships back to the database. The score describes
+taxonomy overlap only; semantic retrieval remains a separate explicit mode.
+
 Phase 4 implements the first article profile as an immutable, validated seed in
 `src/ai/voice`. Runtime guidance strips source notes and passes only bounded,
 versioned observations to `article-first-draft/v2`; archive excerpts remain a
