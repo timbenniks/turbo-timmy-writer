@@ -76,6 +76,28 @@ Acceptance criteria:
 Privacy and cost review: restore makes no external or model call. It creates two
 small database snapshots by design so the operation is reversible and auditable.
 
+### Slice 4: keyboard command palette
+
+Complete locally on 2026-09-06. `⌘K` or `Ctrl+K` opens an accessible,
+dependency-free command palette from every application shell. It filters stable
+navigation, search, current-article history/variants/editor actions, and recent
+articles by normalized labels and keywords. Arrow keys move the active result,
+Enter navigates, and Escape closes it. Secondary article pages pass only the
+lightweight context needed for their article commands.
+
+Acceptance criteria:
+
+- Keyboard and visible triggers open the same labelled dialog.
+- Search order and matching are deterministic and tested.
+- Commands expose only existing safe routes; no destructive mutation runs from
+  the palette.
+- Current-article commands work from editor, history, and variants pages.
+- Desktop and mobile authenticated browser coverage exercises open, filter,
+  and close behavior.
+
+Privacy and cost review: command filtering is entirely local, stores no query,
+and introduces no service, dependency, or model call.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations

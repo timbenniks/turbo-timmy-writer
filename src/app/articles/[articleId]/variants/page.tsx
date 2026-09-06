@@ -37,6 +37,7 @@ export default async function ArticleVariantsPage({
       githubLogin={session.user.githubLogin}
       activeFilter="all"
       articles={[]}
+      commandArticle={{ id: article.id, title: article.title }}
       recentArticles={recentArticles}
       themes={themes}
       taxonomyTags={taxonomyTags}

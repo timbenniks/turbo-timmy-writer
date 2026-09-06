@@ -103,6 +103,7 @@ export default async function ArticleHistoryPage({
       githubLogin={session.user.githubLogin}
       activeFilter="all"
       articles={[]}
+      commandArticle={{ id: article.id, title: article.title }}
       recentArticles={recentArticles}
       themes={themes}
       taxonomyTags={taxonomyTags}

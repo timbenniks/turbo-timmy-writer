@@ -101,6 +101,13 @@ test.describe("version comparison", () => {
 
       await page.goto(`/articles/${articleId}/history`);
       await expect(page.getByRole("heading", { name: "Playwright fixture version history" })).toBeVisible();
+      await page.keyboard.press("Control+k");
+      const palette = page.getByRole("dialog", { name: "Command palette" });
+      await expect(palette).toBeVisible();
+      await palette.getByRole("textbox", { name: "Search commands" }).fill("publication variants");
+      await expect(palette.getByRole("button", { name: /Publication variants/ })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(palette).toBeHidden();
       await expect(page.getByText("article-first-draft@v2 · test-model · succeeded · 240 ms")).toBeVisible();
       await expect(page.getByText("Old evidence", { exact: true })).toBeVisible();
       await expect(page.getByText("Specific evidence", { exact: true })).toBeVisible();

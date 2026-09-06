@@ -1,6 +1,5 @@
 import {
   ChevronDown,
-  Command,
   FileText,
   MoreHorizontal,
   Plus,
@@ -19,6 +18,7 @@ import {
 } from "@/articles/model";
 import type { TagTaxonomyItem } from "@/articles/organization";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { CommandPalette, CommandPaletteTrigger } from "@/components/navigation/command-palette";
 import { ArticleEditor } from "@/components/editor/article-editor";
 import type {
   AiRunSnapshot,
@@ -59,6 +59,7 @@ type AppShellProps = {
   articles: ArticleSummary[];
   recentArticles: ArticleSummary[];
   selectedArticle?: SelectedArticle;
+  commandArticle?: { id: string; title: string };
   selectedArticleOrganization?: {
     tags: string[];
     versionCount: number;
@@ -123,6 +124,7 @@ export function AppShell({
   articles,
   recentArticles,
   selectedArticle,
+  commandArticle,
   selectedArticleOrganization,
   selectedArticleStart,
   selectedArticleBrief,
@@ -135,9 +137,34 @@ export function AppShell({
   taxonomyTags,
   content,
 }: AppShellProps) {
+  const activeCommandArticle = selectedArticle ?? commandArticle;
+  const commands = [
+    { id: "new-article", label: "New article", group: "Navigate" as const, href: "/start" as Route, keywords: "premise blank" },
+    { id: "search", label: "Search writing memory", group: "Navigate" as const, href: "/search" as Route, keywords: "archive memory" },
+    ...libraryDestinations.map((destination) => ({
+      id: `library-${destination.filter}`,
+      label: destination.label,
+      group: "Navigate" as const,
+      href: destination.href,
+    })),
+    ...(activeCommandArticle ? [
+      { id: "article-editor", label: "Open current article", group: "Article" as const, href: `/articles/${activeCommandArticle.id}` as Route, keywords: activeCommandArticle.title },
+      { id: "article-history", label: "Version history", group: "Article" as const, href: `/articles/${activeCommandArticle.id}/history` as Route, keywords: "compare restore" },
+      { id: "article-variants", label: "Publication variants", group: "Article" as const, href: `/articles/${activeCommandArticle.id}/variants` as Route, keywords: "website linkedin newsletter publish" },
+    ] : []),
+    ...recentArticles.map((article) => ({
+      id: `recent-${article.id}`,
+      label: articleDisplayTitle(article.title),
+      group: "Recent" as const,
+      href: `/articles/${article.id}` as Route,
+      keywords: articleStatusLabel(article.status),
+    })),
+  ];
+
   return (
     <WritingWorkspaceProvider themes={themes}>
       <div className="workspace-frame mx-auto grid h-full min-h-0 max-w-[1800px] overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_70px_rgba(37,32,24,0.08)] lg:grid-cols-[248px_minmax(0,1fr)_320px]">
+        <CommandPalette commands={commands} />
         <aside className="workspace-navigation hidden min-h-0 border-r border-border bg-sidebar lg:flex lg:flex-col">
           <div className="workspace-sidebar-header flex h-16 shrink-0 items-center justify-between px-4">
             <Link
@@ -205,12 +232,10 @@ export function AppShell({
           </div>
 
           <div className="workspace-sidebar-footer mt-auto shrink-0 space-y-1 border-t border-border p-3">
+            <CommandPaletteTrigger />
             <Link href={"/search" as Route} aria-label="Search" className="workspace-footer-action flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               <Search className="size-4" />
               <span className="workspace-footer-label">Search</span>
-              <span className="workspace-footer-label ml-auto rounded border border-border px-1.5 py-0.5 text-[10px]">
-                ⌘K
-              </span>
             </Link>
             <div className="workspace-account-row flex h-9 w-full items-center gap-1 rounded-lg px-1 text-sm text-muted-foreground">
               <TagManager initialTags={taxonomyTags} />
@@ -263,9 +288,7 @@ function Library({
   return (
     <>
       <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
-        <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open library">
-          <Command />
-        </Button>
+        <div className="lg:hidden"><CommandPaletteTrigger compact /></div>
         <div className="min-w-0">
           <p className="text-sm font-medium">{title}</p>
           <p className="text-xs text-muted-foreground">
