@@ -76,7 +76,7 @@ describe("GitHub publisher adapter", () => {
       repository: "timbenniks/timbenniks-2026",
       path: "src/content/writing/cafe.md",
       message: "Publish café",
-      markdown: "# Café ☕",
+      content: "# Café ☕",
     })).resolves.toMatchObject({ commit: { sha: commitSha } });
 
     const init = fetchMock.mock.calls[0]?.[1];
@@ -104,7 +104,7 @@ describe("GitHub publisher adapter", () => {
       repository: "timbenniks/timbenniksdev-2024",
       path: "content/4.writing/a.md",
       message: "Update a",
-      markdown: "Updated",
+      content: "Updated",
       expectedSha: sha,
     });
 
@@ -124,7 +124,13 @@ describe("GitHub publisher adapter", () => {
       repository: "timbenniks/timbenniksdev-2024",
       path: "../secret",
       message: "Nope",
-      markdown: "Nope",
+      content: "Nope",
+    })).rejects.toMatchObject({ code: "invalid_request" });
+    await expect(adapter.writeFile({
+      repository: "timbenniks/timbenniksdev-2024",
+      path: "backups/latest.json",
+      message: "Oversized",
+      content: "a".repeat(10_000_001),
     })).rejects.toMatchObject({ code: "invalid_request" });
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -143,7 +149,7 @@ describe("GitHub publisher adapter", () => {
       repository: "timbenniks/timbenniksdev-2024",
       path: "content/4.writing/a.md",
       message: "Update a",
-      markdown: "Updated",
+      content: "Updated",
       expectedSha: sha,
     })).rejects.toMatchObject({
       code: "github_conflict",
@@ -162,7 +168,7 @@ describe("GitHub publisher adapter", () => {
       repository: "timbenniks/timbenniksdev-2024",
       path: "content/4.writing/a.md",
       message: "Publish a",
-      markdown: "Body",
+      content: "Body",
     })).rejects.toMatchObject({ code: "invalid_response" });
   });
 

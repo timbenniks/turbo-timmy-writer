@@ -40,6 +40,14 @@ const githubPublisherEnvironmentSchema = z.object({
   GITHUB_PUBLISH_BRANCH: z.string().trim().min(1).max(255).default("main"),
 });
 
+const githubBackupEnvironmentSchema = z.object({
+  GITHUB_PUBLISH_TOKEN: z.string().trim().min(1),
+  GITHUB_BACKUP_REPOSITORY: z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/),
+  GITHUB_BACKUP_PATH: z.string().trim().min(1).max(1_024)
+    .refine((path) => !path.startsWith("/") && !path.split("/").includes("..")),
+  GITHUB_BACKUP_BRANCH: z.string().trim().min(1).max(255).default("main"),
+});
+
 const cloudinaryEnvironmentSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().trim().regex(/^[a-z0-9_-]+$/i).max(100),
   CLOUDINARY_API_KEY: z.string().trim().min(1).max(200),
@@ -72,6 +80,12 @@ export type ArchiveEmbeddingEnvironment = {
 
 export type GitHubPublisherEnvironment = {
   token: string;
+  branch: string;
+};
+export type GitHubBackupEnvironment = {
+  token: string;
+  repository: string;
+  path: string;
   branch: string;
 };
 
@@ -141,6 +155,21 @@ export function readGitHubPublisherEnvironment(): GitHubPublisherEnvironment | n
   return result.success
     ? { token: result.data.GITHUB_PUBLISH_TOKEN, branch: result.data.GITHUB_PUBLISH_BRANCH }
     : null;
+}
+
+export function readGitHubBackupEnvironment(): GitHubBackupEnvironment | null {
+  const result = githubBackupEnvironmentSchema.safeParse({
+    GITHUB_PUBLISH_TOKEN: process.env.GITHUB_PUBLISH_TOKEN,
+    GITHUB_BACKUP_REPOSITORY: process.env.GITHUB_BACKUP_REPOSITORY,
+    GITHUB_BACKUP_PATH: process.env.GITHUB_BACKUP_PATH,
+    GITHUB_BACKUP_BRANCH: process.env.GITHUB_BACKUP_BRANCH,
+  });
+  return result.success ? {
+    token: result.data.GITHUB_PUBLISH_TOKEN,
+    repository: result.data.GITHUB_BACKUP_REPOSITORY,
+    path: result.data.GITHUB_BACKUP_PATH,
+    branch: result.data.GITHUB_BACKUP_BRANCH,
+  } : null;
 }
 
 export function readCloudinaryEnvironment(): CloudinaryEnvironment | null {

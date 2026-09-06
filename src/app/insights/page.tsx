@@ -7,12 +7,14 @@ import { listTaxonomyTagsForUser } from "@/db/queries/article-organization";
 import { listRecentArticlesForUser } from "@/db/queries/articles";
 import { getUsageSummaryForUser } from "@/db/queries/insights";
 import { listThemesForUser } from "@/db/queries/themes";
+import { readGitHubBackupEnvironment } from "@/lib/env/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function InsightsPage() {
   const session = await getAllowedSession();
   if (!session) redirect("/sign-in");
+  const backupEnvironment = readGitHubBackupEnvironment();
   const [summary, recentArticles, themes, taxonomyTags] = await Promise.all([
     getUsageSummaryForUser(session.user.id),
     listRecentArticlesForUser(session.user.id),
@@ -28,7 +30,12 @@ export default async function InsightsPage() {
       recentArticles={recentArticles}
       themes={themes}
       taxonomyTags={taxonomyTags}
-      content={<UsageInsights summary={summary} />}
+      content={<UsageInsights
+        summary={summary}
+        githubBackupTarget={backupEnvironment
+          ? `${backupEnvironment.repository}/${backupEnvironment.path} on ${backupEnvironment.branch}`
+          : null}
+      />}
     />
   );
 }

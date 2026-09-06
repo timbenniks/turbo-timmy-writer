@@ -369,13 +369,37 @@ use would transmit the confirmed post text to LinkedIn and publish it publicly
 in the same call, so explicit confirmation and an auditable immutable snapshot
 are mandatory; it must never run during generation or variant save.
 
+### Slice 17: optional GitHub backup delivery
+
+Complete locally on 2026-09-06. Insights keeps the direct JSON download and
+adds an optional explicitly confirmed GitHub delivery to one configured file.
+The server regenerates the owner-scoped portable snapshot at confirmation time,
+inspects the remote file, and uses its blob SHA for optimistic replacement. A
+successful result links to the immutable GitHub commit.
+
+Acceptance criteria:
+
+- Download remains available without GitHub configuration or a provider call.
+- Repository, path, branch, and token are validated server-side as one optional configuration.
+- The UI identifies the exact target and requires confirmation that it should be private.
+- Authentication and configuration checks occur before querying backup data.
+- Delivery reuses the allowlisted GitHub boundary, caps UTF-8 content at 10 MB,
+  and supplies the inspected SHA when replacing a file.
+- Provider errors are sanitized and success exposes only the commit URL.
+- Automated validation uses mocks and never writes a live repository.
+
+Privacy and cost review: the payload contains private canonical writing and its
+history. Nothing leaves the app unless Tim explicitly confirms delivery, and
+the configured repository should be private. GitHub retains the backup in
+commit history; normal repository storage and API limits apply. No AI call,
+new database record, or automatic schedule is added.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
 - Command palette and broader keyboard shortcuts
 - Improved theme builder
 - Hero image and optional Cloudinary integration
-- Optional GitHub delivery for the portable backup
 - Audited, explicitly confirmed newsletter draft orchestration
 - Contentstack Developers field mapping and audited publish orchestration
 - Explicitly confirmed and audited LinkedIn publication orchestration

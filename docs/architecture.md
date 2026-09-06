@@ -108,8 +108,11 @@ internals. It includes canonical Tiptap documents, deterministic Markdown
 projections, tags, article versions, editable variants, and publication history
 in stable order. It excludes authentication records, secrets, provider
 configuration, rebuildable embeddings, and binary assets. Optional GitHub
-delivery must consume this same payload and remain separate from website
-publication.
+delivery regenerates this same owner-scoped payload only after confirmation,
+targets one server-configured private file, and uses the existing allowlisted
+Contents adapter with optimistic blob-SHA replacement. The returned commit is
+the external audit trail; delivery adds no local scheduling or background sync.
+It remains separate from website publication.
 
 Ideas, fragments, and research notes use the canonical article aggregate from
 capture onward. `metadata.entryKind` supplies the inbox distinction while

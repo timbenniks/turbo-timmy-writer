@@ -253,7 +253,7 @@ export async function publishWebsiteVariantAction(input: unknown): Promise<Publi
       path: output.path,
       branch: environment.branch,
       message: `${operation === "create" ? "Publish" : "Update"} ${metadata.data.title}`,
-      markdown: output.markdown,
+      content: output.markdown,
       expectedSha: remote?.sha,
     });
     const canonicalUrl = timbenniksDevCanonicalUrl(metadata.data.slug);

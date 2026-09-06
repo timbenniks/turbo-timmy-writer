@@ -39,7 +39,7 @@ describe("GitHub publisher live validation", () => {
       path,
       branch,
       message: "Validate Phase 6 publisher create",
-      markdown: createdMarkdown!,
+      content: createdMarkdown!,
     });
     expect(created.commit.sha).toMatch(/^[a-f0-9]{40}$/);
 
@@ -56,7 +56,7 @@ describe("GitHub publisher live validation", () => {
       path,
       branch,
       message: "Validate Phase 6 publisher update",
-      markdown: updatedMarkdown!,
+      content: updatedMarkdown!,
       expectedSha: existing?.sha,
     });
     expect(updated.commit.sha).not.toBe(created.commit.sha);

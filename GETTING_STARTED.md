@@ -89,6 +89,9 @@ in `.env.local` or Vercel's encrypted environment storage.
 | `OPENAI_MODEL_EMBEDDING` | Archive semantic search | Must be a `text-embedding-3-*` model; vectors use 1,024 dimensions. |
 | `GITHUB_PUBLISH_TOKEN` | Live website publishing | Optional fine-grained token described below. |
 | `GITHUB_PUBLISH_BRANCH` | Website target branch | Defaults to `main`. |
+| `GITHUB_BACKUP_REPOSITORY` | Optional portable-backup delivery | Private `owner/repository` target; requires the publish token to have Contents access there. |
+| `GITHUB_BACKUP_PATH` | Optional portable-backup delivery | Exact repository-relative JSON path, for example `backups/turbo-timmy-writer.json`. |
+| `GITHUB_BACKUP_BRANCH` | Optional portable-backup delivery | Defaults to `main`. |
 | `CLOUDINARY_CLOUD_NAME` | Optional managed hero-image uploads | Product-environment cloud name; all three Cloudinary values are required together. |
 | `CLOUDINARY_API_KEY` | Optional managed hero-image uploads | Server-side credential from Cloudinary API Keys settings. |
 | `CLOUDINARY_API_SECRET` | Optional managed hero-image uploads | Secret; never expose it to the browser. |
@@ -230,6 +233,26 @@ Before the first real publication:
 
 The application writes through the GitHub Contents API. It does not shell out
 to `gh`, invoke Vercel, or modify a local website checkout.
+
+## Enable private GitHub backups later
+
+Create or select a private repository and give the fine-grained
+`GITHUB_PUBLISH_TOKEN` Contents read/write access to that repository. Then add
+the exact target configuration and redeploy:
+
+```bash
+vercel env add GITHUB_BACKUP_REPOSITORY production
+vercel env add GITHUB_BACKUP_PATH production
+vercel env add GITHUB_BACKUP_BRANCH production
+```
+
+The Insights button stays disabled until all values and the token are valid.
+Each click shows the configured target and requires confirmation, then replaces
+that one file using its current blob SHA and links to the resulting commit.
+Use a private repository: the JSON includes canonical writing, immutable
+versions, variants, and publication history, and GitHub retains prior commits.
+Payloads above 10 MB are rejected. Direct browser download remains available
+without this setup.
 
 ## Validate before pushing
 

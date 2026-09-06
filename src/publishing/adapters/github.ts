@@ -47,7 +47,7 @@ type GitHubFileInput = {
 
 type GitHubWriteInput = GitHubFileInput & {
   message: string;
-  markdown: string;
+  content: string;
   expectedSha?: string;
 };
 
@@ -205,12 +205,15 @@ export function createGitHubPublisher(options: GitHubPublisherOptions) {
     async writeFile(input: GitHubWriteInput) {
       let parsed: ReturnType<typeof safeRequest>;
       let message: string;
-      let markdown: string;
+      let content: string;
       let expectedSha: string | undefined;
       try {
         parsed = safeRequest(input);
         message = z.string().trim().min(1).max(500).parse(input.message);
-        markdown = z.string().max(500_000).parse(input.markdown);
+        content = z.string().parse(input.content);
+        if (Buffer.byteLength(content, "utf8") > 10_000_000) {
+          throw new Error("GitHub text files are limited to 10 MB.");
+        }
         expectedSha = input.expectedSha
           ? githubShaSchema.parse(input.expectedSha)
           : undefined;
@@ -225,7 +228,7 @@ export function createGitHubPublisher(options: GitHubPublisherOptions) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message,
-            content: Buffer.from(markdown, "utf8").toString("base64"),
+            content: Buffer.from(content, "utf8").toString("base64"),
             branch: parsed.branch,
             ...(expectedSha ? { sha: expectedSha } : {}),
           }),
