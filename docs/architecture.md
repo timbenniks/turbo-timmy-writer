@@ -103,6 +103,14 @@ references linked to an article with optional quote and context. They are not
 archive recall, voice evidence, or AI input by default, and source operations
 never insert or change canonical prose.
 
+Portable writing export is a versioned boundary rather than a dump of database
+internals. It includes canonical Tiptap documents, deterministic Markdown
+projections, tags, article versions, editable variants, and publication history
+in stable order. It excludes authentication records, secrets, provider
+configuration, rebuildable embeddings, and binary assets. Optional GitHub
+delivery must consume this same payload and remain separate from website
+publication.
+
 Phase 4 implements the first article profile as an immutable, validated seed in
 `src/ai/voice`. Runtime guidance strips source notes and passes only bounded,
 versioned observations to `article-first-draft/v2`; archive excerpts remain a

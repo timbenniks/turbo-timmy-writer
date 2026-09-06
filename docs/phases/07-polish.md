@@ -232,6 +232,28 @@ and render only into his authenticated workspace. No data leaves the database,
 no new behavioral history is collected, and there is no provider or dependency
 cost.
 
+### Slice 11: portable writing backup
+
+Complete locally on 2026-09-06. The protected Insights workspace can download
+a versioned JSON backup containing canonical article Tiptap JSON and Markdown
+projections, tags, immutable article versions, editable publication variants,
+and exact publication history. Stable ID ordering makes repeated exports easy
+to diff. This establishes the payload contract before optional GitHub delivery.
+
+Acceptance criteria:
+
+- Export authentication occurs before any database query.
+- Every included row is owner-scoped directly or through its owned article.
+- Canonical Tiptap JSON remains present; Markdown is explicitly a projection.
+- Tags and arrays use stable ordering, and the filename/date contract is tested.
+- The response is a JSON attachment with private `no-store` caching.
+- Auth records, credentials, provider configuration, archive embeddings, and uploaded image bytes are excluded.
+
+Privacy and cost review: the generated file contains private authored content,
+so it is returned only to Tim's authenticated browser and is never cached by
+the app shell. Download is explicit. No external write, model/provider call,
+dependency, or new database row is involved.
+
 ## Candidate work
 
 - Richer version comparison and AI annotations
@@ -241,7 +263,7 @@ cost.
 - Source and citation management UI and citation formatting
 - Archive relationships and graph exploration
 - Fragments, research notes, and ideas inbox
-- GitHub backup/export
+- Optional GitHub delivery for the portable backup
 - Newsletter provider adapter
 - Contentstack Developers publisher
 - LinkedIn API publishing if a reliable supported API is practical

@@ -223,10 +223,11 @@ Phases 0 through 6 are complete. Phase 7 is active with an operational-readiness
 - Began source/citation management with validated source and link models, additive `sources`/`article_sources` migration `0016_nasty_nico_minoru.sql`, and deterministic owner-scoped create/list/update/unlink operations. Sources remain distinct from archive and voice memory, and none of these operations touches canonical prose.
 - Added a production-only installable PWA shell with a standalone manifest, uncached root-scoped service worker, and generic navigation fallback. It pre-caches only the public offline page and icon; protected pages, API responses, and article content never enter Cache Storage, while the already-open editor retains its existing local recovery/retry behavior.
 - Added protected private Insights derived from existing owner-scoped article, AI-run, variant, and publication records. It reports writing volume, recent activity, pipeline distribution, AI outcomes/tokens/timing, variant readiness, and publication outcomes without tracking scripts, third-party analytics, new cookies, or new behavioral rows.
+- Added an explicit portable writing backup from Insights. The owner-only, private/no-store JSON attachment includes canonical Tiptap documents plus Markdown projections, tags, immutable article versions, variants, and exact publication history in stable ID order, while excluding auth records, secrets, provider configuration, embeddings, and binary assets.
 
 ## Current validation checkpoint
 
-Phase 7 Slice 10 passes ESLint, standalone TypeScript, 143 tests across 48 files, and the production build. Unit coverage proves deterministic/zero-safe insight calculations; the existing desktop/mobile fail-closed browser boundary now enters through `/insights`, proving authentication occurs before metric access. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
+Phase 7 Slice 11 passes ESLint, standalone TypeScript, 146 tests across 50 files, and the production build. Unit/route coverage proves the versioned filename, fail-closed access, owner ID propagation, private/no-store JSON attachment, and stable contract without touching a live database or external service. The authenticated desktop/mobile hero round trip from Slices 6/7 remains pending because its latest fixture setup could not reach Neon during VPN testing; no product assertion ran.
 
 ## Known issues and setup state
 

@@ -1,3 +1,5 @@
+import { Download } from "lucide-react";
+
 import type { UsageSummary } from "@/insights/model";
 
 const number = new Intl.NumberFormat("en-GB");
@@ -24,6 +26,10 @@ export function UsageInsights({ summary }: { summary: UsageSummary }) {
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Derived from your existing writing and operational records. No tracking script or third-party analytics service is involved.
         </p>
+        <a href="/api/export/writing" download className="mt-4 inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-medium hover:bg-muted">
+          <Download className="size-4" />
+          Download writing backup
+        </a>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Metric label="Articles" value={summary.articles.total} detail={`${number.format(summary.articles.words)} canonical words`} />
           <Metric label="Active writing" value={summary.articles.activeLast30Days} detail="Articles updated in the last 30 days" />
