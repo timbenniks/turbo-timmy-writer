@@ -140,14 +140,14 @@ export async function updateArticleTagsAction(
 export type CreateManualCheckpointResult =
   | { ok: true; createdAt: string; versionCount: number }
   | { ok: false; code: "conflict"; currentRevision: number; message: string }
-  | { ok: false; code: "invalid" | "not-found"; message: string };
+  | { ok: false; code: "invalid" | "unauthorized" | "not-found"; message: string };
 
 export async function createManualCheckpointAction(
   input: unknown,
 ): Promise<CreateManualCheckpointResult> {
   const session = await getAllowedSession();
   if (!session) {
-    return { ok: false, code: "not-found", message: "Your session has expired." };
+    return { ok: false, code: "unauthorized", message: "Your session has expired." };
   }
 
   const parsed = createCheckpointInputSchema.safeParse(input);

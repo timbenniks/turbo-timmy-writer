@@ -293,11 +293,11 @@ state; see [tests/e2e/README.md](tests/e2e/README.md). Never commit that state.
 
 ## Archive maintenance
 
-Archive scripts are intentionally dry-run-first. The source is the 2024 site's
-`content/4.writing` directory.
+Archive scripts are intentionally dry-run-first. The source is the 2026 site's
+`src/content/writing` directory. Only published files are imported.
 
 ```bash
-pnpm db:import-archive --source=/absolute/path/to/content/4.writing
+pnpm db:import-archive --source=/absolute/path/to/src/content/writing
 pnpm db:sync-archive-memory
 ```
 
@@ -305,13 +305,22 @@ Only add `--write` after inspecting the dry-run summary. Add `--embed` together
 with `--write` only when OpenAI usage is intended:
 
 ```bash
-pnpm db:import-archive --source=/absolute/path/to/content/4.writing --write
+pnpm db:import-archive --source=/absolute/path/to/src/content/writing --write
 pnpm db:sync-archive-memory --write --embed
 ```
 
-`db:import-writing` is a replacement import for canonical articles and is more
-destructive. Do not pass its `--replace` option without first backing up the
-database and confirming that replacing the owner's articles is intended.
+Canonical article refresh uses the 2026 site's `src/content/writing` directory.
+The default command is a dry-run reconcile: it matches by slug or unique title,
+reports inserts, remaps, body/tag/hero updates, and leaves unmatched local
+articles in place.
+
+```bash
+pnpm db:import-writing --source=/absolute/path/to/src/content/writing
+pnpm db:import-writing --source=/absolute/path/to/src/content/writing --write
+```
+
+`--replace` still deletes and recreates the owner's articles, versions, and
+tags. Do not pass it without first backing up the database.
 
 ## Common problems
 

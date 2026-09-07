@@ -42,26 +42,37 @@ type ArticleSummary = {
   id: string;
   title: string;
   status: ArticleStatus;
-  plainText: string;
+  previewText: string;
   metadata: ArticleMetadata;
   createdAt: Date;
   updatedAt: Date;
 };
 
-type SelectedArticle = ArticleSummary & {
+type RecentArticle = {
+  id: string;
+  title: string;
+  status: ArticleStatus;
+  updatedAt: Date;
+};
+
+type SelectedArticle = {
+  id: string;
   userId: string;
+  title: string;
   slug: string;
+  status: ArticleStatus;
   documentJson: ArticleDocument;
   metadata: ArticleMetadata;
   revision: number;
   publishedAt: Date | null;
+  updatedAt: Date;
 };
 
 type AppShellProps = {
   githubLogin: string;
   activeFilter: LibraryFilter;
   articles: ArticleSummary[];
-  recentArticles: ArticleSummary[];
+  recentArticles: RecentArticle[];
   selectedArticle?: SelectedArticle;
   commandArticle?: { id: string; title: string };
   selectedArticleOrganization?: {
@@ -347,7 +358,7 @@ function Library({
                     {articleDisplayTitle(article.title)}
                   </h2>
                   <p className="mt-1 truncate text-sm text-muted-foreground">
-                    {article.plainText || "A blank page, ready for a first sentence."}
+                    {article.previewText || "A blank page, ready for a first sentence."}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground sm:justify-end">

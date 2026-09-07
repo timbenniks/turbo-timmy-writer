@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   articleDocumentSchema,
+  isSafeArticleImageSource,
+  isSafeArticleLinkHref,
   normalizeArticleDocument,
   type ArticleDocument,
 } from "@/editor/document";
@@ -107,6 +109,17 @@ describe("article document boundary", () => {
         ],
       }).success,
     ).toBe(false);
+  });
+
+  it("accepts only safe editor link and image protocols", () => {
+    expect(isSafeArticleLinkHref("https://timbenniks.dev/writing")).toBe(true);
+    expect(isSafeArticleLinkHref("/writing/example")).toBe(true);
+    expect(isSafeArticleLinkHref("#notes")).toBe(true);
+    expect(isSafeArticleLinkHref("mailto:tim@example.com")).toBe(true);
+    expect(isSafeArticleLinkHref("javascript:alert(1)")).toBe(false);
+    expect(isSafeArticleImageSource("https://res.example.com/hero.png")).toBe(true);
+    expect(isSafeArticleImageSource("file:///etc/passwd")).toBe(false);
+    expect(isSafeArticleImageSource("/images/hero.png")).toBe(false);
   });
 
   it("normalizes ProseMirror attribute maps to server-action-safe JSON", () => {

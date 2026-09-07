@@ -1,7 +1,7 @@
 import type { ArticleStatus } from "@/articles/model";
 
 type UsageRows = {
-  articles: { status: ArticleStatus; plainText: string; updatedAt: Date }[];
+  articles: { status: ArticleStatus; wordCount: number; updatedAt: Date }[];
   aiRuns: {
     status: "running" | "succeeded" | "failed" | "cancelled";
     inputTokens: number | null;
@@ -12,11 +12,6 @@ type UsageRows = {
   variants: { status: "draft" | "ready" | "published"; hasManualEdits: boolean; updatedAt: Date }[];
   publications: { status: "pending" | "succeeded" | "failed"; createdAt: Date }[];
 };
-
-function wordCount(text: string) {
-  const normalized = text.trim();
-  return normalized ? normalized.split(/\s+/u).length : 0;
-}
 
 function isRecent(date: Date, cutoff: number) {
   return date.getTime() >= cutoff;
@@ -41,7 +36,7 @@ export function summarizeUsage(rows: UsageRows, now = new Date()) {
   return {
     articles: {
       total: rows.articles.length,
-      words: rows.articles.reduce((total, article) => total + wordCount(article.plainText), 0),
+      words: rows.articles.reduce((total, article) => total + article.wordCount, 0),
       activeLast30Days: rows.articles.filter((article) => isRecent(article.updatedAt, cutoff)).length,
       statuses: articleStatuses,
     },

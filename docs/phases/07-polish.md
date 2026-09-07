@@ -252,6 +252,7 @@ Acceptance criteria:
 - Canonical Tiptap JSON remains present; Markdown is explicitly a projection.
 - Tags and arrays use stable ordering, and the filename/date contract is tested.
 - The response is a JSON attachment with private `no-store` caching.
+- Download uses same-origin POST; a missing or foreign Origin is rejected.
 - Auth records, credentials, provider configuration, archive embeddings, and uploaded image bytes are excluded.
 
 Privacy and cost review: the generated file contains private authored content,
@@ -442,6 +443,30 @@ Privacy and cost review: confirmation sends the saved post text and configured
 Person identity to LinkedIn and immediately makes it public. LinkedIn retains
 the post under its platform policies. There is no background execution,
 automatic retry, token exposure, generation-time call, or silent canonical edit.
+
+### Slice 20: audit hot-path hardening
+
+Complete locally on 2026-09-07. The writing backup download is a same-origin
+POST with an Origin check, so a Lax session cookie cannot trigger a cross-site
+GET attachment. Library and archive lists project `left(..., 280)` previews
+instead of full prose. The archive graph reads only id, title, URL, and tags.
+Insights counts words in SQL and never ships `plain_text` into Node.
+
+Acceptance criteria:
+
+- `GET /api/export/writing` is gone. POST without a matching Origin returns 403
+  before authentication or export.
+- Authenticated same-origin POST still returns the owner-only `private, no-store`
+  JSON attachment.
+- Library and archive list queries do not select full article or archive bodies.
+- Archive relationship graph loading does not select `body_text`.
+- Insights word totals come from a SQL word estimate, not fetched prose.
+- Existing backup, usage-summary, and export tests cover the new contracts.
+
+Privacy and cost review: download remains owner-only and explicit. No new
+provider call, cookie, or behavioral row. SQL still reads `plain_text` on the
+database for Insights and list previews; that text no longer crosses the
+application wire on those paths.
 
 ## Candidate work
 

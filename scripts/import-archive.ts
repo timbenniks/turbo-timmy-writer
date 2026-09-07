@@ -23,7 +23,7 @@ import { httpUrlSchema } from "../src/lib/validation/http-url";
 const frontmatterSchema = z
   .object({
     id: z.union([z.string(), z.number()]).optional(),
-    slug: z.string().trim().min(1),
+    slug: z.string().trim().min(1).optional(),
     title: z.string().trim().min(1),
     date: z.union([z.string(), z.number(), z.date()]),
     canonical_url: z.preprocess(
@@ -97,10 +97,13 @@ export function parseArchiveSource(
     throw new Error(`${sourceFile} has an invalid publication date.`);
   }
 
+  const slug = parsed.data.slug?.trim() || sourceFile.replace(/\.md$/i, "");
+  if (!slug) throw new Error(`${sourceFile} is missing a slug.`);
+
   const url =
     parsed.data.canonical_url ??
     new URL(
-      `/writing/${parsed.data.slug}`,
+      `/writing/${slug}`,
       "https://timbenniks.dev",
     ).toString();
   if (!httpUrlSchema.safeParse(url).success) {
@@ -130,7 +133,7 @@ export function parseArchiveSource(
       importVersion: ARCHIVE_IMPORT_VERSION,
       sourceFile,
       sourceId: parsed.data.id === undefined ? null : String(parsed.data.id),
-      slug: parsed.data.slug,
+      slug,
       frontmatter,
     },
   };
@@ -199,7 +202,38 @@ async function main() {
   };
 
   if (!shouldWrite) {
-    console.log(JSON.stringify({ mode: "dry-run", ...baseSummary }, null, 2));
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      console.log(JSON.stringify({ mode: "dry-run", ...baseSummary }, null, 2));
+      return;
+    }
+    const sql = neon(databaseUrl);
+    const ownerRows = await sql`
+      select id from users where lower(github_login) = lower(${githubLogin}) limit 2
+    `;
+    if (ownerRows.length !== 1 || typeof ownerRows[0]?.id !== "string") {
+      throw new Error(`Expected exactly one database user for ${githubLogin}.`);
+    }
+    const existingRows = existingRowsSchema.parse(await sql`
+      select source_key, content_hash
+      from archive_documents
+      where user_id = ${ownerRows[0].id} and source = ${TIMBENNIKS_ARCHIVE_SOURCE}
+    `);
+    const plan = planArchiveDocumentImport(
+      existingRows.map((row) => ({
+        sourceKey: row.source_key,
+        contentHash: row.content_hash,
+      })),
+      documents,
+    );
+    console.log(JSON.stringify({
+      mode: "dry-run",
+      ...baseSummary,
+      inserted: plan.inserted,
+      updated: plan.updated.length,
+      unchanged: plan.unchanged.length,
+      removed: plan.removed,
+    }, null, 2));
     return;
   }
 

@@ -4,7 +4,7 @@ import { getAllowedSession } from "@/auth/session";
 import { ArchiveGraphExplorer } from "@/components/archive/archive-graph-explorer";
 import { AppShell } from "@/components/writing/app-shell";
 import { listTaxonomyTagsForUser } from "@/db/queries/article-organization";
-import { listArchiveDocumentsForUser } from "@/db/queries/archive-documents";
+import { listArchiveGraphDocumentsForUser } from "@/db/queries/archive-documents";
 import { listRecentArticlesForUser } from "@/db/queries/articles";
 import { listThemesForUser } from "@/db/queries/themes";
 import { buildArchiveRelationshipGraph } from "@/search/archive/relationships";
@@ -15,7 +15,7 @@ export default async function ArchiveGraphPage() {
   const session = await getAllowedSession();
   if (!session) redirect("/sign-in");
   const [documents, recentArticles, themes, taxonomyTags] = await Promise.all([
-    listArchiveDocumentsForUser(session.user.id),
+    listArchiveGraphDocumentsForUser(session.user.id),
     listRecentArticlesForUser(session.user.id),
     listThemesForUser(session.user.id),
     listTaxonomyTagsForUser(session.user.id),

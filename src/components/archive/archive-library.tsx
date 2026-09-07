@@ -7,7 +7,7 @@ type ArchiveDocumentSummary = {
   title: string;
   url: string;
   publishedAt: Date;
-  bodyText: string;
+  previewText: string;
   tags: string[];
   source: string;
   destination: string;
@@ -56,7 +56,7 @@ export function ArchiveLibrary({ documents }: { documents: ArchiveDocumentSummar
                   <ExternalLink className="size-3.5 shrink-0" />
                 </a>
                 <p className="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                  {document.bodyText}
+                  {document.previewText}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <time dateTime={document.publishedAt.toISOString()}>

@@ -7,8 +7,8 @@ describe("usage summary", () => {
     const now = new Date("2026-09-06T12:00:00Z");
     const summary = summarizeUsage({
       articles: [
-        { status: "published", plainText: "Three useful words", updatedAt: new Date("2026-09-01T00:00:00Z") },
-        { status: "drafting", plainText: "Work in progress", updatedAt: new Date("2026-07-01T00:00:00Z") },
+        { status: "published", wordCount: 3, updatedAt: new Date("2026-09-01T00:00:00Z") },
+        { status: "drafting", wordCount: 3, updatedAt: new Date("2026-07-01T00:00:00Z") },
       ],
       aiRuns: [
         { status: "succeeded", inputTokens: 100, outputTokens: 20, durationMs: 500, createdAt: now },

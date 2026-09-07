@@ -8,14 +8,14 @@ import { restoreArticleVersionInputSchema } from "@/versions/model";
 
 export type RestoreArticleVersionResult =
   | { ok: true; revision: number; updatedAt: string }
-  | { ok: false; code: "invalid" | "not-found" | "conflict"; message: string };
+  | { ok: false; code: "invalid" | "unauthorized" | "not-found" | "conflict"; message: string };
 
 export async function restoreArticleVersionAction(
   input: unknown,
 ): Promise<RestoreArticleVersionResult> {
   const session = await getAllowedSession();
   if (!session) {
-    return { ok: false, code: "not-found", message: "Your session has expired." };
+    return { ok: false, code: "unauthorized", message: "Your session has expired." };
   }
 
   const parsed = restoreArticleVersionInputSchema.safeParse(input);

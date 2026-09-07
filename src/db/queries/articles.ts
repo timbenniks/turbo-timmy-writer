@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 import {
   emptyArticleMetadata,
@@ -21,13 +21,22 @@ import { articles } from "@/db/schema";
 import { emptyArticleDocument } from "@/editor/document";
 import { articleDocumentToPlainText } from "@/editor/serialization/plain-text";
 
-const articleSummarySelection = {
+export const ARTICLE_LIST_PREVIEW_CHARACTERS = 280;
+
+const articleListSelection = {
   id: articles.id,
   title: articles.title,
   status: articles.status,
-  plainText: articles.plainText,
+  previewText: sql<string>`left(${articles.plainText}, ${ARTICLE_LIST_PREVIEW_CHARACTERS})`.as("preview_text"),
   metadata: articles.metadata,
   createdAt: articles.createdAt,
+  updatedAt: articles.updatedAt,
+};
+
+const recentArticleSelection = {
+  id: articles.id,
+  title: articles.title,
+  status: articles.status,
   updatedAt: articles.updatedAt,
 };
 
@@ -38,7 +47,7 @@ export async function listArticlesForUser(
   const statuses = statusesForLibraryFilter(filter);
 
   return getDatabase()
-    .select(articleSummarySelection)
+    .select(articleListSelection)
     .from(articles)
     .where(
       and(eq(articles.userId, userId), inArray(articles.status, [...statuses])),
@@ -48,7 +57,7 @@ export async function listArticlesForUser(
 
 export async function listRecentArticlesForUser(userId: string) {
   return getDatabase()
-    .select(articleSummarySelection)
+    .select(recentArticleSelection)
     .from(articles)
     .where(eq(articles.userId, userId))
     .orderBy(desc(articles.updatedAt))

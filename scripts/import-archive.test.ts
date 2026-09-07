@@ -56,6 +56,18 @@ describe("archive import", () => {
     expect(document?.url).toBe("https://timbenniks.dev/writing/useful-memory");
   });
 
+  it("derives the slug from the filename when frontmatter omits it", () => {
+    const document = parseArchiveSource(
+      "skills-over-mcp-explained.md",
+      publishedSource().replace("slug: useful-memory\n", ""),
+    );
+    expect(document).toMatchObject({
+      sourceKey: "skills-over-mcp-explained.md",
+      metadata: { slug: "skills-over-mcp-explained" },
+    });
+    expect(document?.url).toBe("https://timbenniks.dev/writing/useful-memory");
+  });
+
   it("changes hashes only when normalized imported content changes", () => {
     const first = parseArchiveSource("useful-memory.md", publishedSource());
     const same = parseArchiveSource("useful-memory.md", publishedSource());

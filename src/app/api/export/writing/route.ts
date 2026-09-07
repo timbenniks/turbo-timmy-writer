@@ -5,7 +5,16 @@ import { portableBackupFilename } from "@/export/model";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+function isSameOriginPost(request: Request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  return origin === new URL(request.url).origin;
+}
+
+export async function POST(request: Request) {
+  if (!isSameOriginPost(request)) {
+    return Response.json({ error: "This download must start from Insights." }, { status: 403 });
+  }
   const session = await getAllowedSession();
   if (!session) return Response.json({ error: "Your session has expired." }, { status: 401 });
   const exportedAt = new Date();

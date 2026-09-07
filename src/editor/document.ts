@@ -40,7 +40,7 @@ function hasOnlyKeys(
   return Object.keys(value).every((key) => allowedKeys.includes(key));
 }
 
-function isSafeLinkHref(value: unknown) {
+export function isSafeArticleLinkHref(value: unknown) {
   if (typeof value !== "string" || value.length > 2_048) {
     return false;
   }
@@ -57,7 +57,7 @@ function isSafeLinkHref(value: unknown) {
   }
 }
 
-function isSafeImageSource(value: unknown) {
+export function isSafeArticleImageSource(value: unknown) {
   if (typeof value !== "string" || value.length > 2_048) {
     return false;
   }
@@ -99,7 +99,7 @@ function isValidMark(value: unknown): value is ArticleMark {
   }
 
   return (
-    isSafeLinkHref(value.attrs.href) &&
+    isSafeArticleLinkHref(value.attrs.href) &&
     isNullableString(value.attrs.target) &&
     isNullableString(value.attrs.rel) &&
     isNullableString(value.attrs.class)
@@ -145,7 +145,7 @@ function isValidNode(
 
     return (
       hasOnlyKeys(value.attrs, ["src", "alt", "title", "width", "height"]) &&
-      isSafeImageSource(value.attrs.src) &&
+      isSafeArticleImageSource(value.attrs.src) &&
       isNullableString(value.attrs.alt) &&
       isNullableString(value.attrs.title) &&
       isNullableDimension(value.attrs.width) &&

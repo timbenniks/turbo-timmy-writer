@@ -72,6 +72,8 @@ import {
 } from "@/components/themes/writing-workspace-provider";
 import {
   ARTICLE_DOCUMENT_VERSION,
+  isSafeArticleImageSource,
+  isSafeArticleLinkHref,
   normalizeArticleDocument,
   type ArticleDocument,
 } from "@/editor/document";
@@ -858,15 +860,29 @@ export function ArticleEditor({
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
     }
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim() }).run();
+    const href = url.trim();
+    if (!isSafeArticleLinkHref(href)) {
+      setOrganizationError(true);
+      setOrganizationMessage("Use an http, https, mailto, site, or in-page link.");
+      return;
+    }
+    setOrganizationError(false);
+    editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
   }
 
   function addImage() {
     if (!editor) return;
     const source = window.prompt("External image URL", "https://");
     if (!source?.trim()) return;
+    const src = source.trim();
+    if (!isSafeArticleImageSource(src)) {
+      setOrganizationError(true);
+      setOrganizationMessage("Images need an http or https URL.");
+      return;
+    }
     const alt = window.prompt("Image description (alt text)", "") ?? "";
-    editor.chain().focus().setImage({ src: source.trim(), alt }).run();
+    setOrganizationError(false);
+    editor.chain().focus().setImage({ src, alt }).run();
   }
 
   const statusText =
